@@ -1,4 +1,4 @@
-set(EXAMPLE_NAME "RLG-Example")
+set(EXAMPLE_NAME "RLH-Example")
 # create the executable for the example
 add_executable(${EXAMPLE_NAME}
 	${EXAMPLE_NAME}/main.c
@@ -15,7 +15,7 @@ target_include_directories(${EXAMPLE_NAME} PRIVATE
 	${RLH_INCLUDE_DIR}
 	${STB_INCLUDE_DIRS}
 )
-set_property(TARGET ${EXAMPLE_NAME} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY $<TARGET_FILE_DIR:${FULL_EXAMPLE_NAME}>)
+set_property(TARGET ${EXAMPLE_NAME} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY $<TARGET_FILE_DIR:${EXAMPLE_NAME}>)
 # grab the content file paths
 file(GLOB asset_files
 	assets/*
@@ -24,5 +24,5 @@ file(GLOB asset_files
 add_custom_command(TARGET ${EXAMPLE_NAME} POST_BUILD    
 	COMMAND ${CMAKE_COMMAND} -E copy_if_different
 		${asset_files}
-		$<TARGET_FILE_DIR:${FULL_EXAMPLE_NAME}>
+		$<TARGET_FILE_DIR:${EXAMPLE_NAME}>
 )
