@@ -120,11 +120,6 @@ void rlhTermDraw(rlhterm_h const term);
 #include <stdio.h>
 #include <string.h>
 
-void a(const char* e, const char* fun) {
-	printf(e);
-	printf("\n");
-	printf(fun);
-};
 #ifdef RLH_USE_RAYLIB
 const char* kVertexSource =
 "#version 330 core\n\
@@ -410,8 +405,6 @@ rlhterm_h rlhTermCreate(const size_t console_pixel_width, const size_t console_p
 		memset(term, 0, sizeof(rlhterm_s));
 		return term;
 	}
-
-	GLD_SET_CALLBACK(&a);
 
 	GLD_START();
 
