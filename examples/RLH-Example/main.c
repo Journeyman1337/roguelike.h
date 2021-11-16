@@ -3,7 +3,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#define RLH_IMPLEMENTATION
+#define JM_RLH_IMPLEMENTATION
 #include <jm/roguelike.h>
 
 int main()
@@ -27,7 +27,7 @@ int main()
     const int w_width = tiles_wide * tile_size;
     const int w_height = tiles_tall * tile_size;
 
-    GLFWwindow* window = glfwCreateWindow(w_width, w_height, "rlh test", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(w_width, w_height, "jm test", NULL, NULL);
     glfwMakeContextCurrent(window);
 
     if (!window)
@@ -91,32 +91,32 @@ int main()
         }
     }
 
-    rlhTerm_h t = rlhTermCreate(w_width, w_height, tile_size, tile_size, i_width, i_height, 1, pixels, 256, stpqp);
+    jmTerm_h t = jmTermCreate(w_width, w_height, tile_size, tile_size, i_width, i_height, 1, pixels, 256, stpqp);
 
     free(stpqp);
     stbi_image_free(pixels);
 
     while (!glfwWindowShouldClose(window))
     {
-        rlhTermClear(t);
+        jmTermClear(t);
 
         for (size_t x = 0; x < 16; x++)
         {
             for (size_t y = 0; y < 16; y++)
             {
-                rlhTermPushTileGrid(t, x, y, (y * 16) + x, RLH_C32(255, 0, 255, 255), RLH_C32(0, 0, 0, 255));
+                jmTermPushTileGrid(t, x, y, (y * 16) + x, JM_C32(255, 0, 255, 255), JM_C32(0, 0, 0, 255));
             }
         }
 
-        rlhTermPushTileFree(t, 15 * tile_size + (tile_size / 2), 15 * tile_size + (tile_size / 2), 2, RLH_WHITE(), RLH_TRANSPARENT());
+        jmTermPushTileFree(t, 15 * tile_size + (tile_size / 2), 15 * tile_size + (tile_size / 2), 2, JM_WHITE(), JM_TRANSPARENT());
 
-        rlhTermPushTileGridSized(t, 25, 25, tile_size * 3, tile_size * 3, 2, RLH_WHITE(), RLH_TRANSPARENT());
+        jmTermPushTileGridSized(t, 25, 25, tile_size * 3, tile_size * 3, 2, JM_WHITE(), JM_TRANSPARENT());
 
-        rlhTermPushTileFreeSized(t, 30 * tile_size + (tile_size / 2), 30 * tile_size, 15 * tile_size, 8 * tile_size, 2, RLH_WHITE(), RLH_TRANSPARENT());
+        jmTermPushTileFreeSized(t, 30 * tile_size + (tile_size / 2), 30 * tile_size, 15 * tile_size, 8 * tile_size, 2, JM_WHITE(), JM_TRANSPARENT());
 
-        rlhTermSetupDefaultDraw(t);
-        rlhClearColor(RLH_BLACK());
-        rlhTermDraw(t);
+        jmTermSetupDefaultDraw(t);
+        jmClearColor(JM_BLACK());
+        jmTermDraw(t);
 
         glfwPollEvents();
 
