@@ -64,7 +64,7 @@ typedef struct rlhcolor32_s
 #define RLH_PURPLE() ((rlhcolor32_s){ (128), (0), (128), (255) })
 #define RLH_TRANSPARENT() ((rlhcolor32_s){ (0), (0), (0), (0) })
 
-typedef struct rlhterm_s* rlhterm_h;
+typedef struct rlhTerm_s* rlhTerm_h;
 
 #define RLH_FAILURE 0
 #define RLH_SUCCESS 1
@@ -75,37 +75,37 @@ typedef struct rlhterm_s* rlhterm_h;
 // Clear the color of the console area with a solid color.
 void rlhClearColor(const rlhcolor32_s color);
 // Create a term object
-rlhterm_h rlhTermCreate(const size_t console_pixel_width, const size_t console_pixel_height, const size_t default_tile_pixel_width, const size_t default_tile_pixel_height, const size_t atlas_pixel_width, const size_t atlas_pixel_height, const size_t atlas_page_count, const uint8_t* atlas_pixel_rgba, const size_t atlas_glyph_count, const float* atlas_glyph_stpqp);
+rlhTerm_h rlhTermCreate(const size_t console_pixel_width, const size_t console_pixel_height, const size_t default_tile_pixel_width, const size_t default_tile_pixel_height, const size_t atlas_pixel_width, const size_t atlas_pixel_height, const size_t atlas_page_count, const uint8_t* atlas_pixel_rgba, const size_t atlas_glyph_count, const float* atlas_glyph_stpqp);
 // Destroy a term object and free all of its resources.
-void rlhTermDestroy(rlhterm_h const term);
+void rlhTermDestroy(rlhTerm_h const term);
 // Resize the pixel dimensions of a console.
-void rlhTermResizeConsole(rlhterm_h const term, const size_t console_pixel_width, const size_t console_pixel_height);
+void rlhTermResizeConsole(rlhTerm_h const term, const size_t console_pixel_width, const size_t console_pixel_height);
 // Change the default width and height of console tiles.
-void rlhTermResizeTiles(rlhterm_h const term, const size_t default_tile_width, const size_t default_tile_height);
+void rlhTermResizeTiles(rlhTerm_h const term, const size_t default_tile_width, const size_t default_tile_height);
 // Get the tile dimensions of a console.
-void rlhTermGetTileDimensions(rlhterm_h const term, int* const console_tiles_wide, int* const console_tiles_tall);
+void rlhTermGetTileDimensions(rlhTerm_h const term, int* const console_tiles_wide, int* const console_tiles_tall);
 // Get the pixel dimensions of a console.
-void rlhTermGetPixelDimensions(rlhterm_h const term, size_t* const console_pixel_width, size_t* const console_pixel_height);
+void rlhTermGetPixelDimensions(rlhTerm_h const term, size_t* const console_pixel_width, size_t* const console_pixel_height);
 // Change the atlas texture and glyph coordinates
-void rlhTermChangeAtlas(rlhterm_h const term, const size_t atlas_pixel_width, const size_t atlas_pixel_height, const size_t atlas_page_count, const uint8_t* atlas_pixel_rgba, const size_t atlas_glyph_count, const float* atlas_glyph_stpqp);
+void rlhTermChangeAtlas(rlhTerm_h const term, const size_t atlas_pixel_width, const size_t atlas_pixel_height, const size_t atlas_page_count, const uint8_t* atlas_pixel_rgba, const size_t atlas_glyph_count, const float* atlas_glyph_stpqp);
 // Clear a terminal's data buffer.
-void rlhTermClear(rlhterm_h const term);
+void rlhTermClear(rlhTerm_h const term);
 // Get how many tiles have been set since the last clear.
-size_t rlhTermGetTileCount(rlhterm_h const term);
+size_t rlhTermGetTileCount(rlhTerm_h const term);
 // Push a tile to a terminal in a grid cell position with default pixel width and pixel height.
-void rlhTermPushTileGrid(rlhterm_h const term, const int grid_x, const int grid_y, const uint16_t glyph, const rlhcolor32_s fg, const rlhcolor32_s bg);
+void rlhTermPushTileGrid(rlhTerm_h const term, const int grid_x, const int grid_y, const uint16_t glyph, const rlhcolor32_s fg, const rlhcolor32_s bg);
 // Push a tile to a terminal in a grid cell position with a custom pixel width and pixel height.
-void rlhTermPushTileGridSized(rlhterm_h const term, const int grid_x, const int grid_y, const int tile_pixel_width, const int tile_pixel_height, const uint16_t glyph, const rlhcolor32_s fg, const rlhcolor32_s bg);
+void rlhTermPushTileGridSized(rlhTerm_h const term, const int grid_x, const int grid_y, const int tile_pixel_width, const int tile_pixel_height, const uint16_t glyph, const rlhcolor32_s fg, const rlhcolor32_s bg);
 // Push a tile to a terminal in a pixel position with a default pixel width and pixel height.
-void rlhTermPushTileFree(rlhterm_h const term, const int screen_pixel_x, const int screen_pixel_y, const uint16_t glyph, const rlhcolor32_s fg, const rlhcolor32_s bg);
+void rlhTermPushTileFree(rlhTerm_h const term, const int screen_pixel_x, const int screen_pixel_y, const uint16_t glyph, const rlhcolor32_s fg, const rlhcolor32_s bg);
 // Push a tile to a terminal in a pixel position with a custom pixel width and pixel height.
-void rlhTermPushTileFreeSized(rlhterm_h const term, const int screen_pixel_x, const int screen_pixel_y, const int tile_pixel_width, const int tile_pixel_height, const uint16_t glyph, const rlhcolor32_s fg, const rlhcolor32_s bg);
+void rlhTermPushTileFreeSized(rlhTerm_h const term, const int screen_pixel_x, const int screen_pixel_y, const int tile_pixel_width, const int tile_pixel_height, const uint16_t glyph, const rlhcolor32_s fg, const rlhcolor32_s bg);
 // Setup the viewport, scissor, and blend mode for drawing the terminal in a default setup directly to a window area.
-void rlhTermSetupDefaultDraw(rlhterm_h const term);
+void rlhTermSetupDefaultDraw(rlhTerm_h const term);
 // Setup the viewport, scissor, and blend mode for drawing the terminal in a default setup directly to a window area of a different size than the terminal itself.
-void rlhTermSetupStretchedDraw(rlhterm_h const term, const int viewport_width, const int viewport_height);
+void rlhTermSetupStretchedDraw(rlhTerm_h const term, const int viewport_width, const int viewport_height);
 // Draw a terminal to the current bound framebuffer of the current graphics context.
-void rlhTermDraw(rlhterm_h const term);
+void rlhTermDraw(rlhTerm_h const term);
 #ifdef RLH_IMPLEMENTATION
 #include <stdlib.h>
 #include <string.h>
@@ -227,7 +227,7 @@ const size_t kVerticesPerTile = 6;
 const int kTilePositionOffset = 4096;
 const int kMaxTilePixelDimensions = 65565;
 
-typedef struct rlhterm_s
+typedef struct rlhTerm_s
 {
     size_t AtlasPixelWidth;
     size_t AtlasPixelHeight;
@@ -252,7 +252,7 @@ typedef struct rlhterm_s
     GLuint DataTEX;
     GLuint FontmapBUF;
     GLuint FontmapTEX;
-} rlhterm_s;
+} rlhTerm_s;
 
 static inline GLuint _rlhCreateGlTextureArray(const size_t pixel_width, const size_t pixel_height, const size_t page_count, const uint8_t* const pixel_rgba)
 {
@@ -281,11 +281,11 @@ void rlhClearColor(const rlhcolor32_s color)
     GLD_CALL(glClearColor((float)color.r / 255.0f, (float)color.g / 255.0f, (float)color.b / 255.0f, (float)color.a / 255.0f));
     GLD_CALL(glClear(GL_COLOR_BUFFER_BIT));
 }
-rlhterm_h rlhTermCreate(const size_t console_pixel_width, const size_t console_pixel_height, const size_t default_tile_pixel_width, const size_t default_tile_pixel_height, const size_t atlas_pixel_width, const size_t atlas_pixel_height, const size_t atlas_page_count, const uint8_t* atlas_pixel_rgba, const size_t atlas_glyph_count, const float* atlas_glyph_stpqp)
+rlhTerm_h rlhTermCreate(const size_t console_pixel_width, const size_t console_pixel_height, const size_t default_tile_pixel_width, const size_t default_tile_pixel_height, const size_t atlas_pixel_width, const size_t atlas_pixel_height, const size_t atlas_page_count, const uint8_t* atlas_pixel_rgba, const size_t atlas_glyph_count, const float* atlas_glyph_stpqp)
 {
-    rlhterm_h term = (rlhterm_h)malloc(sizeof(rlhterm_s));
+    rlhTerm_h term = (rlhTerm_h)malloc(sizeof(rlhTerm_s));
     if (term == NULL) return NULL;
-    memset(term, 0, sizeof(rlhterm_s)); // set all struct properties to 0 by default.
+    memset(term, 0, sizeof(rlhTerm_s)); // set all struct properties to 0 by default.
     term->ConsolePixelWidth = console_pixel_width;
     term->ConsolePixelHeight = console_pixel_height;
     term->DefaultTilePixelWidth = default_tile_pixel_width;
@@ -305,7 +305,7 @@ rlhterm_h rlhTermCreate(const size_t console_pixel_width, const size_t console_p
     term->Data = (uint8_t*)malloc(reserved_data_size);
     if (term->Data == NULL)
     {
-        memset(term, 0, sizeof(rlhterm_s));
+        memset(term, 0, sizeof(rlhTerm_s));
         return term;
     }
 
@@ -355,7 +355,7 @@ rlhterm_h rlhTermCreate(const size_t console_pixel_width, const size_t console_p
     return term;
 }
 
-void rlhTermDestroy(rlhterm_h const term)
+void rlhTermDestroy(rlhTerm_h const term)
 {
     // free allocated memory
     free(term->Data);
@@ -405,10 +405,10 @@ void rlhTermDestroy(rlhterm_h const term)
     GLD_END();
 
     // wipe all value in struct to 0
-    memset(term, 0, sizeof(rlhterm_s));
+    memset(term, 0, sizeof(rlhTerm_s));
 }
 
-void rlhTermResizeConsole(rlhterm_h const term, const size_t console_pixel_width, const size_t console_pixel_height)
+void rlhTermResizeConsole(rlhTerm_h const term, const size_t console_pixel_width, const size_t console_pixel_height)
 {
     term->ConsolePixelWidth = console_pixel_width;
     term->ConsolePixelHeight = console_pixel_height;
@@ -417,7 +417,7 @@ void rlhTermResizeConsole(rlhterm_h const term, const size_t console_pixel_width
     term->DataTileCount = 0;
 }
 
-void rlhTermResizeTiles(rlhterm_h const term, const size_t default_tile_width, const size_t default_tile_height)
+void rlhTermResizeTiles(rlhTerm_h const term, const size_t default_tile_width, const size_t default_tile_height)
 {
     term->DefaultTilePixelWidth = default_tile_width;
     term->DefaultTilePixelHeight = default_tile_height;
@@ -426,7 +426,7 @@ void rlhTermResizeTiles(rlhterm_h const term, const size_t default_tile_width, c
     term->DataTileCount = 0;
 }
 
-void rlhTermGetTileDimensions(rlhterm_h const term, int* const console_tiles_wide, int* const console_tiles_tall)
+void rlhTermGetTileDimensions(rlhTerm_h const term, int* const console_tiles_wide, int* const console_tiles_tall)
 {
     if (console_tiles_wide != NULL)
     {
@@ -438,7 +438,7 @@ void rlhTermGetTileDimensions(rlhterm_h const term, int* const console_tiles_wid
     }
 }
 
-void rlhTermGetPixelDimensions(rlhterm_h const term, size_t* const console_pixel_width, size_t* const console_pixel_height)
+void rlhTermGetPixelDimensions(rlhTerm_h const term, size_t* const console_pixel_width, size_t* const console_pixel_height)
 {
     if (console_pixel_width != NULL)
     {
@@ -450,7 +450,7 @@ void rlhTermGetPixelDimensions(rlhterm_h const term, size_t* const console_pixel
     }
 }
 
-void rlhTermChangeAtlas(rlhterm_h const term, const size_t atlas_pixel_width, const size_t atlas_pixel_height, const size_t atlas_page_count, const uint8_t* atlas_pixel_rgba, const size_t atlas_glyph_count, const float* atlas_glyph_stpqp)
+void rlhTermChangeAtlas(rlhTerm_h const term, const size_t atlas_pixel_width, const size_t atlas_pixel_height, const size_t atlas_page_count, const uint8_t* atlas_pixel_rgba, const size_t atlas_glyph_count, const float* atlas_glyph_stpqp)
 {
     GLD_START();
 
@@ -468,17 +468,17 @@ void rlhTermChangeAtlas(rlhterm_h const term, const size_t atlas_pixel_width, co
     GLD_END();
 }
 
-void rlhTermClear(rlhterm_h term)
+void rlhTermClear(rlhTerm_h term)
 {
     term->DataTileCount = 0;
 }
 
-size_t rlhTermGetTileCount(rlhterm_h const term)
+size_t rlhTermGetTileCount(rlhTerm_h const term)
 {
     return term->DataTileCount;
 }
 
-static inline uint8_t _rlhTermTryReserve(rlhterm_h const term)
+static inline uint8_t _rlhTermTryReserve(rlhTerm_h const term)
 {
     if (term->DataTileCount == term->DataReservedTileCount) // If we hit the reserved tile count, double the amount of reserved space.
     {
@@ -494,7 +494,7 @@ static inline uint8_t _rlhTermTryReserve(rlhterm_h const term)
     return 1;
 }
 
-static inline void _rlhTermPushTile(rlhterm_h const term, const int pixel_x, const int pixel_y, const unsigned int pixel_w_u, const unsigned int pixel_h_u, const uint16_t glyph, const rlhcolor32_s fg, const rlhcolor32_s bg)
+static inline void _rlhTermPushTile(rlhTerm_h const term, const int pixel_x, const int pixel_y, const unsigned int pixel_w_u, const unsigned int pixel_h_u, const uint16_t glyph, const rlhcolor32_s fg, const rlhcolor32_s bg)
 {
     const unsigned int offset_pixel_x = (unsigned int)(pixel_x + kTilePositionOffset);
     const unsigned int offset_pixel_y = (unsigned int)(pixel_y + kTilePositionOffset);
@@ -520,7 +520,7 @@ static inline void _rlhTermPushTile(rlhterm_h const term, const int pixel_x, con
     term->DataTileCount++;
 }
 
-void rlhTermPushTileGrid(rlhterm_h const term, const int grid_x, const int grid_y, const uint16_t glyph, const rlhcolor32_s fg, const rlhcolor32_s bg)
+void rlhTermPushTileGrid(rlhTerm_h const term, const int grid_x, const int grid_y, const uint16_t glyph, const rlhcolor32_s fg, const rlhcolor32_s bg)
 {
     if (grid_x < 0 || grid_y < 0 || grid_x > term->ConsoleTilesWide || grid_y > term->ConsoleTilesTall) return;
     const int pixel_x = grid_x * term->DefaultTilePixelWidth;
@@ -529,7 +529,7 @@ void rlhTermPushTileGrid(rlhterm_h const term, const int grid_x, const int grid_
     _rlhTermPushTile(term, pixel_x, pixel_y, term->DefaultTilePixelWidth, term->DefaultTilePixelHeight, glyph, fg, bg);
 }
 
-void rlhTermPushTileGridSized(rlhterm_h const term, const int grid_x, const int grid_y, const int tile_pixel_width, const int tile_pixel_height, const uint16_t glyph, const rlhcolor32_s fg, const rlhcolor32_s bg)
+void rlhTermPushTileGridSized(rlhTerm_h const term, const int grid_x, const int grid_y, const int tile_pixel_width, const int tile_pixel_height, const uint16_t glyph, const rlhcolor32_s fg, const rlhcolor32_s bg)
 {
     if (grid_x < 0 || grid_y < 0 || grid_x > term->ConsoleTilesWide || grid_y > term->ConsoleTilesTall) return;
     if (tile_pixel_width <= 0 || tile_pixel_height <= 0 || tile_pixel_width > kMaxTilePixelDimensions || tile_pixel_height > kMaxTilePixelDimensions) return;
@@ -541,7 +541,7 @@ void rlhTermPushTileGridSized(rlhterm_h const term, const int grid_x, const int 
     _rlhTermPushTile(term, pixel_x, pixel_y, pixel_w_u, pixel_h_u, glyph, fg, bg);
 }
 
-void rlhTermPushTileFree(rlhterm_h const term, const int screen_pixel_x, const int screen_pixel_y, const uint16_t glyph, const rlhcolor32_s fg, const rlhcolor32_s bg)
+void rlhTermPushTileFree(rlhTerm_h const term, const int screen_pixel_x, const int screen_pixel_y, const uint16_t glyph, const rlhcolor32_s fg, const rlhcolor32_s bg)
 {
     const int negative_default_width = -(int)term->DefaultTilePixelWidth;
     const int negative_default_height = -(int)term->DefaultTilePixelHeight;
@@ -550,7 +550,7 @@ void rlhTermPushTileFree(rlhterm_h const term, const int screen_pixel_x, const i
     _rlhTermPushTile(term, screen_pixel_x, screen_pixel_y, term->DefaultTilePixelWidth, term->DefaultTilePixelHeight, glyph, fg, bg);
 }
 
-void rlhTermPushTileFreeSized(rlhterm_h const term, const int screen_pixel_x, const int screen_pixel_y, const int tile_pixel_width, const int tile_pixel_height, const uint16_t glyph, const rlhcolor32_s fg, const rlhcolor32_s bg)
+void rlhTermPushTileFreeSized(rlhTerm_h const term, const int screen_pixel_x, const int screen_pixel_y, const int tile_pixel_width, const int tile_pixel_height, const uint16_t glyph, const rlhcolor32_s fg, const rlhcolor32_s bg)
 {
     if (screen_pixel_x < -tile_pixel_width || screen_pixel_y < -tile_pixel_height || screen_pixel_x > term->ConsolePixelWidth || screen_pixel_y > term->ConsolePixelHeight) return;
     if (tile_pixel_width <= 0 || tile_pixel_height <= 0 || tile_pixel_width > kMaxTilePixelDimensions || tile_pixel_height > kMaxTilePixelDimensions) return;
@@ -558,7 +558,7 @@ void rlhTermPushTileFreeSized(rlhterm_h const term, const int screen_pixel_x, co
     _rlhTermPushTile(term, screen_pixel_x, screen_pixel_y, (unsigned int)tile_pixel_width, (unsigned int)tile_pixel_height, glyph, fg, bg);
 }
 
-void rlhTermSetupDefaultDraw(rlhterm_h term)
+void rlhTermSetupDefaultDraw(rlhTerm_h term)
 {
     GLD_START();
 
@@ -575,7 +575,7 @@ void rlhTermSetupDefaultDraw(rlhterm_h term)
     GLD_END();
 }
 
-void rlhTermSetupStretchedDraw(rlhterm_h const term, const int viewport_width, const int viewport_height)
+void rlhTermSetupStretchedDraw(rlhTerm_h const term, const int viewport_width, const int viewport_height)
 {
     GLD_START();
 
@@ -592,7 +592,7 @@ void rlhTermSetupStretchedDraw(rlhterm_h const term, const int viewport_width, c
     GLD_END();
 }
 
-void rlhTermDraw(rlhterm_h term)
+void rlhTermDraw(rlhTerm_h term)
 {
     if (term->DataTileCount > 0) // only render if there are tiles to render
     {

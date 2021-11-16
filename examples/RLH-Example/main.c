@@ -91,7 +91,7 @@ return 1;
 		}
 	}
 
-	rlhterm_h t = rlhTermCreate(w_width, w_height, tile_size, tile_size, i_width, i_height, 1, pixels, 256, stpqp);
+	rlhTerm_h t = rlhTermCreate(w_width, w_height, tile_size, tile_size, i_width, i_height, 1, pixels, 256, stpqp);
 
 	free(stpqp);
 	stbi_image_free(pixels);
