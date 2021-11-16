@@ -64,14 +64,6 @@ typedef struct rlhcolor32_s
 #define RLH_PURPLE() ((rlhcolor32_s){ (128), (0), (128), (255) })
 #define RLH_TRANSPARENT() ((rlhcolor32_s){ (0), (0), (0), (0) })
 
-typedef struct rlhmatrix4x4_s
-{
-    float values[4 * 4];
-} rlhmatrix4x4_s;
-
-#define RLH_SCREEN_MATRIX_NON_COMPOUND() ({ {2.0f, 0.0f, 0.0f, -1.0f, 0.0f, -2.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f} })
-#define RLH_SCREEN_MATRIX() ((rlhmatrix4x4_s){ {2.0f, 0.0f, 0.0f, -1.0f, 0.0f, -2.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f} })
-
 typedef struct rlhterm_s* rlhterm_h;
 
 #define RLH_FAILURE 0
@@ -119,6 +111,8 @@ void rlhTermDraw(rlhterm_h const term);
 #include <string.h>
 #include <stdio.h>
 #include <string.h>
+
+const float* kOpengl33ScreenMatrix[4 * 4] = {2.0f, 0.0f, 0.0f, -1.0f, 0.0f, -2.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f};
 
 const char* kVertexSource =
 "#version 330 core\n\
@@ -635,7 +629,7 @@ void rlhTermDraw(rlhterm_h term)
         GLD_CALL(glBindTexture(GL_TEXTURE_BUFFER, term->DataTEX));
 
         // set the matrix uniform
-        GLD_CALL(glUniformMatrix4fv(glGetUniformLocation(term->Program, "Matrix"), 1, 0, RLH_SCREEN_MATRIX().values));
+        GLD_CALL(glUniformMatrix4fv(glGetUniformLocation(term->Program, "Matrix"), 1, 0, kOpengl33ScreenMatrix));
 
         // set the screen tile dimensions uniform
         GLD_CALL(glUniform2f(glGetUniformLocation(term->Program, "ConsolePixelUnitSize"), 1.0f/((float)term->ConsolePixelWidth), 1.0f/((float)term->ConsolePixelHeight)));
