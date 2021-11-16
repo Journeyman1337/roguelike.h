@@ -66,12 +66,6 @@ typedef struct rlhcolor32_s
 
 typedef struct rlhTerm_s* rlhTerm_h;
 
-#define RLH_FAILURE 0
-#define RLH_SUCCESS 1
-
-#define RLH_FALSE 0
-#define RLH_TRUE 1
-
 // Clear the color of the console area with a solid color.
 void rlhClearColor(const rlhcolor32_s color);
 // Create a term object
