@@ -106,7 +106,7 @@ void jmTermDraw(jmTerm_h const term);
 #include <stdio.h>
 #include <string.h>
 
-const float* kOpengl33ScreenMatrix[4 * 4] = {2.0f, 0.0f, 0.0f, -1.0f, 0.0f, -2.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f};
+const float kOpengl33ScreenMatrix[4 * 4] = {2.0f, 0.0f, 0.0f, -1.0f, 0.0f, -2.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f};
 
 const char* kVertexSource =
 "#version 330 core\n\
