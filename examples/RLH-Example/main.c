@@ -24,8 +24,9 @@ int main()
     const int tiles_wide = 80;
     const int tiles_tall = 50;
     const int tile_size = 8 * 2;
-    const int w_width = tiles_wide * tile_size;
-    const int w_height = tiles_tall * tile_size;
+    const int pixel_scale = 1;
+    const int w_width = (tiles_wide * tile_size * pixel_scale) + 64;
+    const int w_height = (tiles_tall * tile_size * pixel_scale) + 64;
 
     GLFWwindow* window = glfwCreateWindow(w_width, w_height, "jm test", NULL, NULL);
     glfwMakeContextCurrent(window);
@@ -91,7 +92,7 @@ int main()
         }
     }
 
-    jmTerm_h t = jmTermCreate(w_width, w_height, tile_size, tile_size, i_width, i_height, 1, pixels, 256, stpqp);
+    jmTerm_h t = jmTermCreate(tiles_wide, tiles_tall, pixel_scale, tile_size, tile_size, i_width, i_height, 1, pixels, 256, stpqp);
 
     free(stpqp);
     stbi_image_free(pixels);
@@ -114,8 +115,9 @@ int main()
 
         jmTermPushTileFreeSized(t, 30 * tile_size + (tile_size / 2), 30 * tile_size, 15 * tile_size, 8 * tile_size, 2, JM_WHITE(), JM_TRANSPARENT());
 
-        jmTermSetupDefaultDraw(t);
+        jmTermSetupStretchedDraw(t, w_width, w_height);
         jmClearColor(JM_BLACK());
+        jmTermSetupOffsetDraw(t, 32, 32, w_height);
         jmTermDraw(t);
 
         glfwPollEvents();

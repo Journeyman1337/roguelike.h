@@ -69,15 +69,19 @@ typedef struct jmTerm_s* jmTerm_h;
 // Clear the color of the console area with a solid color.
 void jmClearColor(const jmColor32_s color);
 // Create a term object
-jmTerm_h jmTermCreate(const size_t console_pixel_width, const size_t console_pixel_height, const size_t default_tile_pixel_width, const size_t default_tile_pixel_height, const size_t atlas_pixel_width, const size_t atlas_pixel_height, const size_t atlas_page_count, const uint8_t* atlas_pixel_rgba, const size_t atlas_glyph_count, const float* atlas_glyph_stpqp);
+jmTerm_h jmTermCreate(const size_t console_pixel_width, const size_t console_pixel_height, const size_t console_pixel_scale, const size_t default_tile_pixel_width, const size_t default_tile_pixel_height, const size_t atlas_pixel_width, const size_t atlas_pixel_height, const size_t atlas_page_count, const uint8_t* atlas_pixel_rgba, const size_t atlas_glyph_count, const float* atlas_glyph_stpqp);
 // Destroy a term object and free all of its resources.
 void jmTermDestroy(jmTerm_h const term);
-// Resize the pixel dimensions of a console.
-void jmTermResizeConsole(jmTerm_h const term, const size_t console_pixel_width, const size_t console_pixel_height);
+// Resize the tile dimensions of a console.
+void jmTermResizeConsole(jmTerm_h const term, const size_t console_tiles_wide, const size_t console_tiles_tall);
+// Change the size ratio of a terminal pixel per screen pixel.
+void jmTermResizePixelScale(jmTerm_h const term, const console_pixel_scale);
 // Change the default width and height of console tiles.
 void jmTermResizeTiles(jmTerm_h const term, const size_t default_tile_width, const size_t default_tile_height);
 // Get the tile dimensions of a console.
 void jmTermGetTileDimensions(jmTerm_h const term, int* const console_tiles_wide, int* const console_tiles_tall);
+// Get the size ratio of a terminal pixel per screen pixel.
+size_t jmTermGetPixelScale(jmTerm_h const term);
 // Get the pixel dimensions of a console.
 void jmTermGetPixelDimensions(jmTerm_h const term, size_t* const console_pixel_width, size_t* const console_pixel_height);
 // Change the atlas texture and glyph coordinates
@@ -94,10 +98,12 @@ void jmTermPushTileGridSized(jmTerm_h const term, const int grid_x, const int gr
 void jmTermPushTileFree(jmTerm_h const term, const int screen_pixel_x, const int screen_pixel_y, const uint16_t glyph, const jmColor32_s fg, const jmColor32_s bg);
 // Push a tile to a terminal in a pixel position with a custom pixel width and pixel height.
 void jmTermPushTileFreeSized(jmTerm_h const term, const int screen_pixel_x, const int screen_pixel_y, const int tile_pixel_width, const int tile_pixel_height, const uint16_t glyph, const jmColor32_s fg, const jmColor32_s bg);
-// Setup the viewport, scissor, and blend mode for drawing the terminal in a default setup directly to a window area.
+// Setup the viewport, scissor, and blend mode for drawing the terminal in a pixel perfect to a viewport window from the top left corner. If the terminal is smaller than the window, there will be gaps to the bottom and right of the terminal area.
 void jmTermSetupDefaultDraw(jmTerm_h const term);
-// Setup the viewport, scissor, and blend mode for drawing the terminal in a default setup directly to a window area of a different size than the terminal itself.
-void jmTermSetupStretchedDraw(jmTerm_h const term, const int viewport_width, const int viewport_height);
+// Draw the terminal pixel perect, starting from a specific viewport pixel. Can be used to render the terminal offset if it does not fit the window size. Same as default draw, but from a custom position instead of top left corner.
+void jmTermSetupOffsetDraw(jmTerm_h term, int left_x_pixel, int top_y_pixel, int window_viewport_height);
+// Setup for drawing across an entire viewport area of a window. If the terminal does not fit the window perfectly, it will be stretched and/or squished to fit. This can be used before drawing a clear color to clear the color of the entire window viewport.
+void jmTermSetupStretchedDraw(jmTerm_h const term, const int window_viewport_width, const int window_viewport_height);
 // Draw a terminal to the current bound framebuffer of the current graphics context.
 void jmTermDraw(jmTerm_h const term);
 #ifdef JM_RLH_IMPLEMENTATION
@@ -227,10 +233,11 @@ typedef struct jmTerm_s
     size_t AtlasPixelHeight;
     size_t AtlasPageCount;
     size_t AtlasGlyphCount;
-    size_t ConsoleTilesWide;
-    size_t ConsoleTilesTall;
     size_t ConsolePixelWidth;
     size_t ConsolePixelHeight;
+    size_t ConsoleTilesWide;
+    size_t ConsoleTilesTall;
+    size_t ConsolePixelScale;
     size_t DefaultTilePixelWidth;
     size_t DefaultTilePixelHeight;
     size_t TileDataSize;
@@ -275,17 +282,18 @@ void jmClearColor(const jmColor32_s color)
     GLD_CALL(glClearColor((float)color.r / 255.0f, (float)color.g / 255.0f, (float)color.b / 255.0f, (float)color.a / 255.0f));
     GLD_CALL(glClear(GL_COLOR_BUFFER_BIT));
 }
-jmTerm_h jmTermCreate(const size_t console_pixel_width, const size_t console_pixel_height, const size_t default_tile_pixel_width, const size_t default_tile_pixel_height, const size_t atlas_pixel_width, const size_t atlas_pixel_height, const size_t atlas_page_count, const uint8_t* atlas_pixel_rgba, const size_t atlas_glyph_count, const float* atlas_glyph_stpqp)
+jmTerm_h jmTermCreate(const size_t console_tiles_wide, const size_t console_tiles_tall, const size_t console_pixel_scale, const size_t default_tile_pixel_width, const size_t default_tile_pixel_height, const size_t atlas_pixel_width, const size_t atlas_pixel_height, const size_t atlas_page_count, const uint8_t* atlas_pixel_rgba, const size_t atlas_glyph_count, const float* atlas_glyph_stpqp)
 {
     jmTerm_h term = (jmTerm_h)malloc(sizeof(jmTerm_s));
     if (term == NULL) return NULL;
     memset(term, 0, sizeof(jmTerm_s)); // set all struct properties to 0 by default.
-    term->ConsolePixelWidth = console_pixel_width;
-    term->ConsolePixelHeight = console_pixel_height;
+    term->ConsolePixelScale = console_pixel_scale;
+    term->ConsoleTilesWide = console_tiles_wide;
+    term->ConsoleTilesTall = console_tiles_tall;
     term->DefaultTilePixelWidth = default_tile_pixel_width;
     term->DefaultTilePixelHeight = default_tile_pixel_height;
-    term->ConsoleTilesWide = console_pixel_width / default_tile_pixel_width;
-    term->ConsoleTilesTall = console_pixel_height / default_tile_pixel_height;
+    term->ConsolePixelWidth = console_tiles_wide * default_tile_pixel_width * console_pixel_scale;
+    term->ConsolePixelHeight = console_tiles_tall * default_tile_pixel_height * console_pixel_scale;
     term->DataReservedTileCount = term->ConsoleTilesWide * term->ConsoleTilesTall;
     term->AtlasPixelWidth = atlas_pixel_width;
     term->AtlasPixelHeight = atlas_pixel_height;
@@ -402,21 +410,28 @@ void jmTermDestroy(jmTerm_h const term)
     memset(term, 0, sizeof(jmTerm_s));
 }
 
-void jmTermResizeConsole(jmTerm_h const term, const size_t console_pixel_width, const size_t console_pixel_height)
+void jmTermResizeConsole(jmTerm_h const term, const size_t console_tiles_wide, const size_t console_tiles_tall)
 {
-    term->ConsolePixelWidth = console_pixel_width;
-    term->ConsolePixelHeight = console_pixel_height;
-    term->ConsoleTilesWide = term->ConsolePixelWidth / term->DefaultTilePixelWidth;
-    term->ConsoleTilesTall = term->ConsolePixelHeight / term->DefaultTilePixelHeight;
+    term->ConsoleTilesWide = console_tiles_wide;
+    term->ConsoleTilesTall = console_tiles_tall;
+    term->ConsolePixelWidth = term->ConsoleTilesWide * term->DefaultTilePixelWidth * term->ConsolePixelScale;
+    term->ConsolePixelHeight = term->ConsoleTilesTall * term->DefaultTilePixelHeight * term->ConsolePixelScale;
     term->DataTileCount = 0;
+}
+
+void jmTermResizePixelScale(jmTerm_h const term, const console_pixel_scale)
+{
+	term->ConsolePixelScale = console_pixel_scale;
+	term->ConsolePixelWidth = term->ConsoleTilesWide * term->DefaultTilePixelWidth * term->ConsolePixelScale;
+    term->ConsolePixelHeight = term->ConsoleTilesTall * term->DefaultTilePixelHeight * term->ConsolePixelScale;
 }
 
 void jmTermResizeTiles(jmTerm_h const term, const size_t default_tile_width, const size_t default_tile_height)
 {
     term->DefaultTilePixelWidth = default_tile_width;
     term->DefaultTilePixelHeight = default_tile_height;
-    term->ConsoleTilesWide = term->ConsolePixelWidth / term->DefaultTilePixelWidth;
-    term->ConsoleTilesTall = term->ConsolePixelHeight / term->DefaultTilePixelHeight;
+    term->ConsolePixelWidth = term->ConsoleTilesWide * term->DefaultTilePixelWidth * term->ConsolePixelScale;
+    term->ConsolePixelHeight = term->ConsoleTilesTall * term->DefaultTilePixelHeight * term->ConsolePixelScale;
     term->DataTileCount = 0;
 }
 
@@ -430,6 +445,11 @@ void jmTermGetTileDimensions(jmTerm_h const term, int* const console_tiles_wide,
     {
         *console_tiles_tall = term->ConsoleTilesTall;
     }
+}
+
+size_t jmTermGetPixelScale(jmTerm_h const term)
+{
+	return term->ConsolePixelScale;
 }
 
 void jmTermGetPixelDimensions(jmTerm_h const term, size_t* const console_pixel_width, size_t* const console_pixel_height)
@@ -517,10 +537,10 @@ static inline void _jmTermPushTile(jmTerm_h const term, const int pixel_x, const
 void jmTermPushTileGrid(jmTerm_h const term, const int grid_x, const int grid_y, const uint16_t glyph, const jmColor32_s fg, const jmColor32_s bg)
 {
     if (grid_x < 0 || grid_y < 0 || grid_x > term->ConsoleTilesWide || grid_y > term->ConsoleTilesTall) return;
-    const int pixel_x = grid_x * term->DefaultTilePixelWidth;
-    const int pixel_y = grid_y * term->DefaultTilePixelHeight;
+    const int pixel_x = grid_x * term->DefaultTilePixelWidth * term->ConsolePixelScale;
+    const int pixel_y = grid_y * term->DefaultTilePixelHeight * term->ConsolePixelScale;
     if (!_jmTermTryReserve(term)) return;
-    _jmTermPushTile(term, pixel_x, pixel_y, term->DefaultTilePixelWidth, term->DefaultTilePixelHeight, glyph, fg, bg);
+    _jmTermPushTile(term, pixel_x, pixel_y, term->DefaultTilePixelWidth * term->ConsolePixelScale, term->DefaultTilePixelHeight * term->ConsolePixelScale, glyph, fg, bg);
 }
 
 void jmTermPushTileGridSized(jmTerm_h const term, const int grid_x, const int grid_y, const int tile_pixel_width, const int tile_pixel_height, const uint16_t glyph, const jmColor32_s fg, const jmColor32_s bg)
@@ -528,10 +548,10 @@ void jmTermPushTileGridSized(jmTerm_h const term, const int grid_x, const int gr
     if (grid_x < 0 || grid_y < 0 || grid_x > term->ConsoleTilesWide || grid_y > term->ConsoleTilesTall) return;
     if (tile_pixel_width <= 0 || tile_pixel_height <= 0 || tile_pixel_width > kMaxTilePixelDimensions || tile_pixel_height > kMaxTilePixelDimensions) return;
     if (!_jmTermTryReserve(term)) return;
-    const int pixel_x = (unsigned int)grid_x * term->DefaultTilePixelWidth;
-    const int pixel_y = (unsigned int)grid_y * term->DefaultTilePixelHeight;
-    const unsigned int pixel_w_u = (unsigned int)tile_pixel_width;
-    const unsigned int pixel_h_u = (unsigned int)tile_pixel_height;
+    const unsigned int pixel_x = (unsigned int)grid_x * term->DefaultTilePixelWidth * term->ConsolePixelScale;
+    const unsigned int pixel_y = (unsigned int)grid_y * term->DefaultTilePixelHeight * term->ConsolePixelScale;
+    const unsigned int pixel_w_u = (unsigned int)tile_pixel_width * term->ConsolePixelScale;
+    const unsigned int pixel_h_u = (unsigned int)tile_pixel_height * term->ConsolePixelScale;
     _jmTermPushTile(term, pixel_x, pixel_y, pixel_w_u, pixel_h_u, glyph, fg, bg);
 }
 
@@ -541,7 +561,7 @@ void jmTermPushTileFree(jmTerm_h const term, const int screen_pixel_x, const int
     const int negative_default_height = -(int)term->DefaultTilePixelHeight;
     if (screen_pixel_x < negative_default_width || screen_pixel_y < negative_default_height || screen_pixel_x > term->ConsolePixelWidth || screen_pixel_y > term->ConsolePixelHeight) return;
     if (!_jmTermTryReserve(term)) return;
-    _jmTermPushTile(term, screen_pixel_x, screen_pixel_y, term->DefaultTilePixelWidth, term->DefaultTilePixelHeight, glyph, fg, bg);
+    _jmTermPushTile(term, (unsigned int)screen_pixel_x * term->ConsolePixelScale, (unsigned int)screen_pixel_y * term->ConsolePixelScale, term->DefaultTilePixelWidth * term->ConsolePixelScale, term->DefaultTilePixelHeight * term->ConsolePixelScale, glyph, fg, bg);
 }
 
 void jmTermPushTileFreeSized(jmTerm_h const term, const int screen_pixel_x, const int screen_pixel_y, const int tile_pixel_width, const int tile_pixel_height, const uint16_t glyph, const jmColor32_s fg, const jmColor32_s bg)
@@ -549,7 +569,20 @@ void jmTermPushTileFreeSized(jmTerm_h const term, const int screen_pixel_x, cons
     if (screen_pixel_x < -tile_pixel_width || screen_pixel_y < -tile_pixel_height || screen_pixel_x > term->ConsolePixelWidth || screen_pixel_y > term->ConsolePixelHeight) return;
     if (tile_pixel_width <= 0 || tile_pixel_height <= 0 || tile_pixel_width > kMaxTilePixelDimensions || tile_pixel_height > kMaxTilePixelDimensions) return;
     if (!_jmTermTryReserve(term)) return;
-    _jmTermPushTile(term, screen_pixel_x, screen_pixel_y, (unsigned int)tile_pixel_width, (unsigned int)tile_pixel_height, glyph, fg, bg);
+    _jmTermPushTile(term, screen_pixel_x * term->ConsolePixelScale, screen_pixel_y * term->ConsolePixelScale, (unsigned int)tile_pixel_width * term->ConsolePixelScale, (unsigned int)tile_pixel_height * term->ConsolePixelScale, glyph, fg, bg);
+}
+
+void jmTermSetupStretchedDraw(jmTerm_h const term, const int window_viewport_width, const int window_viewport_height)
+{
+    GLD_START();
+
+    // set viewport
+    GLD_CALL(glViewport(0, 0, window_viewport_width, window_viewport_height));
+
+    //set scissor
+    GLD_CALL(glScissor(0, 0, window_viewport_width, window_viewport_height));
+
+    GLD_END();
 }
 
 void jmTermSetupDefaultDraw(jmTerm_h term)
@@ -562,26 +595,21 @@ void jmTermSetupDefaultDraw(jmTerm_h term)
     //set scissor
     GLD_CALL(glScissor(0, 0, term->ConsolePixelWidth, term->ConsolePixelHeight));
 
-    // set blend mode
-    GLD_CALL(glEnable(GL_BLEND));
-    GLD_CALL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
-
     GLD_END();
 }
 
-void jmTermSetupStretchedDraw(jmTerm_h const term, const int viewport_width, const int viewport_height)
+void jmTermSetupOffsetDraw(jmTerm_h term, int left_x_pixel, int top_y_pixel, int window_viewport_height)
 {
     GLD_START();
 
+    // find bottom y pixel because opengl y axis is flipped
+    int bottom_y_pixel = window_viewport_height - (top_y_pixel + term->ConsolePixelHeight);
+
     // set viewport
-    GLD_CALL(glViewport(0, 0, viewport_width, viewport_height));
+    GLD_CALL(glViewport(left_x_pixel, bottom_y_pixel, term->ConsolePixelWidth, term->ConsolePixelHeight));
 
     //set scissor
-    GLD_CALL(glScissor(0, 0, viewport_width, viewport_height));
-
-    // set blend mode
-    GLD_CALL(glEnable(GL_BLEND));
-    GLD_CALL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+    GLD_CALL(glScissor(left_x_pixel, bottom_y_pixel, term->ConsolePixelWidth, term->ConsolePixelHeight));
 
     GLD_END();
 }
@@ -627,6 +655,10 @@ void jmTermDraw(jmTerm_h term)
 
         // set the screen tile dimensions uniform
         GLD_CALL(glUniform2f(glGetUniformLocation(term->Program, "ConsolePixelUnitSize"), 1.0f/((float)term->ConsolePixelWidth), 1.0f/((float)term->ConsolePixelHeight)));
+
+        // set blend mode
+        GLD_CALL(glEnable(GL_BLEND));
+        GLD_CALL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 
         // DRAW!!!
         GLD_CALL(glDrawArrays(GL_TRIANGLES, 0, term->DataTileCount * (size_t)kVerticesPerTile));
