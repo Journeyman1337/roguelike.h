@@ -69,7 +69,7 @@ typedef struct jmTerm_s* jmTerm_h;
 // Clear the color of the console area with a solid color.
 void jmClearColor(const jmColor32_s color);
 // Create a term object
-jmTerm_h jmTermCreate(const size_t console_pixel_width, const size_t console_pixel_height, const size_t console_pixel_scale, const size_t default_tile_pixel_width, const size_t default_tile_pixel_height, const size_t atlas_pixel_width, const size_t atlas_pixel_height, const size_t atlas_page_count, const uint8_t* atlas_pixel_rgba, const size_t atlas_glyph_count, const float* atlas_glyph_stpqp);
+jmTerm_h jmTermCreate(const size_t console_tiles_wide, const size_t console_tiles_tall, const size_t console_pixel_scale, const size_t default_tile_pixel_width, const size_t default_tile_pixel_height, const size_t atlas_pixel_width, const size_t atlas_pixel_height, const size_t atlas_page_count, const uint8_t* atlas_pixel_rgba, const size_t atlas_glyph_count, const float* atlas_glyph_stpqp);
 // Destroy a term object and free all of its resources.
 void jmTermDestroy(jmTerm_h const term);
 // Resize the tile dimensions of a console.
