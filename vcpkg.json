@@ -5,7 +5,6 @@
 	"dependencies": [
 	"glfw3",
 	"glad",
-	"stb",
-	"raylib"
+	"stb"
   ]
 }
