@@ -99,7 +99,7 @@ void jmTermPushTileFree(jmTerm_h const term, const int screen_pixel_x, const int
 // Push a tile to a terminal in a pixel position with a custom pixel width and pixel height.
 void jmTermPushTileFreeSized(jmTerm_h const term, const int screen_pixel_x, const int screen_pixel_y, const int tile_pixel_width, const int tile_pixel_height, const uint16_t glyph, const jmColor32_s fg, const jmColor32_s bg);
 // Setup the viewport, scissor, and blend mode for drawing the terminal in a pixel perfect to a viewport window from the top left corner. If the terminal is smaller than the window, there will be gaps to the bottom and right of the terminal area.
-void jmTermSetupDefaultDraw(jmTerm_h const term);
+void jmTermSetupDefaultDraw(jmTerm_h const term, int window_viewport_height);
 // Draw the terminal pixel perect, starting from a specific viewport pixel. Can be used to render the terminal offset if it does not fit the window size. Same as default draw, but from a custom position instead of top left corner.
 void jmTermSetupOffsetDraw(jmTerm_h term, int left_x_pixel, int top_y_pixel, int window_viewport_height);
 // Setup for drawing across an entire viewport area of a window. If the terminal does not fit the window perfectly, it will be stretched and/or squished to fit. This can be used before drawing a clear color to clear the color of the entire window viewport.
@@ -589,11 +589,14 @@ void jmTermSetupDefaultDraw(jmTerm_h term)
 {
     GLD_START();
 
+	// find bottom y pixel because opengl y axis is flipped
+	int bottom_y_pixel = window_viewport_height - term->ConsolePixelHeight;
+	
     // set viewport
-    GLD_CALL(glViewport(0, 0, term->ConsolePixelWidth, term->ConsolePixelHeight));
+    GLD_CALL(glViewport(0, bottom_y_pixel, term->ConsolePixelWidth, term->ConsolePixelHeight));
 
     //set scissor
-    GLD_CALL(glScissor(0, 0, term->ConsolePixelWidth, term->ConsolePixelHeight));
+    GLD_CALL(glScissor(0, bottom_y_pixel, term->ConsolePixelWidth, term->ConsolePixelHeight));
 
     GLD_END();
 }
