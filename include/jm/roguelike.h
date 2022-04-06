@@ -585,7 +585,7 @@ void jmTermSetupStretchedDraw(jmTerm_h const term, const int window_viewport_wid
     GLD_END();
 }
 
-void jmTermSetupDefaultDraw(jmTerm_h term)
+void jmTermSetupDefaultDraw(jmTerm_h term, int window_viewport_height)
 {
     GLD_START();
 
