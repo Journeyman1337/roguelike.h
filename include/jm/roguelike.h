@@ -603,20 +603,37 @@ static inline void _TransformMatrix(float* matrix, int screen_width, int screen_
     matrix[7] -= y_translate;
 }
 
-void jmTermDrawTranslated(jmTerm_h const term, const int translate_x, const int translate_y, const int viewport_width, const int viewport_height, const int scissor)
+#define MAX(x, y) ((x) > (y)) ? (x) : y
+
+static void _setTermScissor(const int translate_x, const int translate_y, const int width, const int height)
+{
+	GLD_START();
+	
+	//crop the scissor area so the position is not less than 0 (this causes opengl error)
+	const int cropped_x = MAX(translate_x, 0);
+	const int cropped_y = MAX(translate_y, 0);
+	
+	const int translate_x_difference = cropped_x - translate_x;
+	const int translate_y_difference = cropped_y - translate_y;
+	
+	const int cropped_width = width - translate_x_difference;
+	const int cropped_height = height - translate_y_difference;	
+	
+	// set scissor
+	GLD_CALL(glScissor(cropped_x, cropped_y, cropped_width, cropped_height));
+	GLD_CALL(glEnable(GL_SCISSOR_TEST));
+
+	GLD_END();
+}
+
+void jmTermDrawTranslated(jmTerm_h const term, const int translate_x, const int translate_y, const int viewport_width, const int viewport_height)
 {
     float matrix[16];
     memcpy(matrix, kOpengl33ScreenMatrix, sizeof(float) * 16);
     _TransformMatrix(matrix, viewport_width, viewport_height, translate_x, translate_y, term->ConsolePixelWidth, term->ConsolePixelHeight);
 
-	GLD_START();
-
-	// set scissor
-	GLD_CALL(glScissor(translate_x, translate_y, term->ConsolePixelWidth, term->ConsolePixelHeight));
-	GLD_CALL(glEnable(GL_SCISSOR_TEST));
-
-	GLD_END();
-
+	_setTermScissor(translate_x, translate_y, term->ConsolePixelWidth, term->ConsolePixelHeight);
+	
     // draw
     jmTermDrawMatrix(term, matrix);
 
@@ -628,20 +645,14 @@ void jmTermDrawTranslated(jmTerm_h const term, const int translate_x, const int 
 	GLD_END();
 }
 
-void jmTermDrawTransformed(jmTerm_h const term, const int translate_x, const int translate_y, const float scale_x, const float scale_y, const int viewport_width, const int viewport_height, const int scissor)
+void jmTermDrawTransformed(jmTerm_h const term, const int translate_x, const int translate_y, const float scale_x, const float scale_y, const int viewport_width, const int viewport_height)
 {
     float matrix[16];
     memcpy(matrix, kOpengl33ScreenMatrix, sizeof(float) * 16);
     _TransformMatrix(matrix, viewport_width, viewport_height, translate_x, translate_y, term->ConsolePixelWidth * scale_x, term->ConsolePixelHeight * scale_y);
-
-	GLD_START();
-
-	// set scissor
-	GLD_CALL(glScissor(translate_x, translate_y, term->ConsolePixelWidth * scale_x, term->ConsolePixelHeight * scale_y));
-	GLD_CALL(glEnable(GL_SCISSOR_TEST));
-
-	GLD_END();
-
+	
+	_setTermScissor(translate_x, translate_y, term->ConsolePixelWidth * scale_x, term->ConsolePixelHeight * scale_y);
+	
     // draw
     jmTermDrawMatrix(term, matrix);
 
