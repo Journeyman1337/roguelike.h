@@ -107,7 +107,7 @@ void jmTermDrawTranslated(jmTerm_h const term, const int translate_x, const int 
 // Draw a terminal translated to by a 2d pixel vector and scaled by a 2d float vector.
 void jmTermDrawTransformed(jmTerm_h const term, const int translate_x, const int translate_y, const float scale_x, const float scale_y, const int viewport_width, const int viewport_height);
 // Draw a terminal transformed by a matrix 4x4 (with 16 floats)
-void jmTermDrawMatrix(jmTerm_h const term, float* const matrix_4x4);
+void jmTermDrawMatrix(jmTerm_h const term, const float* const matrix_4x4);
 
 #ifdef JM_RLH_IMPLEMENTATION
 #include <stdlib.h>
@@ -664,7 +664,7 @@ void jmTermDrawTransformed(jmTerm_h const term, const int translate_x, const int
 	GLD_END();
 }
 
-void jmTermDrawMatrix(jmTerm_h const term, float* const matrix_4x4)
+void jmTermDrawMatrix(jmTerm_h const term, const float* const matrix_4x4)
 {
     if (term->DataTileCount > 0) // only render if there are tiles to render
     {
