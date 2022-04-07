@@ -31,7 +31,7 @@ int main()
     const int w_width = (tiles_wide * tile_size * pixel_scale) + (border_pixels * 2);
     const int w_height = (tiles_tall * tile_size * pixel_scale) + (border_pixels * 2);
 
-    GLFWwindow* window = glfwCreateWindow(w_width, w_height, "jm test", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(w_width, w_height, "rlh test", NULL, NULL);
     glfwMakeContextCurrent(window);
 
     if (!window)
@@ -95,7 +95,8 @@ int main()
         }
     }
 
-    rlhTerm_h t = rlhTermCreate(tiles_wide, tiles_tall, pixel_scale, tile_size, tile_size, i_width, i_height, 1, pixels, 256, stpqp);
+    rlhAtlas_h a = rlhAtlasCreate(i_width, i_height, 1, pixels, 256, stpqp);
+    rlhTerm_h t = rlhTermCreate(tiles_wide, tiles_tall, pixel_scale, tile_size, tile_size);
 
     free(stpqp);
     stbi_image_free(pixels);
@@ -146,12 +147,17 @@ int main()
 
         rlhViewport(0, 0, w_width, w_height);
         rlhClearColor(RLH_BLACK());
-        rlhTermDrawTranslated(t, border_pixels, border_pixels, w_width, w_height);
+        rlhTermDrawTranslated(t, a, border_pixels, border_pixels, w_width, w_height);
 
         glfwPollEvents();
 
         glfwSwapBuffers(window);
     }
+
+    rlhAtlasDestroy(a);
+    a = NULL;
+    rlhTermDestroy(t);
+    t = NULL;
 
     glfwDestroyWindow(window);
     window = NULL;

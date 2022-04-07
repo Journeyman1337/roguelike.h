@@ -65,11 +65,24 @@ typedef struct rlhColor32_s
 #define RLH_TRANSPARENT() ((rlhColor32_s){ (0), (0), (0), (0) })
 
 typedef struct rlhTerm_s* rlhTerm_h;
+typedef struct rlhAtlas_s* rlhAtlas_h;
 
 // Clear the color of the console area with a solid color.
 void rlhClearColor(const rlhColor32_s color);
+// Set viewport area to draw to.
+void rlhViewport(const int x, const int y, const int width, const int height);
+
+rlhAtlas_h rlhAtlasCreate(const size_t atlas_pixel_width, const size_t atlas_pixel_height, const size_t atlas_page_count, const uint8_t* atlas_pixel_rgba, const size_t atlas_glyph_count, const float* atlas_glyph_stpqp);
+
+void rlhAtlasDestroy(rlhAtlas_h const atlas);
+
+void rlhAtlasModify(rlhAtlas_h const atlas, const size_t atlas_pixel_width, const size_t atlas_pixel_height, const size_t atlas_page_count, const uint8_t* atlas_pixel_rgba, const size_t atlas_glyph_count, const float* atlas_glyph_stpqp);
+
+void rlhAtlasGetDimensions(rlhAtlas_h const atlas, size_t* const width, size_t* const height, size_t* const pages);
+
+size_t rlhAtlasGetGlyphCount(rlhAtlas_h const atlas);
 // Create a term object
-rlhTerm_h rlhTermCreate(const size_t console_tiles_wide, const size_t console_tiles_tall, const float console_pixel_scale, const size_t default_tile_pixel_width, const size_t default_tile_pixel_height, const size_t atlas_pixel_width, const size_t atlas_pixel_height, const size_t atlas_page_count, const uint8_t* atlas_pixel_rgba, const size_t atlas_glyph_count, const float* atlas_glyph_stpqp);
+rlhTerm_h rlhTermCreate(const size_t console_tiles_wide, const size_t console_tiles_tall, const float console_pixel_scale, const size_t default_tile_pixel_width, const size_t default_tile_pixel_height);
 // Destroy a term object and free all of its resources.
 void rlhTermDestroy(rlhTerm_h const term);
 // Resize the tile dimensions of a console.
@@ -84,8 +97,6 @@ void rlhTermGetTileDimensions(rlhTerm_h const term, int* const console_tiles_wid
 float rlhTermGetPixelScale(rlhTerm_h const term);
 // Get the pixel dimensions of a console.
 void rlhTermGetPixelDimensions(rlhTerm_h const term, size_t* const console_pixel_width, size_t* const console_pixel_height);
-// Change the atlas texture and glyph coordinates
-void rlhTermChangeAtlas(rlhTerm_h const term, const size_t atlas_pixel_width, const size_t atlas_pixel_height, const size_t atlas_page_count, const uint8_t* atlas_pixel_rgba, const size_t atlas_glyph_count, const float* atlas_glyph_stpqp);
 // Clear a terminal's data buffer.
 void rlhTermClear(rlhTerm_h const term);
 // Get how many tiles have been set since the last clear.
@@ -98,16 +109,14 @@ void rlhTermPushTileGridSized(rlhTerm_h const term, const int grid_x, const int 
 void rlhTermPushTileFree(rlhTerm_h const term, const int screen_pixel_x, const int screen_pixel_y, const uint16_t glyph, const rlhColor32_s fg, const rlhColor32_s bg);
 // Push a tile to a terminal in a pixel position with a custom pixel width and pixel height.
 void rlhTermPushTileFreeSized(rlhTerm_h const term, const int screen_pixel_x, const int screen_pixel_y, const int tile_pixel_width, const int tile_pixel_height, const uint16_t glyph, const rlhColor32_s fg, const rlhColor32_s bg);
-// Set viewport area to draw to.
-void rlhViewport(const int x, const int y, const int width, const int height);
 // Draw a terminal to the current bound framebuffer of the current graphics context. Draws it to fit the viewport.
-void rlhTermDraw(rlhTerm_h const term);
+void rlhTermDraw(rlhTerm_h const term, rlhAtlas_h const atlas);
 // Draw a terminal translated to by a 2d pixel vector.
-void rlhTermDrawTranslated(rlhTerm_h const term, const int translate_x, const int translate_y, const int viewport_width, const int viewport_height);
+void rlhTermDrawTranslated(rlhTerm_h const term, rlhAtlas_h const atlas, const int translate_x, const int translate_y, const int viewport_width, const int viewport_height);
 // Draw a terminal translated to by a 2d pixel vector and scaled by a 2d float vector.
-void rlhTermDrawTransformed(rlhTerm_h const term, const int translate_x, const int translate_y, const float scale_x, const float scale_y, const int viewport_width, const int viewport_height);
+void rlhTermDrawTransformed(rlhTerm_h const term, rlhAtlas_h const atlas, const int translate_x, const int translate_y, const float scale_x, const float scale_y, const int viewport_width, const int viewport_height);
 // Draw a terminal transformed by a matrix 4x4 (with 16 floats)
-void rlhTermDrawMatrix(rlhTerm_h const term, const float* const matrix_4x4);
+void rlhTermDrawMatrix(rlhTerm_h const term, rlhAtlas_h const atlas, const float* const matrix_4x4);
 
 #ifdef RLH_IMPLEMENTATION
 #include <stdlib.h>
@@ -232,10 +241,6 @@ const int kMaxTilePixelDimensions = 65565;
 
 typedef struct rlhTerm_s
 {
-    size_t AtlasPixelWidth;
-    size_t AtlasPixelHeight;
-    size_t AtlasPageCount;
-    size_t AtlasGlyphCount;
     size_t ConsolePixelWidth;
     size_t ConsolePixelHeight;
     size_t ConsoleTilesWide;
@@ -251,12 +256,22 @@ typedef struct rlhTerm_s
     // Opengl33 handles
     GLuint Program;
     GLuint VAO;
-    GLuint AtlasTEX;
     GLuint DataBUF;
     GLuint DataTEX;
+} rlhTerm_s;
+
+typedef struct rlhAtlas_s
+{
+    size_t PixelWidth;
+    size_t PixelHeight;
+    size_t PageCount;
+    size_t GlyphCount;
+
+    // Opengl33 handles
+    GLuint AtlasTEX;
     GLuint FontmapBUF;
     GLuint FontmapTEX;
-} rlhTerm_s;
+} rlhAtlas_s;
 
 static inline GLuint _rlhCreateGlTextureArray(const size_t pixel_width, const size_t pixel_height, const size_t page_count, const uint8_t* const pixel_rgba)
 {
@@ -285,7 +300,109 @@ void rlhClearColor(const rlhColor32_s color)
     GLD_CALL(glClearColor((float)color.r / 255.0f, (float)color.g / 255.0f, (float)color.b / 255.0f, (float)color.a / 255.0f));
     GLD_CALL(glClear(GL_COLOR_BUFFER_BIT));
 }
-rlhTerm_h rlhTermCreate(const size_t console_tiles_wide, const size_t console_tiles_tall, const float console_pixel_scale, const size_t default_tile_pixel_width, const size_t default_tile_pixel_height, const size_t atlas_pixel_width, const size_t atlas_pixel_height, const size_t atlas_page_count, const uint8_t* atlas_pixel_rgba, const size_t atlas_glyph_count, const float* atlas_glyph_stpqp)
+
+void rlhViewport(const int x, const int y, const int width, const int height)
+{
+    GLD_START();
+
+    // set viewport
+    GLD_CALL(glViewport(x, y, width, height));
+
+    GLD_END();
+}
+
+rlhAtlas_h rlhAtlasCreate(const size_t atlas_pixel_width, const size_t atlas_pixel_height, const size_t atlas_page_count, const uint8_t* atlas_pixel_rgba, const size_t atlas_glyph_count, const float* atlas_glyph_stpqp)
+{
+    rlhAtlas_h atlas = (rlhAtlas_h)malloc(sizeof(rlhAtlas_s));
+    if (atlas == NULL) return NULL;
+    memset(atlas, 0, sizeof(rlhAtlas_s)); // set all struct properties to 0 by default.
+
+    atlas->PixelWidth = atlas_pixel_width;
+    atlas->PixelHeight = atlas_pixel_height;
+    atlas->PageCount = atlas_page_count;
+    atlas->GlyphCount = atlas_glyph_count;
+   
+    const size_t atlas_size = sizeof(uint8_t) * atlas_pixel_width * atlas_pixel_height * atlas_page_count * kChannelsPerAtlasPixel;
+    const size_t fontmap_size = sizeof(float) * atlas_glyph_count * kElementsPerFontmapGlyph;
+
+    atlas->AtlasTEX = _rlhCreateGlTextureArray(atlas_pixel_width, atlas_pixel_height, atlas_page_count, atlas_pixel_rgba);
+
+    GLD_START();
+
+    // load fontmap texture buffer object
+    GLD_CALL(glGenBuffers(1, &atlas->FontmapBUF));
+    GLD_CALL(glBindBuffer(GL_TEXTURE_BUFFER, atlas->FontmapBUF));
+    GLD_CALL(glBufferData(GL_TEXTURE_BUFFER, atlas_glyph_count * kElementsPerFontmapGlyph * sizeof(float), atlas_glyph_stpqp, GL_DYNAMIC_DRAW));
+    GLD_CALL(glGenTextures(1, &atlas->FontmapTEX));
+    GLD_CALL(glBindTexture(GL_TEXTURE_BUFFER, atlas->FontmapTEX));
+    GLD_CALL(glTexBuffer(GL_TEXTURE_BUFFER, GL_R32F, atlas->FontmapBUF));
+
+    GLD_END();
+
+    return atlas;
+}
+
+void rlhAtlasDestroy(rlhAtlas_h const atlas)
+{
+    if (atlas->FontmapBUF != 0)
+    {
+        GLD_CALL(glDeleteBuffers(1, &atlas->FontmapBUF));
+        atlas->FontmapBUF = 0;
+    }
+    if (atlas->FontmapTEX != 0)
+    {
+        GLD_CALL(glDeleteTextures(1, &atlas->FontmapTEX));
+        atlas->FontmapTEX = 0;
+    }
+
+    // destroy atlas texture
+    if (atlas->AtlasTEX != 0)
+    {
+        GLD_CALL(glDeleteTextures(1, &atlas->AtlasTEX));
+        atlas->AtlasTEX = 0;
+    }
+}
+
+void rlhAtlasModify(rlhAtlas_h const atlas, const size_t atlas_pixel_width, const size_t atlas_pixel_height, const size_t atlas_page_count, const uint8_t* atlas_pixel_rgba, const size_t atlas_glyph_count, const float* atlas_glyph_stpqp)
+{
+    GLD_START();
+
+    if (atlas->AtlasTEX != 0)
+    {
+        GLD_CALL(glDeleteTextures(1, &atlas->AtlasTEX));
+        atlas->AtlasTEX = 0;
+    }
+
+    atlas->AtlasTEX = _rlhCreateGlTextureArray(atlas_pixel_width, atlas_pixel_height, atlas_page_count, atlas_pixel_rgba);
+
+    GLD_CALL(glBindBuffer(GL_TEXTURE_BUFFER, atlas->FontmapBUF));
+    GLD_CALL(glBufferData(GL_TEXTURE_BUFFER, sizeof(float) * atlas_glyph_count * kElementsPerFontmapGlyph, atlas_glyph_stpqp, GL_DYNAMIC_DRAW));
+
+    GLD_END();
+}
+
+void rlhAtlasGetDimensions(rlhAtlas_h const atlas, size_t* const width, size_t* const height, size_t* const pages)
+{
+    if (width != NULL)
+    {
+        *width = atlas->PixelWidth;
+    }
+    if (height != NULL)
+    {
+        *height = atlas->PixelHeight;
+    }
+    if (pages != NULL)
+    {
+        *pages = atlas->PageCount; 
+    }
+}
+
+size_t rlhAtlasGetGlyphCount(rlhAtlas_h const atlas)
+{
+    return atlas->GlyphCount;
+}
+
+rlhTerm_h rlhTermCreate(const size_t console_tiles_wide, const size_t console_tiles_tall, const float console_pixel_scale, const size_t default_tile_pixel_width, const size_t default_tile_pixel_height)
 {
     rlhTerm_h term = (rlhTerm_h)malloc(sizeof(rlhTerm_s));
     if (term == NULL) return NULL;
@@ -298,13 +415,7 @@ rlhTerm_h rlhTermCreate(const size_t console_tiles_wide, const size_t console_ti
     term->ConsolePixelWidth = console_tiles_wide * default_tile_pixel_width * console_pixel_scale;
     term->ConsolePixelHeight = console_tiles_tall * default_tile_pixel_height * console_pixel_scale;
     term->DataReservedTileCount = term->ConsoleTilesWide * term->ConsoleTilesTall;
-    term->AtlasPixelWidth = atlas_pixel_width;
-    term->AtlasPixelHeight = atlas_pixel_height;
-    term->AtlasPageCount = atlas_page_count;
-    term->AtlasGlyphCount = atlas_glyph_count;
 
-    const size_t atlas_size = sizeof(uint8_t) * atlas_pixel_width * atlas_pixel_height * atlas_page_count * kChannelsPerAtlasPixel;
-    const size_t fontmap_size = sizeof(float) * atlas_glyph_count * kElementsPerFontmapGlyph;
     const size_t reserved_data_size = sizeof(uint8_t) * term->DataReservedTileCount * kBytesPerTileData;
 
     term->Data = (uint8_t*)malloc(reserved_data_size);
@@ -337,17 +448,6 @@ rlhTerm_h rlhTermCreate(const size_t console_tiles_wide, const size_t console_ti
     // generate and bind vertex array object
     GLD_CALL(glGenVertexArrays(1, &term->VAO));
     GLD_CALL(glBindVertexArray(term->VAO));
-
-    // load atlas texture
-    term->AtlasTEX = _rlhCreateGlTextureArray(atlas_pixel_width, atlas_pixel_height, atlas_page_count, atlas_pixel_rgba);
-
-    // load fontmap texture buffer object
-    GLD_CALL(glGenBuffers(1, &term->FontmapBUF));
-    GLD_CALL(glBindBuffer(GL_TEXTURE_BUFFER, term->FontmapBUF));
-    GLD_CALL(glBufferData(GL_TEXTURE_BUFFER, (size_t)term->AtlasGlyphCount * kElementsPerFontmapGlyph * sizeof(float), atlas_glyph_stpqp, GL_DYNAMIC_DRAW));
-    GLD_CALL(glGenTextures(1, &term->FontmapTEX));
-    GLD_CALL(glBindTexture(GL_TEXTURE_BUFFER, term->FontmapTEX));
-    GLD_CALL(glTexBuffer(GL_TEXTURE_BUFFER, GL_R32F, term->FontmapBUF));
 
     // set shader uniforms
     GLD_CALL(glUseProgram(term->Program));
@@ -387,25 +487,6 @@ void rlhTermDestroy(rlhTerm_h const term)
     }
 
     GLD_CALL(glDeleteProgram(term->Program));
-
-    // destroy fontmap texture buffer object
-    if (term->FontmapBUF != 0)
-    {
-        GLD_CALL(glDeleteBuffers(1, &term->FontmapBUF));
-        term->FontmapBUF = 0;
-    }
-    if (term->FontmapTEX != 0)
-    {
-        GLD_CALL(glDeleteTextures(1, &term->FontmapTEX));
-        term->FontmapTEX = 0;
-    }
-
-    // destroy atlas texture
-    if (term->AtlasTEX != 0)
-    {
-        GLD_CALL(glDeleteTextures(1, &term->AtlasTEX));
-        term->AtlasTEX = 0;
-    }
 
     GLD_END();
 
@@ -465,24 +546,6 @@ void rlhTermGetPixelDimensions(rlhTerm_h const term, size_t* const console_pixel
     {
         *console_pixel_height = term->ConsolePixelHeight;
     }
-}
-
-void rlhTermChangeAtlas(rlhTerm_h const term, const size_t atlas_pixel_width, const size_t atlas_pixel_height, const size_t atlas_page_count, const uint8_t* atlas_pixel_rgba, const size_t atlas_glyph_count, const float* atlas_glyph_stpqp)
-{
-    GLD_START();
-
-    if (term->AtlasTEX != 0)
-    {
-        GLD_CALL(glDeleteTextures(1, &term->AtlasTEX));
-        term->AtlasTEX = 0;
-    }
-
-    term->AtlasTEX = _rlhCreateGlTextureArray(atlas_pixel_width, atlas_pixel_height, atlas_page_count, atlas_pixel_rgba);
-
-    GLD_CALL(glBindBuffer(GL_TEXTURE_BUFFER, term->FontmapBUF));
-    GLD_CALL(glBufferData(GL_TEXTURE_BUFFER, sizeof(float) * atlas_glyph_count* kElementsPerFontmapGlyph, atlas_glyph_stpqp, GL_DYNAMIC_DRAW));
-
-    GLD_END();
 }
 
 void rlhTermClear(rlhTerm_h term)
@@ -575,19 +638,9 @@ void rlhTermPushTileFreeSized(rlhTerm_h const term, const int screen_pixel_x, co
     _rlhTermPushTile(term, screen_pixel_x, screen_pixel_y, tile_pixel_width, tile_pixel_height, glyph, fg, bg);
 }
 
-void rlhViewport(const int x, const int y, const int width, const int height)
+void rlhTermDraw(rlhTerm_h term, rlhAtlas_h const atlas)
 {
-    GLD_START();
-
-    // set viewport
-    GLD_CALL(glViewport(x, y, width, height));
-
-    GLD_END();
-}
-
-void rlhTermDraw(rlhTerm_h term)
-{
-    rlhTermDrawMatrix(term, kOpengl33ScreenMatrix);
+    rlhTermDrawMatrix(term, atlas, kOpengl33ScreenMatrix);
 }
 
 //Translate an opengl screen matrix so that a rectangle using it is flat facing the screen and its 2d edges match the screen space pixel coordinates given.
@@ -626,7 +679,7 @@ static void _setTermScissor(const int translate_x, const int translate_y, const 
 	GLD_END();
 }
 
-void rlhTermDrawTranslated(rlhTerm_h const term, const int translate_x, const int translate_y, const int viewport_width, const int viewport_height)
+void rlhTermDrawTranslated(rlhTerm_h const term, rlhAtlas_h const atlas, const int translate_x, const int translate_y, const int viewport_width, const int viewport_height)
 {
     float matrix[16];
     memcpy(matrix, kOpengl33ScreenMatrix, sizeof(float) * 16);
@@ -635,7 +688,7 @@ void rlhTermDrawTranslated(rlhTerm_h const term, const int translate_x, const in
 	_setTermScissor(translate_x, translate_y, term->ConsolePixelWidth, term->ConsolePixelHeight);
 	
     // draw
-    rlhTermDrawMatrix(term, matrix);
+    rlhTermDrawMatrix(term, atlas, matrix);
 
 	GLD_START();
 
@@ -645,7 +698,7 @@ void rlhTermDrawTranslated(rlhTerm_h const term, const int translate_x, const in
 	GLD_END();
 }
 
-void rlhTermDrawTransformed(rlhTerm_h const term, const int translate_x, const int translate_y, const float scale_x, const float scale_y, const int viewport_width, const int viewport_height)
+void rlhTermDrawTransformed(rlhTerm_h const term, rlhAtlas_h const atlas, const int translate_x, const int translate_y, const float scale_x, const float scale_y, const int viewport_width, const int viewport_height)
 {
     float matrix[16];
     memcpy(matrix, kOpengl33ScreenMatrix, sizeof(float) * 16);
@@ -654,7 +707,7 @@ void rlhTermDrawTransformed(rlhTerm_h const term, const int translate_x, const i
 	_setTermScissor(translate_x, translate_y, term->ConsolePixelWidth * scale_x, term->ConsolePixelHeight * scale_y);
 	
     // draw
-    rlhTermDrawMatrix(term, matrix);
+    rlhTermDrawMatrix(term, atlas, matrix);
 
 	GLD_START();
 
@@ -664,7 +717,7 @@ void rlhTermDrawTransformed(rlhTerm_h const term, const int translate_x, const i
 	GLD_END();
 }
 
-void rlhTermDrawMatrix(rlhTerm_h const term, const float* const matrix_4x4)
+void rlhTermDrawMatrix(rlhTerm_h const term, rlhAtlas_h const atlas, const float* const matrix_4x4)
 {
     if (term->DataTileCount > 0) // only render if there are tiles to render
     {
@@ -690,11 +743,11 @@ void rlhTermDrawMatrix(rlhTerm_h const term, const float* const matrix_4x4)
 
         // bind the atlas texture
         GLD_CALL(glActiveTexture(GL_TEXTURE2));
-        GLD_CALL(glBindTexture(GL_TEXTURE_2D_ARRAY, term->AtlasTEX));
+        GLD_CALL(glBindTexture(GL_TEXTURE_2D_ARRAY, atlas->AtlasTEX));
 
         // bind the fontmap
         GLD_CALL(glActiveTexture(GL_TEXTURE3));
-        GLD_CALL(glBindTexture(GL_TEXTURE_BUFFER, term->FontmapTEX));
+        GLD_CALL(glBindTexture(GL_TEXTURE_BUFFER, atlas->FontmapTEX));
 
         // bind data texture buffer
         GLD_CALL(glActiveTexture(GL_TEXTURE4));
