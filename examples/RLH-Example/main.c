@@ -6,6 +6,8 @@
 #define JM_RLH_IMPLEMENTATION
 #include <jm/roguelike.h>
 
+#include <string.h>
+
 int main()
 {
     if (!glfwInit())
@@ -21,12 +23,13 @@ int main()
 #endif
     glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
-    const int tiles_wide = 80;
-    const int tiles_tall = 50;
-    const int tile_size = 8 * 2;
-    const int pixel_scale = 1;
-    const int w_width = (tiles_wide * tile_size * pixel_scale) + 64;
-    const int w_height = (tiles_tall * tile_size * pixel_scale) + 64;
+    const int tiles_wide = 40;
+    const int tiles_tall = 25;
+    const int tile_size = 8;
+    const float pixel_scale = 2;
+    const int border_pixels = 32;
+    const int w_width = (tiles_wide * tile_size * pixel_scale) + (border_pixels * 2);
+    const int w_height = (tiles_tall * tile_size * pixel_scale) + (border_pixels * 2);
 
     GLFWwindow* window = glfwCreateWindow(w_width, w_height, "jm test", NULL, NULL);
     glfwMakeContextCurrent(window);
@@ -101,6 +104,7 @@ int main()
     {
         jmTermClear(t);
 
+        // every glyph in codepage 437
         for (size_t x = 0; x < 16; x++)
         {
             for (size_t y = 0; y < 16; y++)
@@ -109,16 +113,40 @@ int main()
             }
         }
 
+        //half tile offset face on bottom right corner of codepage
         jmTermPushTileFree(t, 15 * tile_size + (tile_size / 2), 15 * tile_size + (tile_size / 2), 2, JM_WHITE(), JM_TRANSPARENT());
 
-        jmTermPushTileGridSized(t, 25, 25, tile_size * 3, tile_size * 3, 2, JM_WHITE(), JM_TRANSPARENT());
+        // increasingly larger faces
+        jmTermPushTileGridSized(t, 18, 5, tile_size * 5, tile_size * 5, 2, JM_WHITE(), JM_TRANSPARENT());
+        jmTermPushTileGridSized(t, 23, 5, tile_size * 4, tile_size * 4, 2, JM_WHITE(), JM_TRANSPARENT());
+        jmTermPushTileGridSized(t, 27, 5, tile_size * 3, tile_size * 3, 2, JM_WHITE(), JM_TRANSPARENT());
+        jmTermPushTileGridSized(t, 30, 5, tile_size * 2, tile_size * 2, 2, JM_WHITE(), JM_TRANSPARENT());
+        jmTermPushTileGridSized(t, 32, 5, tile_size, tile_size, 2, JM_WHITE(), JM_TRANSPARENT());
 
-        jmTermPushTileFreeSized(t, 30 * tile_size + (tile_size / 2), 30 * tile_size, 15 * tile_size, 8 * tile_size, 2, JM_WHITE(), JM_TRANSPARENT());
+        // big guy in corner going over edges
+        jmTermPushTileFreeSized(t, -(tile_size * 3), 18 * tile_size, 15 * tile_size, 8 * tile_size, 2, JM_RED(), JM_TRANSPARENT());
 
-        jmTermSetupStretchedDraw(t, w_width, w_height);
+        const size_t label_x = 18;
+
+        const char* label_1 = "roguelike.h";
+        const size_t label_1_y = 20;
+        const size_t label_1_length = strlen(label_1);
+        for (size_t x = 0; x < label_1_length; x++)
+        {
+            jmTermPushTileGrid(t, x + label_x, label_1_y, label_1[x], JM_NAVY(), JM_YELLOW());
+        }
+
+        const char* label_2 = "by journeyman";
+        const size_t label_2_y = label_1_y + 1;
+        const size_t label_2_length = strlen(label_2);
+        for (size_t x = 0; x < label_2_length; x++)
+        {
+            jmTermPushTileGrid(t, x + label_x, label_2_y, label_2[x], JM_RED(), JM_GREEN());
+        }
+
+        jmViewport(0, 0, w_width, w_height);
         jmClearColor(JM_BLACK());
-        jmTermSetupOffsetDraw(t, 32, 32, w_height);
-        jmTermDraw(t);
+        jmTermDrawTranslated(t, border_pixels, border_pixels, w_width, w_height, JM_SCISSOR_ENABLE);
 
         glfwPollEvents();
 
