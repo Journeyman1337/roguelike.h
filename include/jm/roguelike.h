@@ -649,7 +649,7 @@ void jmTermDrawTransformed(jmTerm_h const term, const int translate_x, const int
         GLD_START();
 
         // set scissor
-        GLD_CALL(glScissor(translate_x, translate_y, term->ConsolePixelWidth, term->ConsolePixelHeight));
+        GLD_CALL(glScissor(translate_x, translate_y, term->ConsolePixelWidth * scale_x, term->ConsolePixelHeight * scale_y));
         GLD_CALL(glEnable(GL_SCISSOR_TEST));
 
         GLD_END();
