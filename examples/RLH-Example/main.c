@@ -4,7 +4,7 @@
 #include <GLFW/glfw3.h>
 
 #define RLH_IMPLEMENTATION
-#include <jm/roguelike.h>
+#include <roguelike.h>
 
 #include <string.h>
 
