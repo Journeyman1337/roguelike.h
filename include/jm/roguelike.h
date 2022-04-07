@@ -66,10 +66,6 @@ typedef struct jmColor32_s
 
 typedef struct jmTerm_s* jmTerm_h;
 
-// to pass into jmTermDrawTransformed scissor argument
-#define JM_SCISSOR_ENABLE 1
-#define JM_SCISSOR_DISABLE 0
-
 // Clear the color of the console area with a solid color.
 void jmClearColor(const jmColor32_s color);
 // Create a term object
@@ -107,9 +103,9 @@ void jmViewport(const int x, const int y, const int width, const int height);
 // Draw a terminal to the current bound framebuffer of the current graphics context. Draws it to fit the viewport.
 void jmTermDraw(jmTerm_h const term);
 // Draw a terminal translated to by a 2d pixel vector.
-void jmTermDrawTranslated(jmTerm_h const term, const int translate_x, const int translate_y, const int viewport_width, const int viewport_height, const int scissor);
+void jmTermDrawTranslated(jmTerm_h const term, const int translate_x, const int translate_y, const int viewport_width, const int viewport_height);
 // Draw a terminal translated to by a 2d pixel vector and scaled by a 2d float vector.
-void jmTermDrawTransformed(jmTerm_h const term, const int translate_x, const int translate_y, const float scale_x, const float scale_y, const int viewport_width, const int viewport_height, const int scissor);
+void jmTermDrawTransformed(jmTerm_h const term, const int translate_x, const int translate_y, const float scale_x, const float scale_y, const int viewport_width, const int viewport_height);
 // Draw a terminal transformed by a matrix 4x4 (with 16 floats)
 void jmTermDrawMatrix(jmTerm_h const term, float* const matrix_4x4);
 
@@ -613,29 +609,23 @@ void jmTermDrawTranslated(jmTerm_h const term, const int translate_x, const int 
     memcpy(matrix, kOpengl33ScreenMatrix, sizeof(float) * 16);
     _TransformMatrix(matrix, viewport_width, viewport_height, translate_x, translate_y, term->ConsolePixelWidth, term->ConsolePixelHeight);
 
-    if (scissor == JM_SCISSOR_ENABLE)
-    {
-        GLD_START();
+	GLD_START();
 
-        // set scissor
-        GLD_CALL(glScissor(translate_x, translate_y, term->ConsolePixelWidth, term->ConsolePixelHeight));
-        GLD_CALL(glEnable(GL_SCISSOR_TEST));
+	// set scissor
+	GLD_CALL(glScissor(translate_x, translate_y, term->ConsolePixelWidth, term->ConsolePixelHeight));
+	GLD_CALL(glEnable(GL_SCISSOR_TEST));
 
-        GLD_END();
-    }
+	GLD_END();
 
     // draw
     jmTermDrawMatrix(term, matrix);
 
-    if (scissor == JM_SCISSOR_ENABLE)
-    {
-        GLD_START();
+	GLD_START();
 
-        // unset the scissor
-        GLD_CALL(glDisable(GL_SCISSOR_TEST));
+	// unset the scissor
+	GLD_CALL(glDisable(GL_SCISSOR_TEST));
 
-        GLD_END();
-    }
+	GLD_END();
 }
 
 void jmTermDrawTransformed(jmTerm_h const term, const int translate_x, const int translate_y, const float scale_x, const float scale_y, const int viewport_width, const int viewport_height, const int scissor)
@@ -644,29 +634,23 @@ void jmTermDrawTransformed(jmTerm_h const term, const int translate_x, const int
     memcpy(matrix, kOpengl33ScreenMatrix, sizeof(float) * 16);
     _TransformMatrix(matrix, viewport_width, viewport_height, translate_x, translate_y, term->ConsolePixelWidth * scale_x, term->ConsolePixelHeight * scale_y);
 
-    if (scissor == JM_SCISSOR_ENABLE)
-    {
-        GLD_START();
+	GLD_START();
 
-        // set scissor
-        GLD_CALL(glScissor(translate_x, translate_y, term->ConsolePixelWidth * scale_x, term->ConsolePixelHeight * scale_y));
-        GLD_CALL(glEnable(GL_SCISSOR_TEST));
+	// set scissor
+	GLD_CALL(glScissor(translate_x, translate_y, term->ConsolePixelWidth * scale_x, term->ConsolePixelHeight * scale_y));
+	GLD_CALL(glEnable(GL_SCISSOR_TEST));
 
-        GLD_END();
-    }
+	GLD_END();
 
     // draw
     jmTermDrawMatrix(term, matrix);
 
-    if (scissor == JM_SCISSOR_ENABLE)
-    {
-        GLD_START();
+	GLD_START();
 
-        // unset the scissor
-        GLD_CALL(glDisable(GL_SCISSOR_TEST));
+	// unset the scissor
+	GLD_CALL(glDisable(GL_SCISSOR_TEST));
 
-        GLD_END();
-    }
+	GLD_END();
 }
 
 void jmTermDrawMatrix(jmTerm_h const term, float* const matrix_4x4)

@@ -146,7 +146,7 @@ int main()
 
         jmViewport(0, 0, w_width, w_height);
         jmClearColor(JM_BLACK());
-        jmTermDrawTranslated(t, border_pixels, border_pixels, w_width, w_height, JM_SCISSOR_ENABLE);
+        jmTermDrawTranslated(t, border_pixels, border_pixels, w_width, w_height);
 
         glfwPollEvents();
 
