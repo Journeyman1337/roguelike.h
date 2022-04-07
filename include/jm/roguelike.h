@@ -35,81 +35,81 @@ extern "C"
 #endif
 
 
-typedef struct jmColor32_s
+typedef struct rlhColor32_s
 {
     uint8_t r;
     uint8_t g;
     uint8_t b;
     uint8_t a;
-} jmColor32_s;
+} rlhColor32_s;
 
-#define JM_C32_NON_COMPOUND(red, green, blue, alpha) { red, green, blue, alpha }
-#define JM_C32(red, green, blue, alpha) ((jmColor32_s){ (red), (green), (blue), (alpha) })
+#define RLH_C32_NON_COMPOUND(red, green, blue, alpha) { red, green, blue, alpha }
+#define RLH_C32(red, green, blue, alpha) ((rlhColor32_s){ (red), (green), (blue), (alpha) })
 
-#define JM_RED() ((jmColor32_s){ (255), (0), (0), (255) })
-#define JM_LIME() ((jmColor32_s){ (0), (255), (0), (255) })
-#define JM_BLUE() ((jmColor32_s){ (0), (0), (255), (255) })
-#define JM_WHITE() ((jmColor32_s){ (255), (255), (255), (255) })
-#define JM_BLACK() ((jmColor32_s){ (0), (0), (0), (255) })
-#define JM_SILVER() ((jmColor32_s){ (192), (192), (192), (255) })
-#define JM_GRAY() ((jmColor32_s){ (128), (128), (128), (255) })
-#define JM_MAROON() ((jmColor32_s){ (128), (0), (0), (255) })
-#define JM_YELLOW() ((jmColor32_s){ (255), (255), (0), (255) })
-#define JM_OLIVE() ((jmColor32_s){ (128), (128), (0), (255) })
-#define JM_GREEN() ((jmColor32_s){ (0), (128), (0), (255) })
-#define JM_AQUA() ((jmColor32_s){ (0), (255), (255), (255) })
-#define JM_TEAL() ((jmColor32_s){ (0), (128), (128), (255) })
-#define JM_NAVY() ((jmColor32_s){ (0), (0), (128), (255) })
-#define JM_FUCHSIA() ((jmColor32_s){ (255), (0), (255), (255) })
-#define JM_PURPLE() ((jmColor32_s){ (128), (0), (128), (255) })
-#define JM_TRANSPARENT() ((jmColor32_s){ (0), (0), (0), (0) })
+#define RLH_RED() ((rlhColor32_s){ (255), (0), (0), (255) })
+#define RLH_LIME() ((rlhColor32_s){ (0), (255), (0), (255) })
+#define RLH_BLUE() ((rlhColor32_s){ (0), (0), (255), (255) })
+#define RLH_WHITE() ((rlhColor32_s){ (255), (255), (255), (255) })
+#define RLH_BLACK() ((rlhColor32_s){ (0), (0), (0), (255) })
+#define RLH_SILVER() ((rlhColor32_s){ (192), (192), (192), (255) })
+#define RLH_GRAY() ((rlhColor32_s){ (128), (128), (128), (255) })
+#define RLH_MAROON() ((rlhColor32_s){ (128), (0), (0), (255) })
+#define RLH_YELLOW() ((rlhColor32_s){ (255), (255), (0), (255) })
+#define RLH_OLIVE() ((rlhColor32_s){ (128), (128), (0), (255) })
+#define RLH_GREEN() ((rlhColor32_s){ (0), (128), (0), (255) })
+#define RLH_AQUA() ((rlhColor32_s){ (0), (255), (255), (255) })
+#define RLH_TEAL() ((rlhColor32_s){ (0), (128), (128), (255) })
+#define RLH_NAVY() ((rlhColor32_s){ (0), (0), (128), (255) })
+#define RLH_FUCHSIA() ((rlhColor32_s){ (255), (0), (255), (255) })
+#define RLH_PURPLE() ((rlhColor32_s){ (128), (0), (128), (255) })
+#define RLH_TRANSPARENT() ((rlhColor32_s){ (0), (0), (0), (0) })
 
-typedef struct jmTerm_s* jmTerm_h;
+typedef struct rlhTerm_s* rlhTerm_h;
 
 // Clear the color of the console area with a solid color.
-void jmClearColor(const jmColor32_s color);
+void rlhClearColor(const rlhColor32_s color);
 // Create a term object
-jmTerm_h jmTermCreate(const size_t console_tiles_wide, const size_t console_tiles_tall, const float console_pixel_scale, const size_t default_tile_pixel_width, const size_t default_tile_pixel_height, const size_t atlas_pixel_width, const size_t atlas_pixel_height, const size_t atlas_page_count, const uint8_t* atlas_pixel_rgba, const size_t atlas_glyph_count, const float* atlas_glyph_stpqp);
+rlhTerm_h rlhTermCreate(const size_t console_tiles_wide, const size_t console_tiles_tall, const float console_pixel_scale, const size_t default_tile_pixel_width, const size_t default_tile_pixel_height, const size_t atlas_pixel_width, const size_t atlas_pixel_height, const size_t atlas_page_count, const uint8_t* atlas_pixel_rgba, const size_t atlas_glyph_count, const float* atlas_glyph_stpqp);
 // Destroy a term object and free all of its resources.
-void jmTermDestroy(jmTerm_h const term);
+void rlhTermDestroy(rlhTerm_h const term);
 // Resize the tile dimensions of a console.
-void jmTermResizeConsole(jmTerm_h const term, const size_t console_tiles_wide, const size_t console_tiles_tall);
+void rlhTermResizeConsole(rlhTerm_h const term, const size_t console_tiles_wide, const size_t console_tiles_tall);
 // Change the size ratio of a terminal pixel per screen pixel.
-void jmTermResizePixelScale(jmTerm_h const term, const float console_pixel_scale);
+void rlhTermResizePixelScale(rlhTerm_h const term, const float console_pixel_scale);
 // Change the default width and height of console tiles.
-void jmTermResizeTiles(jmTerm_h const term, const size_t default_tile_width, const size_t default_tile_height);
+void rlhTermResizeTiles(rlhTerm_h const term, const size_t default_tile_width, const size_t default_tile_height);
 // Get the tile dimensions of a console.
-void jmTermGetTileDimensions(jmTerm_h const term, int* const console_tiles_wide, int* const console_tiles_tall);
+void rlhTermGetTileDimensions(rlhTerm_h const term, int* const console_tiles_wide, int* const console_tiles_tall);
 // Get the size ratio of a terminal pixel per screen pixel.
-float jmTermGetPixelScale(jmTerm_h const term);
+float rlhTermGetPixelScale(rlhTerm_h const term);
 // Get the pixel dimensions of a console.
-void jmTermGetPixelDimensions(jmTerm_h const term, size_t* const console_pixel_width, size_t* const console_pixel_height);
+void rlhTermGetPixelDimensions(rlhTerm_h const term, size_t* const console_pixel_width, size_t* const console_pixel_height);
 // Change the atlas texture and glyph coordinates
-void jmTermChangeAtlas(jmTerm_h const term, const size_t atlas_pixel_width, const size_t atlas_pixel_height, const size_t atlas_page_count, const uint8_t* atlas_pixel_rgba, const size_t atlas_glyph_count, const float* atlas_glyph_stpqp);
+void rlhTermChangeAtlas(rlhTerm_h const term, const size_t atlas_pixel_width, const size_t atlas_pixel_height, const size_t atlas_page_count, const uint8_t* atlas_pixel_rgba, const size_t atlas_glyph_count, const float* atlas_glyph_stpqp);
 // Clear a terminal's data buffer.
-void jmTermClear(jmTerm_h const term);
+void rlhTermClear(rlhTerm_h const term);
 // Get how many tiles have been set since the last clear.
-size_t jmTermGetTileCount(jmTerm_h const term);
+size_t rlhTermGetTileCount(rlhTerm_h const term);
 // Push a tile to a terminal in a grid cell position with default pixel width and pixel height.
-void jmTermPushTileGrid(jmTerm_h const term, const int grid_x, const int grid_y, const uint16_t glyph, const jmColor32_s fg, const jmColor32_s bg);
+void rlhTermPushTileGrid(rlhTerm_h const term, const int grid_x, const int grid_y, const uint16_t glyph, const rlhColor32_s fg, const rlhColor32_s bg);
 // Push a tile to a terminal in a grid cell position with a custom pixel width and pixel height.
-void jmTermPushTileGridSized(jmTerm_h const term, const int grid_x, const int grid_y, const int tile_pixel_width, const int tile_pixel_height, const uint16_t glyph, const jmColor32_s fg, const jmColor32_s bg);
+void rlhTermPushTileGridSized(rlhTerm_h const term, const int grid_x, const int grid_y, const int tile_pixel_width, const int tile_pixel_height, const uint16_t glyph, const rlhColor32_s fg, const rlhColor32_s bg);
 // Push a tile to a terminal in a pixel position with a default pixel width and pixel height.
-void jmTermPushTileFree(jmTerm_h const term, const int screen_pixel_x, const int screen_pixel_y, const uint16_t glyph, const jmColor32_s fg, const jmColor32_s bg);
+void rlhTermPushTileFree(rlhTerm_h const term, const int screen_pixel_x, const int screen_pixel_y, const uint16_t glyph, const rlhColor32_s fg, const rlhColor32_s bg);
 // Push a tile to a terminal in a pixel position with a custom pixel width and pixel height.
-void jmTermPushTileFreeSized(jmTerm_h const term, const int screen_pixel_x, const int screen_pixel_y, const int tile_pixel_width, const int tile_pixel_height, const uint16_t glyph, const jmColor32_s fg, const jmColor32_s bg);
+void rlhTermPushTileFreeSized(rlhTerm_h const term, const int screen_pixel_x, const int screen_pixel_y, const int tile_pixel_width, const int tile_pixel_height, const uint16_t glyph, const rlhColor32_s fg, const rlhColor32_s bg);
 // Set viewport area to draw to.
-void jmViewport(const int x, const int y, const int width, const int height);
+void rlhViewport(const int x, const int y, const int width, const int height);
 // Draw a terminal to the current bound framebuffer of the current graphics context. Draws it to fit the viewport.
-void jmTermDraw(jmTerm_h const term);
+void rlhTermDraw(rlhTerm_h const term);
 // Draw a terminal translated to by a 2d pixel vector.
-void jmTermDrawTranslated(jmTerm_h const term, const int translate_x, const int translate_y, const int viewport_width, const int viewport_height);
+void rlhTermDrawTranslated(rlhTerm_h const term, const int translate_x, const int translate_y, const int viewport_width, const int viewport_height);
 // Draw a terminal translated to by a 2d pixel vector and scaled by a 2d float vector.
-void jmTermDrawTransformed(jmTerm_h const term, const int translate_x, const int translate_y, const float scale_x, const float scale_y, const int viewport_width, const int viewport_height);
+void rlhTermDrawTransformed(rlhTerm_h const term, const int translate_x, const int translate_y, const float scale_x, const float scale_y, const int viewport_width, const int viewport_height);
 // Draw a terminal transformed by a matrix 4x4 (with 16 floats)
-void jmTermDrawMatrix(jmTerm_h const term, const float* const matrix_4x4);
+void rlhTermDrawMatrix(rlhTerm_h const term, const float* const matrix_4x4);
 
-#ifdef JM_RLH_IMPLEMENTATION
+#ifdef RLH_IMPLEMENTATION
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -230,7 +230,7 @@ const size_t kVerticesPerTile = 6;
 const int kTilePositionOffset = 16384;
 const int kMaxTilePixelDimensions = 65565;
 
-typedef struct jmTerm_s
+typedef struct rlhTerm_s
 {
     size_t AtlasPixelWidth;
     size_t AtlasPixelHeight;
@@ -256,9 +256,9 @@ typedef struct jmTerm_s
     GLuint DataTEX;
     GLuint FontmapBUF;
     GLuint FontmapTEX;
-} jmTerm_s;
+} rlhTerm_s;
 
-static inline GLuint _jmCreateGlTextureArray(const size_t pixel_width, const size_t pixel_height, const size_t page_count, const uint8_t* const pixel_rgba)
+static inline GLuint _rlhCreateGlTextureArray(const size_t pixel_width, const size_t pixel_height, const size_t page_count, const uint8_t* const pixel_rgba)
 {
     GLuint gl_texture_array = 0;
 
@@ -280,16 +280,16 @@ static inline GLuint _jmCreateGlTextureArray(const size_t pixel_width, const siz
     return gl_texture_array;
 }
 
-void jmClearColor(const jmColor32_s color)
+void rlhClearColor(const rlhColor32_s color)
 {
     GLD_CALL(glClearColor((float)color.r / 255.0f, (float)color.g / 255.0f, (float)color.b / 255.0f, (float)color.a / 255.0f));
     GLD_CALL(glClear(GL_COLOR_BUFFER_BIT));
 }
-jmTerm_h jmTermCreate(const size_t console_tiles_wide, const size_t console_tiles_tall, const float console_pixel_scale, const size_t default_tile_pixel_width, const size_t default_tile_pixel_height, const size_t atlas_pixel_width, const size_t atlas_pixel_height, const size_t atlas_page_count, const uint8_t* atlas_pixel_rgba, const size_t atlas_glyph_count, const float* atlas_glyph_stpqp)
+rlhTerm_h rlhTermCreate(const size_t console_tiles_wide, const size_t console_tiles_tall, const float console_pixel_scale, const size_t default_tile_pixel_width, const size_t default_tile_pixel_height, const size_t atlas_pixel_width, const size_t atlas_pixel_height, const size_t atlas_page_count, const uint8_t* atlas_pixel_rgba, const size_t atlas_glyph_count, const float* atlas_glyph_stpqp)
 {
-    jmTerm_h term = (jmTerm_h)malloc(sizeof(jmTerm_s));
+    rlhTerm_h term = (rlhTerm_h)malloc(sizeof(rlhTerm_s));
     if (term == NULL) return NULL;
-    memset(term, 0, sizeof(jmTerm_s)); // set all struct properties to 0 by default.
+    memset(term, 0, sizeof(rlhTerm_s)); // set all struct properties to 0 by default.
     term->ConsolePixelScale = console_pixel_scale;
     term->ConsoleTilesWide = console_tiles_wide;
     term->ConsoleTilesTall = console_tiles_tall;
@@ -310,7 +310,7 @@ jmTerm_h jmTermCreate(const size_t console_tiles_wide, const size_t console_tile
     term->Data = (uint8_t*)malloc(reserved_data_size);
     if (term->Data == NULL)
     {
-        memset(term, 0, sizeof(jmTerm_s));
+        memset(term, 0, sizeof(rlhTerm_s));
         return term;
     }
 
@@ -339,7 +339,7 @@ jmTerm_h jmTermCreate(const size_t console_tiles_wide, const size_t console_tile
     GLD_CALL(glBindVertexArray(term->VAO));
 
     // load atlas texture
-    term->AtlasTEX = _jmCreateGlTextureArray(atlas_pixel_width, atlas_pixel_height, atlas_page_count, atlas_pixel_rgba);
+    term->AtlasTEX = _rlhCreateGlTextureArray(atlas_pixel_width, atlas_pixel_height, atlas_page_count, atlas_pixel_rgba);
 
     // load fontmap texture buffer object
     GLD_CALL(glGenBuffers(1, &term->FontmapBUF));
@@ -360,7 +360,7 @@ jmTerm_h jmTermCreate(const size_t console_tiles_wide, const size_t console_tile
     return term;
 }
 
-void jmTermDestroy(jmTerm_h const term)
+void rlhTermDestroy(rlhTerm_h const term)
 {
     // free allocated memory
     free(term->Data);
@@ -410,10 +410,10 @@ void jmTermDestroy(jmTerm_h const term)
     GLD_END();
 
     // wipe all value in struct to 0
-    memset(term, 0, sizeof(jmTerm_s));
+    memset(term, 0, sizeof(rlhTerm_s));
 }
 
-void jmTermResizeConsole(jmTerm_h const term, const size_t console_tiles_wide, const size_t console_tiles_tall)
+void rlhTermResizeConsole(rlhTerm_h const term, const size_t console_tiles_wide, const size_t console_tiles_tall)
 {
     term->ConsoleTilesWide = console_tiles_wide;
     term->ConsoleTilesTall = console_tiles_tall;
@@ -422,14 +422,14 @@ void jmTermResizeConsole(jmTerm_h const term, const size_t console_tiles_wide, c
     term->DataTileCount = 0;
 }
 
-void jmTermResizePixelScale(jmTerm_h const term, const float console_pixel_scale)
+void rlhTermResizePixelScale(rlhTerm_h const term, const float console_pixel_scale)
 {
 	term->ConsolePixelScale = console_pixel_scale;
 	term->ConsolePixelWidth = term->ConsoleTilesWide * term->DefaultTilePixelWidth * term->ConsolePixelScale;
     term->ConsolePixelHeight = term->ConsoleTilesTall * term->DefaultTilePixelHeight * term->ConsolePixelScale;
 }
 
-void jmTermResizeTiles(jmTerm_h const term, const size_t default_tile_width, const size_t default_tile_height)
+void rlhTermResizeTiles(rlhTerm_h const term, const size_t default_tile_width, const size_t default_tile_height)
 {
     term->DefaultTilePixelWidth = default_tile_width;
     term->DefaultTilePixelHeight = default_tile_height;
@@ -438,7 +438,7 @@ void jmTermResizeTiles(jmTerm_h const term, const size_t default_tile_width, con
     term->DataTileCount = 0;
 }
 
-void jmTermGetTileDimensions(jmTerm_h const term, int* const console_tiles_wide, int* const console_tiles_tall)
+void rlhTermGetTileDimensions(rlhTerm_h const term, int* const console_tiles_wide, int* const console_tiles_tall)
 {
     if (console_tiles_wide != NULL)
     {
@@ -450,12 +450,12 @@ void jmTermGetTileDimensions(jmTerm_h const term, int* const console_tiles_wide,
     }
 }
 
-float jmTermGetPixelScale(jmTerm_h const term)
+float rlhTermGetPixelScale(rlhTerm_h const term)
 {
 	return term->ConsolePixelScale;
 }
 
-void jmTermGetPixelDimensions(jmTerm_h const term, size_t* const console_pixel_width, size_t* const console_pixel_height)
+void rlhTermGetPixelDimensions(rlhTerm_h const term, size_t* const console_pixel_width, size_t* const console_pixel_height)
 {
     if (console_pixel_width != NULL)
     {
@@ -467,7 +467,7 @@ void jmTermGetPixelDimensions(jmTerm_h const term, size_t* const console_pixel_w
     }
 }
 
-void jmTermChangeAtlas(jmTerm_h const term, const size_t atlas_pixel_width, const size_t atlas_pixel_height, const size_t atlas_page_count, const uint8_t* atlas_pixel_rgba, const size_t atlas_glyph_count, const float* atlas_glyph_stpqp)
+void rlhTermChangeAtlas(rlhTerm_h const term, const size_t atlas_pixel_width, const size_t atlas_pixel_height, const size_t atlas_page_count, const uint8_t* atlas_pixel_rgba, const size_t atlas_glyph_count, const float* atlas_glyph_stpqp)
 {
     GLD_START();
 
@@ -477,7 +477,7 @@ void jmTermChangeAtlas(jmTerm_h const term, const size_t atlas_pixel_width, cons
         term->AtlasTEX = 0;
     }
 
-    term->AtlasTEX = _jmCreateGlTextureArray(atlas_pixel_width, atlas_pixel_height, atlas_page_count, atlas_pixel_rgba);
+    term->AtlasTEX = _rlhCreateGlTextureArray(atlas_pixel_width, atlas_pixel_height, atlas_page_count, atlas_pixel_rgba);
 
     GLD_CALL(glBindBuffer(GL_TEXTURE_BUFFER, term->FontmapBUF));
     GLD_CALL(glBufferData(GL_TEXTURE_BUFFER, sizeof(float) * atlas_glyph_count* kElementsPerFontmapGlyph, atlas_glyph_stpqp, GL_DYNAMIC_DRAW));
@@ -485,17 +485,17 @@ void jmTermChangeAtlas(jmTerm_h const term, const size_t atlas_pixel_width, cons
     GLD_END();
 }
 
-void jmTermClear(jmTerm_h term)
+void rlhTermClear(rlhTerm_h term)
 {
     term->DataTileCount = 0;
 }
 
-size_t jmTermGetTileCount(jmTerm_h const term)
+size_t rlhTermGetTileCount(rlhTerm_h const term)
 {
     return term->DataTileCount;
 }
 
-static inline uint8_t _jmTermTryReserve(jmTerm_h const term)
+static inline uint8_t _rlhTermTryReserve(rlhTerm_h const term)
 {
     if (term->DataTileCount == term->DataReservedTileCount) // If we hit the reserved tile count, double the amount of reserved space.
     {
@@ -511,7 +511,7 @@ static inline uint8_t _jmTermTryReserve(jmTerm_h const term)
     return 1;
 }
 
-static inline void _jmTermPushTile(jmTerm_h const term, const int pixel_x, const int pixel_y, const int pixel_w, const int pixel_h, const uint16_t glyph, const jmColor32_s fg, const jmColor32_s bg)
+static inline void _rlhTermPushTile(rlhTerm_h const term, const int pixel_x, const int pixel_y, const int pixel_w, const int pixel_h, const uint16_t glyph, const rlhColor32_s fg, const rlhColor32_s bg)
 {
     const unsigned int offset_pixel_x = (unsigned int)(pixel_x + kTilePositionOffset);
     const unsigned int offset_pixel_y = (unsigned int)(pixel_y + kTilePositionOffset);
@@ -537,45 +537,45 @@ static inline void _jmTermPushTile(jmTerm_h const term, const int pixel_x, const
     term->DataTileCount++;
 }
 
-void jmTermPushTileGrid(jmTerm_h const term, const int grid_x, const int grid_y, const uint16_t glyph, const jmColor32_s fg, const jmColor32_s bg)
+void rlhTermPushTileGrid(rlhTerm_h const term, const int grid_x, const int grid_y, const uint16_t glyph, const rlhColor32_s fg, const rlhColor32_s bg)
 {
     if (grid_x < 0 || grid_y < 0 || grid_x > term->ConsoleTilesWide || grid_y > term->ConsoleTilesTall) return;
     const int pixel_x = grid_x * term->DefaultTilePixelWidth;
     const int pixel_y = grid_y * term->DefaultTilePixelHeight;
-    if (!_jmTermTryReserve(term)) return;
-    _jmTermPushTile(term, pixel_x, pixel_y, term->DefaultTilePixelWidth, term->DefaultTilePixelHeight, glyph, fg, bg);
+    if (!_rlhTermTryReserve(term)) return;
+    _rlhTermPushTile(term, pixel_x, pixel_y, term->DefaultTilePixelWidth, term->DefaultTilePixelHeight, glyph, fg, bg);
 }
 
-void jmTermPushTileGridSized(jmTerm_h const term, const int grid_x, const int grid_y, const int tile_pixel_width, const int tile_pixel_height, const uint16_t glyph, const jmColor32_s fg, const jmColor32_s bg)
+void rlhTermPushTileGridSized(rlhTerm_h const term, const int grid_x, const int grid_y, const int tile_pixel_width, const int tile_pixel_height, const uint16_t glyph, const rlhColor32_s fg, const rlhColor32_s bg)
 {
     if (grid_x < 0 || grid_y < 0 || grid_x > term->ConsoleTilesWide || grid_y > term->ConsoleTilesTall) return;
     if (tile_pixel_width <= 0 || tile_pixel_height <= 0 || tile_pixel_width > kMaxTilePixelDimensions || tile_pixel_height > kMaxTilePixelDimensions) return;
-    if (!_jmTermTryReserve(term)) return;
+    if (!_rlhTermTryReserve(term)) return;
     const unsigned int pixel_x = (unsigned int)grid_x * term->DefaultTilePixelWidth;
     const unsigned int pixel_y = (unsigned int)grid_y * term->DefaultTilePixelHeight;
     const unsigned int pixel_w_u = (unsigned int)tile_pixel_width;
     const unsigned int pixel_h_u = (unsigned int)tile_pixel_height;
-    _jmTermPushTile(term, pixel_x, pixel_y, pixel_w_u, pixel_h_u, glyph, fg, bg);
+    _rlhTermPushTile(term, pixel_x, pixel_y, pixel_w_u, pixel_h_u, glyph, fg, bg);
 }
 
-void jmTermPushTileFree(jmTerm_h const term, const int screen_pixel_x, const int screen_pixel_y, const uint16_t glyph, const jmColor32_s fg, const jmColor32_s bg)
+void rlhTermPushTileFree(rlhTerm_h const term, const int screen_pixel_x, const int screen_pixel_y, const uint16_t glyph, const rlhColor32_s fg, const rlhColor32_s bg)
 {
     const int negative_default_width = -(int)term->DefaultTilePixelWidth;
     const int negative_default_height = -(int)term->DefaultTilePixelHeight;
     if (screen_pixel_x < negative_default_width || screen_pixel_y < negative_default_height || screen_pixel_x > (int)term->ConsolePixelWidth || screen_pixel_y > (int)term->ConsolePixelHeight) return;
-    if (!_jmTermTryReserve(term)) return;
-    _jmTermPushTile(term, (unsigned int)screen_pixel_x, (unsigned int)screen_pixel_y, term->DefaultTilePixelWidth, term->DefaultTilePixelHeight, glyph, fg, bg);
+    if (!_rlhTermTryReserve(term)) return;
+    _rlhTermPushTile(term, (unsigned int)screen_pixel_x, (unsigned int)screen_pixel_y, term->DefaultTilePixelWidth, term->DefaultTilePixelHeight, glyph, fg, bg);
 }
 
-void jmTermPushTileFreeSized(jmTerm_h const term, const int screen_pixel_x, const int screen_pixel_y, const int tile_pixel_width, const int tile_pixel_height, const uint16_t glyph, const jmColor32_s fg, const jmColor32_s bg)
+void rlhTermPushTileFreeSized(rlhTerm_h const term, const int screen_pixel_x, const int screen_pixel_y, const int tile_pixel_width, const int tile_pixel_height, const uint16_t glyph, const rlhColor32_s fg, const rlhColor32_s bg)
 {
     if (screen_pixel_x < -tile_pixel_width || screen_pixel_y < -tile_pixel_height || screen_pixel_x > (int)term->ConsolePixelWidth || screen_pixel_y > (int)term->ConsolePixelHeight) return;
     if (tile_pixel_width <= 0 || tile_pixel_height <= 0 || tile_pixel_width > kMaxTilePixelDimensions || tile_pixel_height > kMaxTilePixelDimensions) return;
-    if (!_jmTermTryReserve(term)) return;
-    _jmTermPushTile(term, screen_pixel_x, screen_pixel_y, tile_pixel_width, tile_pixel_height, glyph, fg, bg);
+    if (!_rlhTermTryReserve(term)) return;
+    _rlhTermPushTile(term, screen_pixel_x, screen_pixel_y, tile_pixel_width, tile_pixel_height, glyph, fg, bg);
 }
 
-void jmViewport(const int x, const int y, const int width, const int height)
+void rlhViewport(const int x, const int y, const int width, const int height)
 {
     GLD_START();
 
@@ -585,9 +585,9 @@ void jmViewport(const int x, const int y, const int width, const int height)
     GLD_END();
 }
 
-void jmTermDraw(jmTerm_h term)
+void rlhTermDraw(rlhTerm_h term)
 {
-    jmTermDrawMatrix(term, kOpengl33ScreenMatrix);
+    rlhTermDrawMatrix(term, kOpengl33ScreenMatrix);
 }
 
 //Translate an opengl screen matrix so that a rectangle using it is flat facing the screen and its 2d edges match the screen space pixel coordinates given.
@@ -626,7 +626,7 @@ static void _setTermScissor(const int translate_x, const int translate_y, const 
 	GLD_END();
 }
 
-void jmTermDrawTranslated(jmTerm_h const term, const int translate_x, const int translate_y, const int viewport_width, const int viewport_height)
+void rlhTermDrawTranslated(rlhTerm_h const term, const int translate_x, const int translate_y, const int viewport_width, const int viewport_height)
 {
     float matrix[16];
     memcpy(matrix, kOpengl33ScreenMatrix, sizeof(float) * 16);
@@ -635,7 +635,7 @@ void jmTermDrawTranslated(jmTerm_h const term, const int translate_x, const int 
 	_setTermScissor(translate_x, translate_y, term->ConsolePixelWidth, term->ConsolePixelHeight);
 	
     // draw
-    jmTermDrawMatrix(term, matrix);
+    rlhTermDrawMatrix(term, matrix);
 
 	GLD_START();
 
@@ -645,7 +645,7 @@ void jmTermDrawTranslated(jmTerm_h const term, const int translate_x, const int 
 	GLD_END();
 }
 
-void jmTermDrawTransformed(jmTerm_h const term, const int translate_x, const int translate_y, const float scale_x, const float scale_y, const int viewport_width, const int viewport_height)
+void rlhTermDrawTransformed(rlhTerm_h const term, const int translate_x, const int translate_y, const float scale_x, const float scale_y, const int viewport_width, const int viewport_height)
 {
     float matrix[16];
     memcpy(matrix, kOpengl33ScreenMatrix, sizeof(float) * 16);
@@ -654,7 +654,7 @@ void jmTermDrawTransformed(jmTerm_h const term, const int translate_x, const int
 	_setTermScissor(translate_x, translate_y, term->ConsolePixelWidth * scale_x, term->ConsolePixelHeight * scale_y);
 	
     // draw
-    jmTermDrawMatrix(term, matrix);
+    rlhTermDrawMatrix(term, matrix);
 
 	GLD_START();
 
@@ -664,7 +664,7 @@ void jmTermDrawTransformed(jmTerm_h const term, const int translate_x, const int
 	GLD_END();
 }
 
-void jmTermDrawMatrix(jmTerm_h const term, const float* const matrix_4x4)
+void rlhTermDrawMatrix(rlhTerm_h const term, const float* const matrix_4x4)
 {
     if (term->DataTileCount > 0) // only render if there are tiles to render
     {

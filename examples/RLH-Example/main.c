@@ -3,7 +3,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#define JM_RLH_IMPLEMENTATION
+#define RLH_IMPLEMENTATION
 #include <jm/roguelike.h>
 
 #include <string.h>
@@ -95,36 +95,36 @@ int main()
         }
     }
 
-    jmTerm_h t = jmTermCreate(tiles_wide, tiles_tall, pixel_scale, tile_size, tile_size, i_width, i_height, 1, pixels, 256, stpqp);
+    rlhTerm_h t = rlhTermCreate(tiles_wide, tiles_tall, pixel_scale, tile_size, tile_size, i_width, i_height, 1, pixels, 256, stpqp);
 
     free(stpqp);
     stbi_image_free(pixels);
 
     while (!glfwWindowShouldClose(window))
     {
-        jmTermClear(t);
+        rlhTermClear(t);
 
         // every glyph in codepage 437
         for (size_t x = 0; x < 16; x++)
         {
             for (size_t y = 0; y < 16; y++)
             {
-                jmTermPushTileGrid(t, x, y, (y * 16) + x, JM_C32(255, 0, 255, 255), JM_C32(0, 0, 0, 255));
+                rlhTermPushTileGrid(t, x, y, (y * 16) + x, RLH_C32(255, 0, 255, 255), RLH_C32(0, 0, 0, 255));
             }
         }
 
         //half tile offset face on bottom right corner of codepage
-        jmTermPushTileFree(t, 15 * tile_size + (tile_size / 2), 15 * tile_size + (tile_size / 2), 2, JM_WHITE(), JM_TRANSPARENT());
+        rlhTermPushTileFree(t, 15 * tile_size + (tile_size / 2), 15 * tile_size + (tile_size / 2), 2, RLH_WHITE(), RLH_TRANSPARENT());
 
         // increasingly larger faces
-        jmTermPushTileGridSized(t, 18, 5, tile_size * 5, tile_size * 5, 2, JM_WHITE(), JM_TRANSPARENT());
-        jmTermPushTileGridSized(t, 23, 5, tile_size * 4, tile_size * 4, 2, JM_WHITE(), JM_TRANSPARENT());
-        jmTermPushTileGridSized(t, 27, 5, tile_size * 3, tile_size * 3, 2, JM_WHITE(), JM_TRANSPARENT());
-        jmTermPushTileGridSized(t, 30, 5, tile_size * 2, tile_size * 2, 2, JM_WHITE(), JM_TRANSPARENT());
-        jmTermPushTileGridSized(t, 32, 5, tile_size, tile_size, 2, JM_WHITE(), JM_TRANSPARENT());
+        rlhTermPushTileGridSized(t, 18, 5, tile_size * 5, tile_size * 5, 2, RLH_WHITE(), RLH_TRANSPARENT());
+        rlhTermPushTileGridSized(t, 23, 5, tile_size * 4, tile_size * 4, 2, RLH_WHITE(), RLH_TRANSPARENT());
+        rlhTermPushTileGridSized(t, 27, 5, tile_size * 3, tile_size * 3, 2, RLH_WHITE(), RLH_TRANSPARENT());
+        rlhTermPushTileGridSized(t, 30, 5, tile_size * 2, tile_size * 2, 2, RLH_WHITE(), RLH_TRANSPARENT());
+        rlhTermPushTileGridSized(t, 32, 5, tile_size, tile_size, 2, RLH_WHITE(), RLH_TRANSPARENT());
 
         // big guy in corner going over edges
-        jmTermPushTileFreeSized(t, -(tile_size * 3), 18 * tile_size, 15 * tile_size, 8 * tile_size, 2, JM_RED(), JM_TRANSPARENT());
+        rlhTermPushTileFreeSized(t, -(tile_size * 3), 18 * tile_size, 15 * tile_size, 8 * tile_size, 2, RLH_RED(), RLH_TRANSPARENT());
 
         const size_t label_x = 18;
 
@@ -133,7 +133,7 @@ int main()
         const size_t label_1_length = strlen(label_1);
         for (size_t x = 0; x < label_1_length; x++)
         {
-            jmTermPushTileGrid(t, x + label_x, label_1_y, label_1[x], JM_NAVY(), JM_YELLOW());
+            rlhTermPushTileGrid(t, x + label_x, label_1_y, label_1[x], RLH_NAVY(), RLH_YELLOW());
         }
 
         const char* label_2 = "by journeyman";
@@ -141,12 +141,12 @@ int main()
         const size_t label_2_length = strlen(label_2);
         for (size_t x = 0; x < label_2_length; x++)
         {
-            jmTermPushTileGrid(t, x + label_x, label_2_y, label_2[x], JM_RED(), JM_GREEN());
+            rlhTermPushTileGrid(t, x + label_x, label_2_y, label_2[x], RLH_RED(), RLH_GREEN());
         }
 
-        jmViewport(0, 0, w_width, w_height);
-        jmClearColor(JM_BLACK());
-        jmTermDrawTranslated(t, border_pixels, border_pixels, w_width, w_height);
+        rlhViewport(0, 0, w_width, w_height);
+        rlhClearColor(RLH_BLACK());
+        rlhTermDrawTranslated(t, border_pixels, border_pixels, w_width, w_height);
 
         glfwPollEvents();
 
