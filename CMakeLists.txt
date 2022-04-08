@@ -8,7 +8,6 @@ endif()
 set(RLH_CMAKE_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
 option(RLH_BUILD_EXAMPLES "Build the example projects" OFF)
-option(RLH_NO_RAYLIB_EXAMPLE "Do not build the raylib example if building examples." ON)
 
 PROJECT(roguelike.h
 	VERSION 0.0
