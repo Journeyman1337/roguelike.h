@@ -152,7 +152,7 @@ int main()
         rlhViewport(0, 0, w_width, w_height);
         // draw clear color as silver
         rlhClearColor(RLH_SILVER);
-        rlhTermDrawTranslated(t, a, border_pixels, border_pixels, w_width, w_height);
+        rlhTermDrawCentered(t, a, w_width, w_height);
 
         glfwPollEvents();
 

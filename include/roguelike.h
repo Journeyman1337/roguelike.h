@@ -118,6 +118,8 @@ void rlhTermPushTileFree(rlhTerm_h const term, const int screen_pixel_x, const i
 void rlhTermPushTileFreeSized(rlhTerm_h const term, const int screen_pixel_x, const int screen_pixel_y, const int tile_pixel_width, const int tile_pixel_height, const uint16_t glyph, const rlhColor32_s fg, const rlhColor32_s bg);
 // Draw a terminal to the current bound framebuffer of the current graphics context. Draws it to fit the viewport.
 void rlhTermDraw(rlhTerm_h const term, rlhAtlas_h const atlas);
+// Draw a terminal centered in a viewport.
+void rlhTermDrawCentered(rlhTerm_h const term, rlhAtlas_h const atlas, const int viewport_width, const int viewport_height);
 // Draw a terminal translated to by a 2d pixel vector.
 void rlhTermDrawTranslated(rlhTerm_h const term, rlhAtlas_h const atlas, const int translate_x, const int translate_y, const int viewport_width, const int viewport_height);
 // Draw a terminal translated to by a 2d pixel vector and scaled by a 2d float vector.
@@ -721,6 +723,16 @@ static void _setTermScissor(const int translate_x, const int translate_y, const 
 	GLD_CALL(glEnable(GL_SCISSOR_TEST));
 
 	GLD_END();
+}
+
+void rlhTermDrawCentered(rlhTerm_h const term, rlhAtlas_h const atlas, const int viewport_width, const int viewport_height)
+{
+    const int width_difference = viewport_width - term->PixelWidth;
+    const int height_difference = viewport_height - term->PixelHeight;
+    const int translate_x = width_difference / 2;
+    const int translate_y = height_difference / 2;
+
+    rlhTermDrawTranslated(term, atlas, translate_x, translate_y, viewport_width, viewport_height);
 }
 
 void rlhTermDrawTranslated(rlhTerm_h const term, rlhAtlas_h const atlas, const int translate_x, const int translate_y, const int viewport_width, const int viewport_height)
