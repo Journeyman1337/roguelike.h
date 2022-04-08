@@ -74,7 +74,7 @@ typedef struct rlhAtlas_s* rlhAtlas_h;
 void rlhClearColor(const rlhColor32_s color);
 // Set viewport area to draw to.
 void rlhViewport(const int x, const int y, const int width, const int height);
-// Create atlas object
+// Create atlas object.
 rlhAtlas_h rlhAtlasCreate(const size_t atlas_pixel_width, const size_t atlas_pixel_height, const size_t atlas_page_count, const uint8_t* atlas_pixel_rgba, const size_t atlas_glyph_count, const float* atlas_glyph_stpqp);
 // Destroy the atlas object and free all of its resources.
 void rlhAtlasDestroy(rlhAtlas_h const atlas);
@@ -106,6 +106,8 @@ void rlhTermResizePixelDimensions(rlhTerm_h const term, const size_t pixel_width
 void rlhTermClear(rlhTerm_h const term);
 // Get how many tiles have been set since the last clear.
 size_t rlhTermGetTileCount(rlhTerm_h const term);
+// Push a tile to the terminal that is stretched over the entire terminal area.
+void rlhTermPushFillTile(rlhTerm_h const term, const uint16_t glyph, const rlhColor32_s fg, const rlhColor32_s bg);
 // Push a tile to a terminal in a grid cell position with default pixel width and pixel height.
 void rlhTermPushTileGrid(rlhTerm_h const term, const int grid_x, const int grid_y, const uint16_t glyph, const rlhColor32_s fg, const rlhColor32_s bg);
 // Push a tile to a terminal in a grid cell position with a custom pixel width and pixel height.
@@ -632,6 +634,12 @@ static inline void _rlhTermPushTile(rlhTerm_h const term, const int pixel_x, con
     term->TileData[index++] = bg.b;
     term->TileData[index++] = bg.a;
     term->TileDataCount++;
+}
+
+void rlhTermPushFillTile(rlhTerm_h const term, const uint16_t glyph, const rlhColor32_s fg, const rlhColor32_s bg)
+{
+    if (!_rlhTermTryReserve(term)) return;
+    _rlhTermPushTile(term, 0, 0, term->PixelWidth, term->PixelHeight, glyph, fg, bg);
 }
 
 void rlhTermPushTileGrid(rlhTerm_h const term, const int grid_x, const int grid_y, const uint16_t glyph, const rlhColor32_s fg, const rlhColor32_s bg)

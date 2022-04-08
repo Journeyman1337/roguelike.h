@@ -105,6 +105,9 @@ int main()
     {
         rlhTermClear(t);
 
+        // set the terminal background color to black by pushing a fill tile
+        rlhTermPushFillTile(t, 0, RLH_TRANSPARENT, RLH_BLACK);
+
         // every glyph in codepage 437
         for (size_t x = 0; x < 16; x++)
         {
@@ -145,8 +148,10 @@ int main()
             rlhTermPushTileGrid(t, x + label_x, label_2_y, label_2[x], RLH_RED, RLH_GREEN);
         }
 
+        // set the viewport to the window dimensions
         rlhViewport(0, 0, w_width, w_height);
-        rlhClearColor(RLH_BLACK);
+        // draw clear color as silver
+        rlhClearColor(RLH_SILVER);
         rlhTermDrawTranslated(t, a, border_pixels, border_pixels, w_width, w_height);
 
         glfwPollEvents();
