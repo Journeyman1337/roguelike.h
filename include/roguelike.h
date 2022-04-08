@@ -361,6 +361,8 @@ void rlhAtlasDestroy(rlhAtlas_h const atlas)
         GLD_CALL(glDeleteTextures(1, &atlas->AtlasTEX));
         atlas->AtlasTEX = 0;
     }
+	// free the struct
+	free(atlas);
 }
 
 void rlhAtlasModify(rlhAtlas_h const atlas, const size_t atlas_pixel_width, const size_t atlas_pixel_height, const size_t atlas_page_count, const uint8_t* atlas_pixel_rgba, const size_t atlas_glyph_count, const float* atlas_glyph_stpqp)
