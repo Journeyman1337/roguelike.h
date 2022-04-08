@@ -1,7 +1,7 @@
 Header only roguelike rendering library. Support for Opengl33.
 
 # Features
- * A performant bathed rendering system that is similliar to the renderer employed by the video game Dwarf Fortress:
+ * A performant batched rendering system that is similliar to the renderer employed by the video game Dwarf Fortress:
 	* The entire terminal is rendered in a single draw call.
 	* Draw data is passed to the GPU in a giant buffer, which contains elements per tile rather than per vertex.
 	* The data buffer is compacted as much as possible to improve latency. It contains only 18 bytes per tile.
