@@ -115,17 +115,17 @@ int main()
         }
 
         //half tile offset face on bottom right corner of codepage
-        rlhTermPushTileFree(t, 15 * tile_size + (tile_size / 2), 15 * tile_size + (tile_size / 2), 2, RLH_WHITE(), RLH_TRANSPARENT());
+        rlhTermPushTileFree(t, 15 * tile_size + (tile_size / 2), 15 * tile_size + (tile_size / 2), 2, RLH_WHITE, RLH_TRANSPARENT);
 
         // increasingly larger faces
-        rlhTermPushTileGridSized(t, 18, 5, tile_size * 5, tile_size * 5, 2, RLH_WHITE(), RLH_TRANSPARENT());
-        rlhTermPushTileGridSized(t, 23, 5, tile_size * 4, tile_size * 4, 2, RLH_WHITE(), RLH_TRANSPARENT());
-        rlhTermPushTileGridSized(t, 27, 5, tile_size * 3, tile_size * 3, 2, RLH_WHITE(), RLH_TRANSPARENT());
-        rlhTermPushTileGridSized(t, 30, 5, tile_size * 2, tile_size * 2, 2, RLH_WHITE(), RLH_TRANSPARENT());
-        rlhTermPushTileGridSized(t, 32, 5, tile_size, tile_size, 2, RLH_WHITE(), RLH_TRANSPARENT());
+        rlhTermPushTileGridSized(t, 18, 5, tile_size * 5, tile_size * 5, 2, RLH_WHITE, RLH_TRANSPARENT);
+        rlhTermPushTileGridSized(t, 23, 5, tile_size * 4, tile_size * 4, 2, RLH_WHITE, RLH_TRANSPARENT);
+        rlhTermPushTileGridSized(t, 27, 5, tile_size * 3, tile_size * 3, 2, RLH_WHITE, RLH_TRANSPARENT);
+        rlhTermPushTileGridSized(t, 30, 5, tile_size * 2, tile_size * 2, 2, RLH_WHITE, RLH_TRANSPARENT);
+        rlhTermPushTileGridSized(t, 32, 5, tile_size, tile_size, 2, RLH_WHITE, RLH_TRANSPARENT);
 
         // big guy in corner going over edges
-        rlhTermPushTileFreeSized(t, -(tile_size * 3), 18 * tile_size, 15 * tile_size, 8 * tile_size, 2, RLH_RED(), RLH_TRANSPARENT());
+        rlhTermPushTileFreeSized(t, -(tile_size * 3), 18 * tile_size, 15 * tile_size, 8 * tile_size, 2, RLH_RED, RLH_TRANSPARENT);
 
         const size_t label_x = 18;
 
@@ -134,7 +134,7 @@ int main()
         const size_t label_1_length = strlen(label_1);
         for (size_t x = 0; x < label_1_length; x++)
         {
-            rlhTermPushTileGrid(t, x + label_x, label_1_y, label_1[x], RLH_NAVY(), RLH_YELLOW());
+            rlhTermPushTileGrid(t, x + label_x, label_1_y, label_1[x], RLH_NAVY, RLH_YELLOW);
         }
 
         const char* label_2 = "by journeyman";
@@ -142,11 +142,11 @@ int main()
         const size_t label_2_length = strlen(label_2);
         for (size_t x = 0; x < label_2_length; x++)
         {
-            rlhTermPushTileGrid(t, x + label_x, label_2_y, label_2[x], RLH_RED(), RLH_GREEN());
+            rlhTermPushTileGrid(t, x + label_x, label_2_y, label_2[x], RLH_RED, RLH_GREEN);
         }
 
         rlhViewport(0, 0, w_width, w_height);
-        rlhClearColor(RLH_BLACK());
+        rlhClearColor(RLH_BLACK);
         rlhTermDrawTranslated(t, a, border_pixels, border_pixels, w_width, w_height);
 
         glfwPollEvents();
