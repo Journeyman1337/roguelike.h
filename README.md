@@ -7,4 +7,4 @@ Header only roguelike rendering library. Support for Opengl33.
  * Ability to render tiles offset from gridspace positions.
  * Ability to render tiles with custom width and height per tile.
 # Screenshot
-![Screenshot](https://user-images.githubusercontent.com/60055347/162100460-df20279c-00eb-480b-b42d-1bf5ddc5021e.png)
+![Screenshot](https://user-images.githubusercontent.com/60055347/162460417-d6114d2f-2386-4eae-ad15-e2db4062a078.png)
