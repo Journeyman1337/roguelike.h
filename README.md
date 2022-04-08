@@ -5,7 +5,7 @@ Header only roguelike rendering library. Support for Opengl33.
 	* The entire terminal is rendered in a single draw call.
 	* Draw data is passed to the GPU in a giant buffer, which contains elements per tile rather than per vertex.
 	* The data buffer is compacted as much as possible to improve latency. It contains only 18 bytes per tile.
-	* On the GPU, most calculation is done per vertex rather than per fragment (pixel), which results in much less work for the GPU.
+	* On the GPU, most calculation is done per vertex rather than per fragment (pixel), which is more efficient.
  * Support for custom glyph atlasses with up to 65535 tiles of custom sizes across multiple texture pages.
  * 32 bit fullcolor background and foreground colors per tile.
  * Ability to render tiles on top of each other, with tiles rendered FIFO in the order that they are pushed into the terminal.
