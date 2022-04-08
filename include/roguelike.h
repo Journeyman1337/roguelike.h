@@ -64,6 +64,9 @@ typedef struct rlhColor32_s
 #define RLH_PURPLE() ((rlhColor32_s){ (128), (0), (128), (255) })
 #define RLH_TRANSPARENT() ((rlhColor32_s){ (0), (0), (0), (0) })
 
+#define RLH_TRUE 1
+#define RLH_FALSE 0
+
 typedef struct rlhTerm_s* rlhTerm_h;
 typedef struct rlhAtlas_s* rlhAtlas_h;
 
