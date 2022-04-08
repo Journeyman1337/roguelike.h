@@ -1,6 +1,7 @@
 Header only roguelike rendering library. Support for Opengl33.
 
 # Features
+ * A terminal is drawn in a single draw call. Tile data is passed to the GPU in a compact buffer for maximum performance.
  * Support for custom glyph atlasses with up to 65535 tiles of custom sizes across multiple texture pages.
  * 32 bit fullcolor background and foreground colors per tile.
  * Ability to render tiles on top of each other, with tiles rendered FIFO in the order that they are pushed into the terminal.
