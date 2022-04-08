@@ -96,7 +96,7 @@ int main()
     }
 
     rlhAtlas_h a = rlhAtlasCreate(i_width, i_height, 1, pixels, 256, stpqp);
-    rlhTerm_h t = rlhTermCreate(tiles_wide, tiles_tall, pixel_scale, tile_size, tile_size);
+    rlhTerm_h t = rlhTermCreateTileDimensions(tiles_wide, tiles_tall, pixel_scale, tile_size, tile_size);
 
     free(stpqp);
     stbi_image_free(pixels);
