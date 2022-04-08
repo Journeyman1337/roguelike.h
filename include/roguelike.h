@@ -592,6 +592,8 @@ void rlhTermResizePixelDimensions(rlhTerm_h const term, const size_t pixel_width
         term->PixelWidth = pixel_width;
         term->PixelHeight = pixel_height;
     }
+	
+	term->TileDataCount = 0;
 }
 
 static inline uint8_t _rlhTermTryReserve(rlhTerm_h const term)
