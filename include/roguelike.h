@@ -80,7 +80,7 @@ typedef enum rlhresult_t
     RLH_RESULT_ERROR_NULL_ARGUMENT = 1,
     RLH_RESULT_ERROR_INVALID_VALUE = 2,
     RLH_RESULT_ERROR_OUT_OF_MEMORY = 3,
-    RLH_RESULT_TILE_OUT_OF_CONSOLE = 4,
+    RLH_RESULT_TILE_OUT_OF_TERMINAL = 4,
     RLH_RESULT_COUNT = 5
 } rlhresult_t;
 
@@ -154,7 +154,7 @@ const char* const const RLH_RESULT_DESCRIPTIONS[RLH_RESULT_COUNT] =
     "ok",
     "unexpected argument value",
     "out of memory",
-    "tile out of console"
+    "tile out of terminal"
 };
 
 const float RLH_OPENGL_SCREEN_MATRIX[4 * 4] = {2.0f, 0.0f, 0.0f, -1.0f, 0.0f, -2.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f};
