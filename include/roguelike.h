@@ -792,7 +792,7 @@ rlhresult_t rlhTermPushFillTile(rlhTerm_h const term, const uint16_t glyph, cons
 
 rlhresult_t rlhTermPushTileGrid(rlhTerm_h const term, const int grid_x, const int grid_y, const uint16_t glyph, const rlhColor32_s fg, const rlhColor32_s bg)
 {
-    if (grid_x < 0 || grid_y < 0 || grid_x > term->TilesWide || grid_y > term->TilesTall) return RLH_RESULT_TILE_OUT_OF_CONSOLE;
+    if (grid_x < 0 || grid_y < 0 || grid_x > term->TilesWide || grid_y > term->TilesTall) return RLH_RESULT_TILE_OUT_OF_TERMINAL;
     const int pixel_x = grid_x * term->TileWidth;
     const int pixel_y = grid_y * term->TileHeight;
     if (!_rlhTermTryReserve(term)) return RLH_RESULT_ERROR_OUT_OF_MEMORY;
@@ -802,8 +802,8 @@ rlhresult_t rlhTermPushTileGrid(rlhTerm_h const term, const int grid_x, const in
 
 rlhresult_t rlhTermPushTileGridSized(rlhTerm_h const term, const int grid_x, const int grid_y, const int tile_pixel_width, const int tile_pixel_height, const uint16_t glyph, const rlhColor32_s fg, const rlhColor32_s bg)
 {
-    if (grid_x < 0 || grid_y < 0 || grid_x > term->TilesWide || grid_y > term->TilesTall) return RLH_RESULT_TILE_OUT_OF_CONSOLE;
-    if (tile_pixel_width <= 0 || tile_pixel_height <= 0 || tile_pixel_width > kMaxTilePixelDimensions || tile_pixel_height > kMaxTilePixelDimensions) return RLH_RESULT_TILE_OUT_OF_CONSOLE;
+    if (grid_x < 0 || grid_y < 0 || grid_x > term->TilesWide || grid_y > term->TilesTall) return RLH_RESULT_TILE_OUT_OF_TERMINAL;
+    if (tile_pixel_width <= 0 || tile_pixel_height <= 0 || tile_pixel_width > kMaxTilePixelDimensions || tile_pixel_height > kMaxTilePixelDimensions) return RLH_RESULT_TILE_OUT_OF_TERMINAL;
     if (!_rlhTermTryReserve(term)) return RLH_RESULT_ERROR_OUT_OF_MEMORY;
     const unsigned int pixel_x = (unsigned int)grid_x * term->TileWidth;
     const unsigned int pixel_y = (unsigned int)grid_y * term->TileHeight;
@@ -817,7 +817,7 @@ rlhresult_t rlhTermPushTileFree(rlhTerm_h const term, const int screen_pixel_x, 
 {
     const int negative_default_width = -(int)term->TileWidth;
     const int negative_default_height = -(int)term->TileHeight;
-    if (screen_pixel_x < negative_default_width || screen_pixel_y < negative_default_height || screen_pixel_x > (int)term->TileWidth || screen_pixel_y > (int)term->TileHeight) return RLH_RESULT_TILE_OUT_OF_CONSOLE;
+    if (screen_pixel_x < negative_default_width || screen_pixel_y < negative_default_height || screen_pixel_x > (int)term->TileWidth || screen_pixel_y > (int)term->TileHeight) return RLH_RESULT_TILE_OUT_OF_TERMINAL;
     if (!_rlhTermTryReserve(term)) return RLH_RESULT_ERROR_OUT_OF_MEMORY;
     _rlhTermPushTile(term, (unsigned int)screen_pixel_x, (unsigned int)screen_pixel_y, term->TileWidth, term->TileHeight, glyph, fg, bg);
     return RLH_RESULT_OK;
@@ -825,8 +825,8 @@ rlhresult_t rlhTermPushTileFree(rlhTerm_h const term, const int screen_pixel_x, 
 
 rlhresult_t rlhTermPushTileFreeSized(rlhTerm_h const term, const int screen_pixel_x, const int screen_pixel_y, const int tile_pixel_width, const int tile_pixel_height, const uint16_t glyph, const rlhColor32_s fg, const rlhColor32_s bg)
 {
-    if (screen_pixel_x < -tile_pixel_width || screen_pixel_y < -tile_pixel_height || screen_pixel_x > (int)term->PixelWidth || screen_pixel_y > (int)term->PixelHeight) return RLH_RESULT_TILE_OUT_OF_CONSOLE;
-    if (tile_pixel_width <= 0 || tile_pixel_height <= 0 || tile_pixel_width > kMaxTilePixelDimensions || tile_pixel_height > kMaxTilePixelDimensions) return RLH_RESULT_TILE_OUT_OF_CONSOLE;
+    if (screen_pixel_x < -tile_pixel_width || screen_pixel_y < -tile_pixel_height || screen_pixel_x > (int)term->PixelWidth || screen_pixel_y > (int)term->PixelHeight) return RLH_RESULT_TILE_OUT_OF_TERMINAL;
+    if (tile_pixel_width <= 0 || tile_pixel_height <= 0 || tile_pixel_width > kMaxTilePixelDimensions || tile_pixel_height > kMaxTilePixelDimensions) return RLH_RESULT_TILE_OUT_OF_TERMINAL;
     if (!_rlhTermTryReserve(term)) return RLH_RESULT_ERROR_OUT_OF_MEMORY;
     _rlhTermPushTile(term, screen_pixel_x, screen_pixel_y, tile_pixel_width, tile_pixel_height, glyph, fg, bg);
     return RLH_RESULT_OK;
