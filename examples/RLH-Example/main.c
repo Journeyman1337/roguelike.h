@@ -95,15 +95,26 @@ int main()
         }
     }
 
-    rlhAtlas_h a = rlhAtlasCreate(i_width, i_height, 1, pixels, 256, stpqp);
-    rlhTerm_h t = rlhTermCreateTileDimensions(tiles_wide, tiles_tall, pixel_scale, tile_size, tile_size);
+    rlhAtlas_h a = NULL;
+    rlhresult_t result = rlhAtlasCreate(i_width, i_height, 1, pixels, 256, stpqp, &a);
+    if (result != RLH_RESULT_OK)
+    {
+        printf("Error creating atlas: %s\n", RLH_RESULT_DESCRIPTIONS[result]);
+    }
+
+    rlhTerm_h t = NULL;
+    result = rlhTermCreateTileDimensions(tiles_wide, tiles_tall, pixel_scale, tile_size, tile_size, &t);
+    if (result != RLH_RESULT_OK)
+    {
+        printf("Error creating terminal: %s\n", RLH_RESULT_DESCRIPTIONS[result]);
+    }
 
     free(stpqp);
     stbi_image_free(pixels);
 
     while (!glfwWindowShouldClose(window))
     {
-        rlhTermClear(t);
+        rlhTermClearTileData(t);
 
         // set the terminal background color to black by pushing a fill tile
         rlhTermPushFillTile(t, 0, RLH_TRANSPARENT, RLH_BLACK);
