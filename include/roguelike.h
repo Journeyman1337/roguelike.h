@@ -346,6 +346,10 @@ void rlhViewport(const int x, const int y, const int width, const int height)
 
 rlhresult_t rlhAtlasCreate(const int atlas_pixel_width, const int atlas_pixel_height, const int atlas_page_count, const uint8_t* atlas_pixel_rgba, const int atlas_glyph_count, const float* atlas_glyph_stpqp, rlhAtlas_h* const atlas)
 {
+	if (atlas == NULL)
+	{
+		return RLH_RESULT_ERROR_NULL_ARGUMENT;
+	}
     if (atlas_pixel_width <= 0 || atlas_pixel_height <= 0 || atlas_page_count <= 0 || atlas_glyph_count <= 0)
     {
         return RLH_RESULT_ERROR_INVALID_VALUE;
