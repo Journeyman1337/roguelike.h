@@ -152,7 +152,7 @@ rlhresult_t rlhTermDrawMatrix(rlhTerm_h const term, rlhAtlas_h const atlas, cons
 const char* const const RLH_RESULT_DESCRIPTIONS[RLH_RESULT_COUNT] =
 {
     "no errors occured",
-	"unexpected null argument",
+    "unexpected null argument",
     "unexpected argument value",
     "out of memory",
     "tile out of terminal"
@@ -282,7 +282,7 @@ typedef struct rlhTerm_s
     float PixelScale;
     size_t TileWidth;
     size_t TileHeight;
-	size_t TileDataCapacity;
+    size_t TileDataCapacity;
     size_t TileDataCount;
     uint8_t* TileData;
 
@@ -346,10 +346,10 @@ void rlhViewport(const int x, const int y, const int width, const int height)
 
 rlhresult_t rlhAtlasCreate(const int atlas_pixel_width, const int atlas_pixel_height, const int atlas_page_count, const uint8_t* atlas_pixel_rgba, const int atlas_glyph_count, const float* atlas_glyph_stpqp, rlhAtlas_h* const atlas)
 {
-	if (atlas == NULL)
-	{
-		return RLH_RESULT_ERROR_NULL_ARGUMENT;
-	}
+    if (atlas == NULL)
+    {
+        return RLH_RESULT_ERROR_NULL_ARGUMENT;
+    }
     if (atlas_pixel_width <= 0 || atlas_pixel_height <= 0 || atlas_page_count <= 0 || atlas_glyph_count <= 0)
     {
         return RLH_RESULT_ERROR_INVALID_VALUE;
@@ -410,9 +410,9 @@ void rlhAtlasDestroy(rlhAtlas_h const atlas)
         GLD_CALL(glDeleteTextures(1, &atlas->AtlasTEX));
         atlas->AtlasTEX = 0;
     }
-	
-	// free the struct
-	free(atlas);
+    
+    // free the struct
+    free(atlas);
 }
 
 rlhresult_t rlhAtlasSetData(rlhAtlas_h const atlas, const int atlas_pixel_width, const int atlas_pixel_height, const int atlas_page_count, const uint8_t* atlas_pixel_rgba, const int atlas_glyph_count, const float* atlas_glyph_stpqp)
@@ -489,10 +489,10 @@ rlhresult_t rlhTermCreateTileDimensions(const int tiles_wide, const int tiles_ta
         return RLH_RESULT_ERROR_INVALID_VALUE;
     }
 
-	const int pixel_width = tiles_wide * tile_width * pixel_scale;
-	const int pixel_height = tiles_tall * tile_height * pixel_scale;
+    const int pixel_width = tiles_wide * tile_width * pixel_scale;
+    const int pixel_height = tiles_tall * tile_height * pixel_scale;
 
-	return rlhTermCreatePixelDimensions(pixel_width, pixel_height, pixel_scale, tile_width, tile_height, RLH_FALSE, term);
+    return rlhTermCreatePixelDimensions(pixel_width, pixel_height, pixel_scale, tile_width, tile_height, RLH_FALSE, term);
 }
 
 rlhresult_t rlhTermCreatePixelDimensions(const int pixel_width, const int pixel_height, const float pixel_scale, const int tile_width, const int tile_height, const rlhbool_t floor_pixels_to_tiles, rlhTerm_h* const term)
@@ -521,23 +521,23 @@ rlhresult_t rlhTermCreatePixelDimensions(const int pixel_width, const int pixel_
     (*term)->TilesTall = (size_t)pixel_height / ((size_t)tile_height * pixel_scale);
     (*term)->TileWidth = (size_t)tile_width;
     (*term)->TileHeight = (size_t)tile_height;
-	if (floor_pixels_to_tiles)
-	{
+    if (floor_pixels_to_tiles)
+    {
         (*term)->PixelWidth = (*term)->TilesWide * (*term)->TileWidth * pixel_scale;
         (*term)->PixelHeight = (*term)->TilesTall * (*term)->TileHeight * pixel_scale;
-	}
-	else
-	{
+    }
+    else
+    {
         (*term)->PixelWidth = (size_t)pixel_width;
         (*term)->PixelHeight = (size_t)pixel_height;
-	}
+    }
 
     (*term)->TileDataCapacity = (*term)->TilesWide * (*term)->TilesTall;
     const size_t reserved_data_size = sizeof(uint8_t) * (*term)->TileDataCapacity * RLH_DATA_BYTES_PER_TILE;
     (*term)->TileData = (uint8_t*)malloc(reserved_data_size);
     if ((*term)->TileData == NULL)
     {
-		free(*term);
+        free(*term);
         return RLH_RESULT_ERROR_OUT_OF_MEMORY;
     }
 
@@ -609,7 +609,7 @@ void rlhTermDestroy(rlhTerm_h const term)
 
     GLD_END();
 
-	// free the struct
+    // free the struct
     free(term);
 }
 
@@ -620,7 +620,7 @@ float rlhTermGetPixelScale(rlhTerm_h const term)
         return 0.0f;
     }
 
-	return term->PixelScale;
+    return term->PixelScale;
 }
 
 void rlhTermGetTileGridDimensions(rlhTerm_h const term, int* const tiles_wide, int* const tiles_tall)
@@ -630,14 +630,14 @@ void rlhTermGetTileGridDimensions(rlhTerm_h const term, int* const tiles_wide, i
         return;
     }
 
-	if (tiles_wide != NULL)
-	{
-		*tiles_wide = term->TilesWide;
-	}
-	if (tiles_tall != NULL)
-	{
-		*tiles_tall = term->TilesTall;
-	}
+    if (tiles_wide != NULL)
+    {
+        *tiles_wide = term->TilesWide;
+    }
+    if (tiles_tall != NULL)
+    {
+        *tiles_tall = term->TilesTall;
+    }
 }
 
 void rlhTermGetPixelDimensions(rlhTerm_h const term, int* const pixel_width, int* const pixel_height)
@@ -647,14 +647,14 @@ void rlhTermGetPixelDimensions(rlhTerm_h const term, int* const pixel_width, int
         return;
     }
 
-	if (pixel_width != NULL)
-	{
-		*pixel_width = (int)term->PixelWidth;
-	}
-	if (pixel_height != NULL)
-	{
-		*pixel_height = (int)term->PixelHeight;
-	}
+    if (pixel_width != NULL)
+    {
+        *pixel_width = (int)term->PixelWidth;
+    }
+    if (pixel_height != NULL)
+    {
+        *pixel_height = (int)term->PixelHeight;
+    }
 }
 
 void rlhTermGetTileDimensions(rlhTerm_h const term, size_t* const tile_width, size_t* const tile_height)
@@ -664,14 +664,14 @@ void rlhTermGetTileDimensions(rlhTerm_h const term, size_t* const tile_width, si
         return;
     }
 
-	if (tile_width != NULL)
-	{
-		*tile_width = term->TileWidth;
-	}
-	if (tile_height != NULL)
-	{
-		*tile_height = term->TileHeight;
-	}
+    if (tile_width != NULL)
+    {
+        *tile_width = term->TileWidth;
+    }
+    if (tile_height != NULL)
+    {
+        *tile_height = term->TileHeight;
+    }
 }
 
 rlhresult_t rlhTermClearTileData(rlhTerm_h term)
@@ -709,7 +709,7 @@ rlhresult_t rlhTermResizeTileDimensions(rlhTerm_h const term, const int tiles_wi
 
     const int pixel_width = tiles_wide * tile_width * pixel_scale;
     const int pixel_height = tiles_tall * tile_height * pixel_scale;
-	return rlhTermResizePixelDimensions(term, pixel_width, pixel_height, pixel_scale, tile_width, tile_height, RLH_FALSE);
+    return rlhTermResizePixelDimensions(term, pixel_width, pixel_height, pixel_scale, tile_width, tile_height, RLH_FALSE);
 }
 
 rlhresult_t rlhTermResizePixelDimensions(rlhTerm_h const term, const int pixel_width, const int pixel_height, const float pixel_scale, const int tile_width, const int tile_height, const rlhbool_t floor_pixels_to_tiles)
@@ -738,9 +738,9 @@ rlhresult_t rlhTermResizePixelDimensions(rlhTerm_h const term, const int pixel_w
         term->PixelWidth = (size_t)pixel_width;
         term->PixelHeight = (size_t)pixel_height;
     }
-	
+    
     // clear tile data because it may no longer fit
-	term->TileDataCount = 0;
+    term->TileDataCount = 0;
 
     return RLH_RESULT_OK;
 }
@@ -865,23 +865,23 @@ static inline void _TransformMatrix(float* matrix, int screen_width, int screen_
 
 static void _setTermScissor(const int translate_x, const int translate_y, const int width, const int height)
 {
-	GLD_START();
-	
-	//crop the scissor area so the position is not less than 0 (this causes opengl error)
-	const int cropped_x = MAX(translate_x, 0);
-	const int cropped_y = MAX(translate_y, 0);
-	
-	const int translate_x_difference = cropped_x - translate_x;
-	const int translate_y_difference = cropped_y - translate_y;
-	
-	const int cropped_width = width - translate_x_difference;
-	const int cropped_height = height - translate_y_difference;	
-	
-	// set scissor
-	GLD_CALL(glScissor(cropped_x, cropped_y, cropped_width, cropped_height));
-	GLD_CALL(glEnable(GL_SCISSOR_TEST));
+    GLD_START();
+    
+    //crop the scissor area so the position is not less than 0 (this causes opengl error)
+    const int cropped_x = MAX(translate_x, 0);
+    const int cropped_y = MAX(translate_y, 0);
+    
+    const int translate_x_difference = cropped_x - translate_x;
+    const int translate_y_difference = cropped_y - translate_y;
+    
+    const int cropped_width = width - translate_x_difference;
+    const int cropped_height = height - translate_y_difference; 
+    
+    // set scissor
+    GLD_CALL(glScissor(cropped_x, cropped_y, cropped_width, cropped_height));
+    GLD_CALL(glEnable(GL_SCISSOR_TEST));
 
-	GLD_END();
+    GLD_END();
 }
 
 rlhresult_t rlhTermDrawCentered(rlhTerm_h const term, rlhAtlas_h const atlas, const int viewport_width, const int viewport_height)
@@ -912,17 +912,17 @@ rlhresult_t rlhTermDrawTranslated(rlhTerm_h const term, rlhAtlas_h const atlas, 
     memcpy(matrix, RLH_OPENGL_SCREEN_MATRIX, sizeof(float) * 16);
     _TransformMatrix(matrix, viewport_width, viewport_height, translate_x, translate_y, term->PixelWidth, term->PixelHeight);
 
-	_setTermScissor(translate_x, translate_y, term->PixelWidth, term->PixelHeight);
-	
+    _setTermScissor(translate_x, translate_y, term->PixelWidth, term->PixelHeight);
+    
     // draw
     rlhTermDrawMatrix(term, atlas, matrix);
 
-	GLD_START();
+    GLD_START();
 
-	// unset the scissor
-	GLD_CALL(glDisable(GL_SCISSOR_TEST));
+    // unset the scissor
+    GLD_CALL(glDisable(GL_SCISSOR_TEST));
 
-	GLD_END();
+    GLD_END();
 
     return RLH_RESULT_OK;
 }
@@ -937,18 +937,18 @@ rlhresult_t rlhTermDrawTransformed(rlhTerm_h const term, rlhAtlas_h const atlas,
     float matrix[16];
     memcpy(matrix, RLH_OPENGL_SCREEN_MATRIX, sizeof(float) * 16);
     _TransformMatrix(matrix, viewport_width, viewport_height, translate_x, translate_y, term->PixelWidth * scale_x, term->PixelHeight * scale_y);
-	
-	_setTermScissor(translate_x, translate_y, term->PixelWidth * scale_x, term->PixelHeight * scale_y);
-	
+    
+    _setTermScissor(translate_x, translate_y, term->PixelWidth * scale_x, term->PixelHeight * scale_y);
+    
     // draw
     rlhTermDrawMatrix(term, atlas, matrix);
 
-	GLD_START();
+    GLD_START();
 
-	// unset the scissor
-	GLD_CALL(glDisable(GL_SCISSOR_TEST));
+    // unset the scissor
+    GLD_CALL(glDisable(GL_SCISSOR_TEST));
 
-	GLD_END();
+    GLD_END();
 
     return RLH_RESULT_OK;
 }
