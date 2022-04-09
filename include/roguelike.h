@@ -151,7 +151,7 @@ rlhresult_t rlhTermDrawMatrix(rlhTerm_h const term, rlhAtlas_h const atlas, cons
 
 const char* const const RLH_RESULT_DESCRIPTIONS[RLH_RESULT_COUNT] =
 {
-    "ok",
+    "no errors occured",
 	"unexpected null argument",
     "unexpected argument value",
     "out of memory",
