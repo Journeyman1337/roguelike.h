@@ -266,12 +266,12 @@ void main()\n\
     FragColor = c;\n\
 }";
 
-const size_t kBytesPerTileData = 18;
-const size_t kChannelsPerAtlasPixel = 4;
-const size_t kElementsPerFontmapGlyph = 5;
-const size_t kVerticesPerTile = 6;
-const int kTilePositionOffset = 16384;
-const int kMaxTilePixelDimensions = 65565;
+const size_t RLH_DATA_BYTES_PER_TILE = 18;
+const size_t RLH_ATLAS_CHANNELS_PER_PIXEL = 4;
+const size_t RLH_FONTMAP_ELEMENTS_PER_GLYPH = 5;
+const size_t RLH_VERTICES_PER_TILE = 6;
+const int RLH_TILE_POSITION_OFFSET = 16384;
+const int RLH_MAX_TILE_SIZE = 65565;
 
 typedef struct rlhTerm_s
 {
@@ -368,8 +368,8 @@ rlhresult_t rlhAtlasCreate(const int atlas_pixel_width, const int atlas_pixel_he
     (*atlas)->PageCount = (size_t)atlas_page_count;
     (*atlas)->GlyphCount = (size_t)atlas_glyph_count;
    
-    const size_t atlas_size = sizeof(uint8_t) * (size_t)atlas_pixel_width * (size_t)atlas_pixel_height * (size_t)atlas_page_count * kChannelsPerAtlasPixel;
-    const size_t fontmap_size = sizeof(float) * (size_t)atlas_glyph_count * kElementsPerFontmapGlyph;
+    const size_t atlas_size = sizeof(uint8_t) * (size_t)atlas_pixel_width * (size_t)atlas_pixel_height * (size_t)atlas_page_count * RLH_ATLAS_CHANNELS_PER_PIXEL;
+    const size_t fontmap_size = sizeof(float) * (size_t)atlas_glyph_count * RLH_FONTMAP_ELEMENTS_PER_GLYPH;
 
     (*atlas)->AtlasTEX = _rlhCreateGlTextureArray((size_t)atlas_pixel_width, (size_t)atlas_pixel_height, (size_t)atlas_page_count, atlas_pixel_rgba);
 
@@ -378,7 +378,7 @@ rlhresult_t rlhAtlasCreate(const int atlas_pixel_width, const int atlas_pixel_he
     // load fontmap texture buffer object
     GLD_CALL(glGenBuffers(1, &(*atlas)->FontmapBUF));
     GLD_CALL(glBindBuffer(GL_TEXTURE_BUFFER, (*atlas)->FontmapBUF));
-    GLD_CALL(glBufferData(GL_TEXTURE_BUFFER, (GLsizei)atlas_glyph_count * kElementsPerFontmapGlyph * sizeof(float), atlas_glyph_stpqp, GL_DYNAMIC_DRAW));
+    GLD_CALL(glBufferData(GL_TEXTURE_BUFFER, (GLsizei)atlas_glyph_count * RLH_FONTMAP_ELEMENTS_PER_GLYPH * sizeof(float), atlas_glyph_stpqp, GL_DYNAMIC_DRAW));
     GLD_CALL(glGenTextures(1, &(*atlas)->FontmapTEX));
     GLD_CALL(glBindTexture(GL_TEXTURE_BUFFER, (*atlas)->FontmapTEX));
     GLD_CALL(glTexBuffer(GL_TEXTURE_BUFFER, GL_R32F, (*atlas)->FontmapBUF));
@@ -437,7 +437,7 @@ rlhresult_t rlhAtlasSetData(rlhAtlas_h const atlas, const int atlas_pixel_width,
     atlas->AtlasTEX = _rlhCreateGlTextureArray((size_t)atlas_pixel_width, (size_t)atlas_pixel_height, (size_t)atlas_page_count, atlas_pixel_rgba);
 
     GLD_CALL(glBindBuffer(GL_TEXTURE_BUFFER, atlas->FontmapBUF));
-    GLD_CALL(glBufferData(GL_TEXTURE_BUFFER, sizeof(float) * (GLsizei)atlas_glyph_count * kElementsPerFontmapGlyph, atlas_glyph_stpqp, GL_DYNAMIC_DRAW));
+    GLD_CALL(glBufferData(GL_TEXTURE_BUFFER, sizeof(float) * (GLsizei)atlas_glyph_count * RLH_FONTMAP_ELEMENTS_PER_GLYPH, atlas_glyph_stpqp, GL_DYNAMIC_DRAW));
 
     GLD_END();
 
@@ -533,7 +533,7 @@ rlhresult_t rlhTermCreatePixelDimensions(const int pixel_width, const int pixel_
 	}
 
     (*term)->TileDataCapacity = (*term)->TilesWide * (*term)->TilesTall;
-    const size_t reserved_data_size = sizeof(uint8_t) * (*term)->TileDataCapacity * kBytesPerTileData;
+    const size_t reserved_data_size = sizeof(uint8_t) * (*term)->TileDataCapacity * RLH_DATA_BYTES_PER_TILE;
     (*term)->TileData = (uint8_t*)malloc(reserved_data_size);
     if ((*term)->TileData == NULL)
     {
@@ -750,7 +750,7 @@ static inline uint8_t _rlhTermTryReserve(rlhTerm_h const term)
     if (term->TileDataCount == term->TileDataCapacity) // If we hit the reserved tile count, double the amount of reserved space.
     {
         size_t new_capacity = term->TileDataCapacity * 2;
-        uint8_t* new_data_ptr = (uint8_t*)realloc(term->TileData, new_capacity * kBytesPerTileData);
+        uint8_t* new_data_ptr = (uint8_t*)realloc(term->TileData, new_capacity * RLH_DATA_BYTES_PER_TILE);
         if (new_data_ptr == NULL)
         {
             return 0; //out of memory
@@ -763,9 +763,9 @@ static inline uint8_t _rlhTermTryReserve(rlhTerm_h const term)
 
 static inline void _rlhTermPushTile(rlhTerm_h const term, const int pixel_x, const int pixel_y, const int pixel_w, const int pixel_h, const uint16_t glyph, const rlhColor32_s fg, const rlhColor32_s bg)
 {
-    const unsigned int offset_pixel_x = (unsigned int)(pixel_x + kTilePositionOffset);
-    const unsigned int offset_pixel_y = (unsigned int)(pixel_y + kTilePositionOffset);
-    size_t index = term->TileDataCount * kBytesPerTileData;
+    const unsigned int offset_pixel_x = (unsigned int)(pixel_x + RLH_TILE_POSITION_OFFSET);
+    const unsigned int offset_pixel_y = (unsigned int)(pixel_y + RLH_TILE_POSITION_OFFSET);
+    size_t index = term->TileDataCount * RLH_DATA_BYTES_PER_TILE;
     term->TileData[index++] = offset_pixel_x & 0xff;
     term->TileData[index++] = (offset_pixel_x >> 8) & 0xff;
     term->TileData[index++] = offset_pixel_y & 0xff;
@@ -807,7 +807,7 @@ rlhresult_t rlhTermPushTileGrid(rlhTerm_h const term, const int grid_x, const in
 rlhresult_t rlhTermPushTileGridSized(rlhTerm_h const term, const int grid_x, const int grid_y, const int tile_pixel_width, const int tile_pixel_height, const uint16_t glyph, const rlhColor32_s fg, const rlhColor32_s bg)
 {
     if (grid_x < 0 || grid_y < 0 || grid_x > term->TilesWide || grid_y > term->TilesTall) return RLH_RESULT_TILE_OUT_OF_TERMINAL;
-    if (tile_pixel_width <= 0 || tile_pixel_height <= 0 || tile_pixel_width > kMaxTilePixelDimensions || tile_pixel_height > kMaxTilePixelDimensions) return RLH_RESULT_TILE_OUT_OF_TERMINAL;
+    if (tile_pixel_width <= 0 || tile_pixel_height <= 0 || tile_pixel_width > RLH_MAX_TILE_SIZE || tile_pixel_height > RLH_MAX_TILE_SIZE) return RLH_RESULT_TILE_OUT_OF_TERMINAL;
     if (!_rlhTermTryReserve(term)) return RLH_RESULT_ERROR_OUT_OF_MEMORY;
     const unsigned int pixel_x = (unsigned int)grid_x * term->TileWidth;
     const unsigned int pixel_y = (unsigned int)grid_y * term->TileHeight;
@@ -830,7 +830,7 @@ rlhresult_t rlhTermPushTileFree(rlhTerm_h const term, const int screen_pixel_x, 
 rlhresult_t rlhTermPushTileFreeSized(rlhTerm_h const term, const int screen_pixel_x, const int screen_pixel_y, const int tile_pixel_width, const int tile_pixel_height, const uint16_t glyph, const rlhColor32_s fg, const rlhColor32_s bg)
 {
     if (screen_pixel_x < -tile_pixel_width || screen_pixel_y < -tile_pixel_height || screen_pixel_x > (int)term->PixelWidth || screen_pixel_y > (int)term->PixelHeight) return RLH_RESULT_TILE_OUT_OF_TERMINAL;
-    if (tile_pixel_width <= 0 || tile_pixel_height <= 0 || tile_pixel_width > kMaxTilePixelDimensions || tile_pixel_height > kMaxTilePixelDimensions) return RLH_RESULT_TILE_OUT_OF_TERMINAL;
+    if (tile_pixel_width <= 0 || tile_pixel_height <= 0 || tile_pixel_width > RLH_MAX_TILE_SIZE || tile_pixel_height > RLH_MAX_TILE_SIZE) return RLH_RESULT_TILE_OUT_OF_TERMINAL;
     if (!_rlhTermTryReserve(term)) return RLH_RESULT_ERROR_OUT_OF_MEMORY;
     _rlhTermPushTile(term, screen_pixel_x, screen_pixel_y, tile_pixel_width, tile_pixel_height, glyph, fg, bg);
     return RLH_RESULT_OK;
@@ -974,7 +974,7 @@ rlhresult_t rlhTermDrawMatrix(rlhTerm_h const term, rlhAtlas_h const atlas, cons
             GLD_CALL(glGenBuffers(1, &term->DataBUF));
         }
         GLD_CALL(glBindBuffer(GL_TEXTURE_BUFFER, term->DataBUF));
-        GLD_CALL(glBufferData(GL_TEXTURE_BUFFER, term->TileDataCount * kBytesPerTileData, term->TileData, GL_STREAM_DRAW));
+        GLD_CALL(glBufferData(GL_TEXTURE_BUFFER, term->TileDataCount * RLH_DATA_BYTES_PER_TILE, term->TileData, GL_STREAM_DRAW));
         if (term->DataTEX == 0)
         {
             GLD_CALL(glGenTextures(1, &term->DataTEX));
@@ -1005,7 +1005,7 @@ rlhresult_t rlhTermDrawMatrix(rlhTerm_h const term, rlhAtlas_h const atlas, cons
         GLD_CALL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 
         // DRAW!!!
-        GLD_CALL(glDrawArrays(GL_TRIANGLES, 0, term->TileDataCount * (size_t)kVerticesPerTile));
+        GLD_CALL(glDrawArrays(GL_TRIANGLES, 0, term->TileDataCount * RLH_VERTICES_PER_TILE));
 
         GLD_END();
     }
