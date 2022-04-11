@@ -512,7 +512,6 @@ rlhresult_t rlhTermCreatePixelDimensions(const int pixel_width, const int pixel_
 
     *term = (rlhTerm_h)malloc(sizeof(rlhTerm_s));
 
-    *term = (rlhTerm_h)malloc(sizeof(rlhTerm_s));
     if (*term == NULL)
     {
         return RLH_RESULT_ERROR_OUT_OF_MEMORY;
