@@ -330,8 +330,12 @@ static inline GLuint _rlhCreateGlTextureArray(const size_t pixel_width, const si
 
 void rlhClearColor(const rlhColor32_s color)
 {
+	GLD_START();
+	
     GLD_CALL(glClearColor((float)color.r / 255.0f, (float)color.g / 255.0f, (float)color.b / 255.0f, (float)color.a / 255.0f));
     GLD_CALL(glClear(GL_COLOR_BUFFER_BIT));
+	
+	GLD_END();
 }
 
 void rlhViewport(const int x, const int y, const int width, const int height)
