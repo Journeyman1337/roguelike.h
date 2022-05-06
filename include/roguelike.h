@@ -16,6 +16,10 @@
     CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
+/*
+	Roguelike.h version 1.0.0
+*/
+
 #ifndef ROGUELIKE_H
 #define ROGUELIKE_H
 #ifdef __cplusplus
