@@ -1,6 +1,6 @@
 Header only roguelike rendering library. Support for Opengl33.
 
-This library is designed for participants in the annual 7DRL game jam. If you use this library in this game jam or for some other purpose, please let me know in an issue thread!
+This library is designed for participants in the annual 7DRL game jam. If you use roguelike.h in your project, feel free to talk about it in an issue thread!
 
 # Features
  * A performant batched rendering system that is similliar to the renderer employed by the video game Dwarf Fortress:
