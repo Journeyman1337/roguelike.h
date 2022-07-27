@@ -1,5 +1,9 @@
 Header only roguelike rendering library. Support for Opengl33.
 
+This library is designed for participants in the annual 7DRL game jam. If you use this library in your entry, please let me know in an issue thread!
+
+If you are interested in a cp->unicode lookup table, or enumerated names of every codepage glyph, take a look at this other project of mine: https://github.com/Journeyman-dev/cp437.h.
+
 # Features
  * A performant batched rendering system that is similliar to the renderer employed by the video game Dwarf Fortress:
 	* The entire terminal is rendered in a single draw call.
