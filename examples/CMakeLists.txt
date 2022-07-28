@@ -3,7 +3,6 @@ set(EXAMPLE_NAME "RLH-Example")
 add_executable(${EXAMPLE_NAME}
     ${EXAMPLE_NAME}/main.c
 )
-
 find_package(glfw3 CONFIG REQUIRED)
 find_path(STB_INCLUDE_DIRS "stb.h")
 find_package(glad CONFIG REQUIRED)
