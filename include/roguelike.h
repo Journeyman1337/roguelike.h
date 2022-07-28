@@ -17,7 +17,36 @@
 */
 
 /*
-    Roguelike.h version 1.0.0
+    Roguelike.h version 1.1.0
+    Header only roguelike rendering library. 
+    The source for this library can be found on GitHub:
+    https://github.com/Journeyman-dev/roguelike.h
+    
+    FEATURES:    
+    - A performant batched rendering system that is similliar to the renderer employed by the video game Dwarf Fortress:
+    - The entire terminal is rendered in a single draw call.
+    - Draw data is passed to the GPU in a giant buffer, which contains elements per tile rather than per vertex.
+    - The data buffer is compacted as much as possible to improve latency. It contains only 18 bytes per tile.
+    - On the GPU, most calculation is done per vertex rather than per fragment (pixel), which is more efficient. 
+    - Support for custom glyph atlasses with up to 65535 tiles of custom sizes across multiple texture pages.
+    - 32 bit fullcolor background and foreground colors per tile.
+    - Ability to render tiles on top of each other, with tiles rendered FIFO in the order that they are pushed into the terminal.
+    - Ability to render tiles offset from gridspace positions.
+    - Ability to render tiles with custom width and height per tile.
+    
+    CHANGELOG:
+    	- Version 1.1
+		Bugfixes
+			Added missing include to stddef.h
+		Tooling Changes
+			Renamed the CMake project to 'rlh'
+			Changed the project's build system so it is no longer monolithic
+			Removed vcpkg.json
+			Removed vcpkg toolchain file setting from CMakeLists.txt
+			Created an interface target the library called 'rlh'
+			Added code linting using trunk.
+	- Version 1.0
+		Initial Release
 */
 
 #ifndef ROGUELIKE_H
