@@ -1,7 +1,7 @@
 # Version 1.1
 
 ## Bugfixes
-	- Added missing included to stddef.h
+	- Added missing include to stddef.h
 	
 ## Tooling Changes
 	- Renamed the CMake project to 'rlh'
