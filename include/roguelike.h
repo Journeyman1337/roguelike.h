@@ -44,7 +44,7 @@
 			Removed vcpkg.json
 			Removed vcpkg toolchain file setting from CMakeLists.txt
 			Created an interface target the library called 'rlh'
-			Added code linting using trunk.
+			Added code linting using trunk
 	- Version 1.0
 		Initial Release
 */
