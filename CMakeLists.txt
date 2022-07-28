@@ -1,19 +1,22 @@
 cmake_minimum_required(VERSION 3.19)
-	
-if (CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
-	set(CMAKE_TOOLCHAIN_FILE ${CMAKE_SOURCE_DIR}/vcpkg/scripts/buildsystems/vcpkg.cmake CACHE STRING "Vcpkg toolchain file")
-endif()
 
 option(RLH_BUILD_EXAMPLES "Build the example projects" OFF)
 
-PROJECT(roguelike.h
-	VERSION 0.0
-	DESCRIPTION "A header only roguelike rendering library."
-	LANGUAGES C
+PROJECT(rlh
+    VERSION 1.1
+    DESCRIPTION "A header only roguelike rendering library."
+    LANGUAGES C
 )
 
-set(RLH_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include/)
+add_library(${PROJECT_NAME} INTERFACE
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/roguelike.h"
+)
+
+target_include_directories(${PROJECT_NAME}
+    INTERFACE
+        "${CMAKE_CURRENT_SOURCE_DIR}/include/"
+)
 
 if (RLH_BUILD_EXAMPLES)
-	add_subdirectory(examples)
+    add_subdirectory(examples)
 endif()

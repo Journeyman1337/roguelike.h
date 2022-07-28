@@ -1,0 +1,12 @@
+Language: Cpp
+BasedOnStyle: Google
+IndentPPDirectives: AfterHash
+BreakConstructorInitializers: BeforeComma
+IndentCaseLabels: false
+AlwaysBreakTemplateDeclarations: false
+DerivePointerAlignment: false
+TabWidth: '4'
+UseTab: Never
+BreakBeforeBraces: Allman
+NamespaceIndentation: All
+ColumnLimit: 100
