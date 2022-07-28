@@ -13,7 +13,7 @@ target_link_libraries(${EXAMPLE_NAME}
         rlh
 )
 target_include_directories(${EXAMPLE_NAME} PRIVATE
-    ${STB_INCLUDE_DIRS}
+    STB_INCLUDE_DIRS
 )
 set_property(TARGET ${EXAMPLE_NAME} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY $<TARGET_FILE_DIR:${EXAMPLE_NAME}>)
 # grab the content file paths
