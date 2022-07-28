@@ -9,6 +9,6 @@
 	- Created an interface target the library called 'rlh'
 - Added code linting using trunk.
 # Version 1.0
-- initial release
+- Initial Release
 	
 
