@@ -10,9 +10,9 @@ target_link_libraries(${EXAMPLE_NAME}
     PRIVATE
         glfw
         glad::glad
-        rlh
 )
 target_include_directories(${EXAMPLE_NAME} PRIVATE
+    ${RLH_INCLUDE_DIR}
     STB_INCLUDE_DIRS
 )
 set_property(TARGET ${EXAMPLE_NAME} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY $<TARGET_FILE_DIR:${EXAMPLE_NAME}>)
