@@ -1,4 +1,4 @@
-Language: C
+Language: Cpp
 BasedOnStyle: Google
 IndentPPDirectives: AfterHash
 BreakConstructorInitializers: BeforeComma
