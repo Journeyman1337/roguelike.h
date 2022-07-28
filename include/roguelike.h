@@ -27,6 +27,7 @@ extern "C"
 {
 #endif
 #include <stdint.h>
+#include <stddef.h>
 
 // If glDebug.h is not included, make the debug macros do nothing.
 #ifndef GL_DEBUG_H
