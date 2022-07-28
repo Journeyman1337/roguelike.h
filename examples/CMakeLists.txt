@@ -19,4 +19,8 @@ set_property(TARGET ${EXAMPLE_NAME} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY $<TAR
 file(GLOB asset_files
     assets/*
 )
-file(COPY ${asset_files} DESTINATION)
+add_custom_command(TARGET ${EXAMPLE_NAME} POST_BUILD    
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${asset_files}
+        $<TARGET_FILE_DIR:${EXAMPLE_NAME}>
+)
