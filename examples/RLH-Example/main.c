@@ -11,6 +11,7 @@ int main()
 {
   if (!glfwInit())
   {
+    printf("GLFW failed to initialize!\n");
     return 1;
   }
 
@@ -35,6 +36,7 @@ int main()
 
   if (!window)
   {
+    printf("window failed to be created!\n");
     glfwTerminate();
     return 2;
   }
@@ -44,6 +46,7 @@ int main()
     glfwDestroyWindow(window);
     window = NULL;
     glfwTerminate();
+    printf("failed to load opengl bindings!\n");
     return 3;
   }
 
@@ -56,6 +59,7 @@ int main()
     glfwDestroyWindow(window);
     window = NULL;
     glfwTerminate();
+    printf("Failed to load texture atlas image. Make sure that the image is in the same directory as the built executable.\n");
     return 4;
   }
 
