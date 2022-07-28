@@ -13,7 +13,6 @@ target_link_libraries(${EXAMPLE_NAME}
         glad::glad
         rlh
 )
-find_path(STB_INCLUDE_DIRS "stb_c_lexer.h")
 target_include_directories(${EXAMPLE_NAME} PRIVATE
     ${STB_INCLUDE_DIRS}
 )
