@@ -1,10 +1,6 @@
 {
-	"name": "roguelike-h",
-	"version-string": "1.0.0",
-	"license": "MIT",
-	"dependencies": [
-	"glfw3",
-	"glad",
-	"stb"
-  ]
+  "name": "roguelike-h",
+  "version-string": "1.0.0",
+  "license": "MIT",
+  "dependencies": ["glfw3", "glad", "stb"]
 }
