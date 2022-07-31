@@ -64,7 +64,7 @@
             #include <roguelike.h>
 
     roguelike.h uses the OpenGL API to do its rendering. There are many open source libraries
-    avaliable for loading these bindings, such as glad (https://github.com/Dav1dde/glad) and GLEW
+    avaliable for loading OpenGL bindings, such as glad (https://github.com/Dav1dde/glad) and GLEW
     (http://glew.sourceforge.net/). It does not matter which loading library you use, but it must
     support at least OpenGL 3.3 core version. A pre-generated glad CMake project targeting this
     version of OpenGL can be found here: https://github.com/Journeyman-dev/glad-opengl33-core.
