@@ -43,17 +43,16 @@
     HOW TO SETUP:
     The roguelike.h library can be included in your project in one of two different ways:
         - Copy and paste the roguelike.h file directly into your source tree.
-        - Clone the GitHub as a git submodule to your project's repository, and use the roguelike.h.
+        - Clone the GitHub as a git submodule to your project's repository, and use the roguelike.h.   
+    	  - In bash console from the root directory of your project's repository:
+    	  
+                git submodule add https://github.com/Journeyman-dev/roguelike.h
+                git submodule update -init
 
-    To do so: In bash console from the root directory of your project's repository:
+          - In your project's top level CMakeLists.txt:
 
-            git submodule add https://github.com/Journeyman-dev/roguelike.h
-            git submodule update -init
-
-    In your project's top level CMakeLists.txt:
-
-            add_submodule(roguelike.h)
-            target_add_link_libraries(YOUR_TARGET_NAME PUBLIC rlh)
+                add_submodule(roguelike.h)
+                target_add_link_libraries(YOUR_TARGET_NAME PUBLIC rlh)
 
     After roguelike.h is included in your project, you must implement the library before you can
     actually use it. To implement roguelike.h, create a new .c or .cpp file and write in it the
@@ -84,7 +83,7 @@
     RLH_RESULT_DESCRIPTIONS. To get the string description of a specific result code from this
     array, index the array with the result code.
 
-    This is an example of how to check for errors and print a result code form a function:
+    This is an example of how to check for errors and print a result code from a function:
 
         rlhresult_t result = rlhFunction(arg0, arg1, arg2);
         printf("function result description: %s\n", RLH_RESULT_DESCRIPTIONS[result]);
