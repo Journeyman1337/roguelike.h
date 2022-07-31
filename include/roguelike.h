@@ -94,7 +94,7 @@
         }
 
      As explained above, the OpenGL calls in roguelike.h is also debuggable using glDebug.h library.
-     Look in the HOW TO SETUP section for more details.
+     Look in the "HOW TO SETUP" section for more details.
 
     HOW TO MAKE COLORS
     Colors in roguelike.h are 32 bit RGBA colors, with a each color channel represented by a uint8_t
