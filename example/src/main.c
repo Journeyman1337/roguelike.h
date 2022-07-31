@@ -113,7 +113,7 @@ int main()
       rlhTermCreateTileDimensions(tiles_wide, tiles_tall, pixel_scale, tile_size, tile_size, &t);
   if (result > RLH_RESULT_LAST_NON_ERROR)
   {
-    rlhAtlasDestroy(&a);
+    rlhAtlasDestroy(a);
     a = NULL;
     glfwTerminate();
     printf("Error creating terminal: %s\n", RLH_RESULT_DESCRIPTIONS[result]);
