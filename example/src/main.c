@@ -101,6 +101,7 @@ int main()
   rlhAtlas_h a = NULL;
   rlhresult_t result = rlhAtlasCreate(i_width, i_height, 1, pixels, 256, stpqp, &a);
   free(stpqp);
+  stbi_image_free(pixels);
   if (result > RLH_RESULT_LAST_NON_ERROR)
   {
     glfwTerminate();
@@ -119,9 +120,6 @@ int main()
     printf("Error creating terminal: %s\n", RLH_RESULT_DESCRIPTIONS[result]);
     return 6;
   }
-
-  free(stpqp);
-  stbi_image_free(pixels);
 
   while (!glfwWindowShouldClose(window))
   {
