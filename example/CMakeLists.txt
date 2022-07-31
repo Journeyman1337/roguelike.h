@@ -31,7 +31,7 @@ list(
 )
 add_custom_command(TARGET rlh_example POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        ${asset_files}
+        ${RLH_ASSET_FILES}
         $<TARGET_FILE_DIR:rlh_example>
 )
 # make sure that the asset files are found in Visual Studio
