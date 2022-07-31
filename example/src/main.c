@@ -1,10 +1,7 @@
-#define STB_IMAGE_IMPLEMENTATION
-#include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include <stb_image.h>
-
-#define RLH_IMPLEMENTATION
+#include <glad/glad.h>
 #include <roguelike.h>
+#include <stb_image.h>
 #include <string.h>
 
 int main()
@@ -59,10 +56,13 @@ int main()
     glfwDestroyWindow(window);
     window = NULL;
     glfwTerminate();
-    printf("Failed to load texture atlas image. Make sure that the image is in the same directory as the built executable.\n");
+    printf(
+        "Failed to load texture atlas image. Make sure that the image is in the same directory as "
+        "the built executable.\n");
     return 4;
   }
 
+  // setup the stpqp coordinates for the atlas
   const int sheet_sprite_dimensions = 16;
   const int sheet_sprite_count = sheet_sprite_dimensions * sheet_sprite_dimensions;
   const size_t stpqp_arr_size = sheet_sprite_count * sizeof(float) * 5;
@@ -79,19 +79,19 @@ int main()
           switch (q)
           {
           case 0:
-            stpqp[i++] = uvtilesize * x;
+            stpqp[i++] = uvtilesize * x;  // the s coordinate (left x)
             break;
           case 1:
-            stpqp[i++] = uvtilesize * x + uvtilesize;
+            stpqp[i++] = uvtilesize * x + uvtilesize;  // the t coordinate (right x)
             break;
           case 2:
-            stpqp[i++] = 1.0f - (uvtilesize * y + uvtilesize);
+            stpqp[i++] = uvtilesize * y + uvtilesize;  // the p coordinate (top y)
             break;
           case 3:
-            stpqp[i++] = 1.0f - (uvtilesize * y);
+            stpqp[i++] = uvtilesize * y;  // the q coordinate (bottom y)
             break;
           case 4:
-            stpqp[i++] = 0;
+            stpqp[i++] = 0;  // the 2nd p coordinate (texture page id)
           }
         }
       }
@@ -100,17 +100,24 @@ int main()
 
   rlhAtlas_h a = NULL;
   rlhresult_t result = rlhAtlasCreate(i_width, i_height, 1, pixels, 256, stpqp, &a);
-  if (result != RLH_RESULT_OK)
+  free(stpqp);
+  if (result > RLH_RESULT_LAST_NON_ERROR)
   {
+    glfwTerminate();
     printf("Error creating atlas: %s\n", RLH_RESULT_DESCRIPTIONS[result]);
+    return 5;
   }
 
   rlhTerm_h t = NULL;
   result =
       rlhTermCreateTileDimensions(tiles_wide, tiles_tall, pixel_scale, tile_size, tile_size, &t);
-  if (result != RLH_RESULT_OK)
+  if (result > RLH_RESULT_LAST_NON_ERROR)
   {
+    rlhAtlasDestroy(&a);
+    a = NULL;
+    glfwTerminate();
     printf("Error creating terminal: %s\n", RLH_RESULT_DESCRIPTIONS[result]);
+    return 6;
   }
 
   free(stpqp);
@@ -118,8 +125,6 @@ int main()
 
   while (!glfwWindowShouldClose(window))
   {
-    rlhTermClearTileData(t);
-
     // set the terminal background color to black by pushing a fill tile
     rlhTermPushFillTile(t, 0, RLH_TRANSPARENT, RLH_BLACK);
 

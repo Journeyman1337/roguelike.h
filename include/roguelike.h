@@ -17,36 +17,212 @@
 */
 
 /*
-    Roguelike.h version 1.1.0
-    Header only roguelike rendering library. 
+    roguelike.h version 1.2.0
+    Header only roguelike rendering library.
     The source for this library can be found on GitHub:
     https://github.com/Journeyman-dev/roguelike.h
-    
-    FEATURES:    
-    - A performant batched rendering system that is similliar to the renderer employed by the video game Dwarf Fortress:
+
+    FEATURES:
+    - A performant batched terminal rendering system that is similliar to the renderer employed by
+      the video game Dwarf Fortress:
     - The entire terminal is rendered in a single draw call.
-    - Draw data is passed to the GPU in a giant buffer, which contains elements per tile rather than per vertex.
-    - The data buffer is compacted as much as possible to improve latency. It contains only 18 bytes per tile.
-    - On the GPU, most calculation is done per vertex rather than per fragment (pixel), which is more efficient. 
-    - Support for custom glyph atlasses with up to 65535 tiles of custom sizes across multiple texture pages.
+    - Draw data is passed to the GPU in a giant buffer, which contains elements per tile rather than
+      per vertex.
+    - The data buffer is compacted as much as possible to improve latency. It contains only 18 bytes
+      per tile.
+    - On the GPU, most calculation is done per vertex rather than per fragment (pixel), which is
+      more efficient.
+    - Support for custom glyph atlasses with up to 65535 tiles of custom sizes across multiple
+      texture pages.
     - 32 bit fullcolor background and foreground colors per tile.
-    - Ability to render tiles on top of each other, with tiles rendered FIFO in the order that they are pushed into the terminal.
+    - Ability to render tiles on top of each other, with tiles rendered FIFO in the order that they
+      are pushed into the terminal.
     - Ability to render tiles offset from gridspace positions.
     - Ability to render tiles with custom width and height per tile.
-    
+
+    HOW TO SETUP:
+    The roguelike.h library can be included in your project in one of two different ways:
+        - Copy and paste the roguelike.h file directly into your source tree.
+        - Clone the GitHub as a git submodule to your project's repository, and use the roguelike.h.
+
+    To do so: In bash console from the root directory of your project's repository:
+
+            git submodule add https://github.com/Journeyman-dev/roguelike.h
+            git submodule update -init
+
+    In your project's top level CMakeLists.txt:
+
+            add_submodule(roguelike.h)
+            target_add_link_libraries(YOUR_TARGET_NAME PUBLIC rlh)
+
+    After roguelike.h is included in your project, you must implement the library before you can
+    actually use it. To implement roguelike.h, create a new .c or .cpp file and write in it the
+    following:
+
+            #include <glDebug.h> // this line is optional (see bellow)
+            #include <glad/glad.h> // you can use a different opengl loader here (see bellow)
+            #define RLH_IMPLEMENTATION
+            #include <roguelike.h>
+
+    roguelike.h uses the OpenGL API to do its rendering. There are many open source libraries
+    avaliable for loading these bindings, such as glad (https://github.com/Dav1dde/glad) and GLEW
+    (http://glew.sourceforge.net/). It does not matter which loading library you use, but it must
+    support at least OpenGL 3.3 core version. A pre-generated glad CMake project targeting this
+    version of OpenGL can be found here: https://github.com/Journeyman-dev/glad-opengl33-core.
+
+    If you want to debug the OpenGL API calls within roguelike.h, you can use the glDebug.h
+    header only library by including it before implementing roguelike.h. The glDebug.h library is
+    avaliable here: https://github.com/Journeyman-dev/glDebug.h. Look at the comment on top of
+    that header for more information about its usage.
+
+    HOW TO DEBUG:
+    Many functions in roguelike.h return an enum value of type rlhresult_t. Result codes with
+    names that start with RLH_RESULT_ERROR_ are returned if an error occured in the function's
+    execution. These values are all greater than RLH_RESULT_LAST_NON_ERROR.
+
+    String descriptions of result codes are stored in the constant string array variable
+    RLH_RESULT_DESCRIPTIONS. To get the string description of a specific result code from this
+    array, index the array with the result code.
+
+    This is an example of how to check for errors and print a result code form a function:
+
+        rlhresult_t result = rlhFunction(arg0, arg1, arg2);
+        printf("function result description: %s\n", RLH_RESULT_DESCRIPTIONS[result]);
+        if (result > RLH_RESULT_LAST_NON_ERROR)
+        {
+            printf("that was an error!\n");
+            return 1;
+        }
+
+     As explained above, the OpenGL calls in roguelike.h is also debuggable using glDebug.h library.
+     Look in the HOW TO SETUP section for more details.
+
+    HOW TO MAKE COLORS
+    Colors in roguelike.h are 32 bit RGBA colors, with a each color channel represented by a uint8_t
+    value between 0 and 255. Colors are stored in structs of type rlhColor32_s. To quickly create
+    a color struct, you can use the included macros such as RLH_RED() or RLH_TRANSPARENT(). You can
+    also use the RLH_C32() to quickly create a color with the given rgba values, like:
+
+        rlmhColor32_s my_color = RLH_C32(127, 42, 245);
+
+    HOW TO USE:
+    To use roguelike.h, you must bind it to an OpenGL context. There are many open source platform
+    libraries for creating a window for rendering, including GLFW (https://www.glfw.org/) and SDL
+    (https://www.libsdl.org/). An example of using GLFW is included in the roguelike.h repository on
+    GitHub in the example folder.
+
+    The general initialization steps for platform libraries are:
+
+        - Initialize the library.
+        - Create a window.
+        - Load an OpenGL context in the window, usually by passing a function pointer from your
+          OpenGL loading library as an argument.
+        - Make the window context "current" so that the next OpenGL function calls will use it.
+
+    After the window is set up for rendering, you can initalize all of your roguelike.h objects. To
+    render with roguelike.h, you require:
+
+        - An atlas (rlhAtlas_h) object, which requires stpqp coordinates and bitmap pixel data of
+          the atlas image.
+        - A terminal object (rlhTerm_h), which represents the rectangle on the window you want to
+          draw to.
+
+    For the atlas, "stpqp" texture coordinates are floating point coordinates within the entire
+    atlas texture that surround each glyph. The coordinates used go from (0,0) in the upper left
+    corner of the entire atlas image, to (1,1) in the bottom right corner. Each glyph requires 5
+    floating point coordinates, each represented by one of the letters in stpqp. The s coordinate is
+    the left side of the glyph on the x axis, the t is the right side of the glyph on the x axis,
+    the p is the top side of the glyph on the y axis, and the q is the bottom side of the glyph
+    on the y axis. If you want to, you can utilize store multiple texture pages of the same size
+    into the bitmap array. The final p coordinate is the page number that the glyph exists on. If
+    you have only one page, this coordinate will always be 0, which is the index for the first page.
+    For a detailed example of how to set up an atlas for a 16x16 glyph codepage atlas, look at the
+    example on the roguelike.h GitHub repository.
+
+    The atlas also needs raw pixel data for the texture atlas image. You can easily load data from 
+    an image file using a library such as stb_image.h 
+    (https://github.com/nothings/stb/blob/master/stb_image.h).
+
+    For the terminal, you need to specify a default pixel size to render tiles to the screen in the
+    arguments tile_width and tile_height. This will be the size of each tile on the screen when you
+    draw them without resizing, and is the size of each cell in the console grid when you draw your
+    glyphs at gridspace positions.
+
+    Terminals need a ratio of a teriminal pixel size to screen pixel size, passed in as the
+    pixel_scale argument. If you want evey teriminal pixel to take up a square of 4 screen pixels,
+    you can use 2 for this value. If you want the pixels to match the screen pixels, use 1.
+    You can use any value greater than 0 for this scalar, even decimal values such as 1.5f.
+    However, if you choose to use decimal values, you glyphs may be distorted, so this is not
+    reccomended.
+
+    Terminals also require you to specify the size of its rendering space. You can do so by either
+    specifying the tile dimensions of the tile grid (rlhTermCreateTileDimensions) or by specifying
+    the pixel dimensions of the entire terminal's rect on the screen (rlhTermCreatePixelDimensions).
+    If you choose to size your terminal based on pixels, you can pass RLH_TRUE in for the
+    floor_pixels_to_tiles argument for the terminal pixel dimensions to automatically be floored to
+    the next lowest tile dimension divisible values. This is great for if you have an arbitrarily
+    sized window, and you want to have extra space past the edges of the terminal within the window
+    where tiles don't quite fit.
+
+    Next you need to create a "render loop", or a loop which will repeat over and over again until
+    the window is closed. Usually, this kind of loop can look like the following (platform libary
+    specific stuff is in pseudocode):
+
+        while (!windowShouldClose(window)) // platform library specific function to keep looping
+        // until the window is closed
+        {
+          pollEvents(); // Platform library specific function to update the window and its buttons
+          // based on mouse clicks, mouse movements, etc.
+
+          // Do your roguelike.h rendering stuff and game logic per frame here.
+          // To draw tiles, use the rlhTermPushTileX functions.
+
+          rlhViewport(0, 0, window_width, window_height); // Always do this before the actual
+          // drawing so opengl knows the window size.
+
+          rlhClearColor(RLH_BLACK); // Color the entire viewport to
+          // clear it of anything left over from previous frames.
+
+          rlhTermDraw(terminal, atlas); // You can use a different rlhTermDrawX function to draw the
+          // terminal to the viewport in different ways.
+          // When you call an rlhTermDrawX function, the tile data is automatically cleared of all
+          // tiles.
+
+          swapBuffers(window); // platform library specific function to swap the window's buffers
+        }
+
+    After this loop, you need to delete the resources from both roguelike.h and the platform
+    library. Use rlhAtlasDestroy to free the atlas, and then use rlhTermDestroy to free the
+    terminal. If you want, you can easily wrap all of this stuff in a C++ class, and
+    automatically free all this automatically when the class goes out of scope using RAII
+    (https://en.cppreference.com/w/cpp/language/raii).
+
+    For more information about each roguelike.h function you can call, look for comments above their
+    declaration further down in this header file.
+
     CHANGELOG:
-    	- Version 1.1
-		Bugfixes
-			Added missing include to stddef.h
-		Tooling Changes
-			Renamed the CMake project to 'rlh'
-			Changed the project's build system so it is no longer monolithic
-			Removed vcpkg.json
-			Removed vcpkg toolchain file setting from CMakeLists.txt
-			Created an interface target the library called 'rlh'
-			Added code linting using trunk
-	- Version 1.0
-		Initial Release
+    - Version 1.2
+        Features
+            - Added automatic terminal clear after each draw so users don't have to remember
+            clear the data themselves to prevent memory leaks.
+            - Update the header comment in roguelike.h with a detailed explanation of usage.
+            - Result codes have been reordered, and RLH_RESULT_LAST_NON_ERROR was added to make it
+            easier to determine if a result code is an error or not.
+        Tooling Changes
+            - Example projects now expect dependency targets to exist already instead of finding
+            them as packages.
+    - Version 1.1
+        Bugfixes
+            - Added missing include to stddef.h
+        Tooling Changes
+            - Renamed the CMake project to 'rlh'
+            - Changed the project's build system so it is no longer monolithic
+            - Removed vcpkg.json
+            - Removed vcpkg toolchain file setting from CMakeLists.txt
+            - Created an interface target the library called 'rlh'
+            - Added code linting using trunk
+    - Version 1.0
+        Initial Release
 */
 
 #ifndef ROGUELIKE_H
@@ -76,12 +252,10 @@ extern "C"
     uint8_t a;
   } rlhColor32_s;
 
-#define RLH_C32_NON_COMPOUND(red, green, blue, alpha) \
-  {                                                   \
-    red, green, blue, alpha                           \
-  }
+// custom color macro
 #define RLH_C32(red, green, blue, alpha) ((rlhColor32_s){(red), (green), (blue), (alpha)})
 
+// standard color macros
 #define RLH_RED ((rlhColor32_s){(255), (0), (0), (255)})
 #define RLH_LIME ((rlhColor32_s){(0), (255), (0), (255)})
 #define RLH_BLUE ((rlhColor32_s){(0), (0), (255), (255)})
@@ -114,10 +288,11 @@ extern "C"
   typedef enum rlhresult_t
   {
     RLH_RESULT_OK = 0,
-    RLH_RESULT_ERROR_NULL_ARGUMENT = 1,
-    RLH_RESULT_ERROR_INVALID_VALUE = 2,
-    RLH_RESULT_ERROR_OUT_OF_MEMORY = 3,
-    RLH_RESULT_TILE_OUT_OF_TERMINAL = 4,
+    RLH_RESULT_TILE_OUT_OF_TERMINAL = 2,
+    RLH_RESULT_LAST_NON_ERROR = RLH_RESULT_TILE_OUT_OF_TERMINAL,
+    RLH_RESULT_ERROR_NULL_ARGUMENT = 3,
+    RLH_RESULT_ERROR_INVALID_VALUE = 4,
+    RLH_RESULT_ERROR_OUT_OF_MEMORY = 5,
     RLH_RESULT_COUNT = 5
   } rlhresult_t;
 
@@ -221,13 +396,14 @@ extern "C"
                                 const float* const matrix_4x4);
 
 #ifdef RLH_IMPLEMENTATION
+
 #  include <stdio.h>
 #  include <stdlib.h>
 #  include <string.h>
 
   const char* const const RLH_RESULT_DESCRIPTIONS[RLH_RESULT_COUNT] = {
-      "no errors occured", "unexpected null argument", "unexpected argument value", "out of memory",
-      "tile out of terminal"};
+      "no errors occured", "tile out of terminal", "unexpected null argument",
+      "unexpected argument value", "out of memory"};
 
   const float RLH_OPENGL_SCREEN_MATRIX[4 * 4] = {2.0f, 0.0f, 0.0f, -1.0f, 0.0f, -2.0f, 0.0f, 1.0f,
                                                  0.0f, 0.0f, 1.0f, 0.0f,  0.0f, 0.0f,  0.0f, 1.0f};
@@ -249,9 +425,9 @@ vec3 getVertexUV(int ch, int tile_vertex)\n\
     index += 1;\n\
     float t = texelFetch(Fontmap, index).r;\n\
     index += 1;\n\
-    float p = texelFetch(Fontmap, index).r;\n\
+    float p = 1.0f - texelFetch(Fontmap, index).r;\n\
     index += 1;\n\
-    float q = texelFetch(Fontmap, index).r;\n\
+    float q = 1.0f - texelFetch(Fontmap, index).r;\n\
     index += 1;\n\
     float page = texelFetch(Fontmap, index).r;\n\
     vec4 uv_square = vec4(s, t, p, q);\n\
@@ -877,12 +1053,12 @@ void main()\n\
           (uint8_t*)realloc(term->TileData, new_capacity * RLH_DATA_BYTES_PER_TILE);
       if (new_data_ptr == NULL)
       {
-        return 0;  // out of memory
+        return RLH_FALSE;  // out of memory
       }
       term->TileData = new_data_ptr;
       term->TileDataCapacity = new_capacity;
     }
-    return 1;
+    return RLH_TRUE;
   }
 
   static inline void _rlhTermPushTile(rlhTerm_h const term, const int pixel_x, const int pixel_y,
@@ -1003,14 +1179,14 @@ void main()\n\
                                       int translate_x, int translate_y, int console_width,
                                       int console_height)
   {
-    float width_scalar = (console_width / ((float)screen_width));
-    float height_scalar = (console_height / ((float)screen_height));
-    float x_translate = (translate_x / (float)screen_width) * 2.0f;
-    float y_translate = (translate_y / (float)screen_height) * 2.0f;
-    matrix[0] *= width_scalar;
-    matrix[5] *= height_scalar;
-    matrix[3] += x_translate;
-    matrix[7] -= y_translate;
+    const float screenspace_width_scalar = (console_width / ((float)screen_width));
+    const float screenspace_height_scalar = (console_height / ((float)screen_height));
+    const float screenspace_translate_x = (translate_x / (float)screen_width) * 2.0f;
+    const float screenspace_translate_y = (translate_y / (float)screen_height) * 2.0f;
+    matrix[0] *= screenspace_width_scalar;
+    matrix[5] *= screenspace_height_scalar;
+    matrix[3] += screenspace_translate_x;
+    matrix[7] -= screenspace_translate_y;
   }
 
 #  define MAX(x, y) ((x) > (y)) ? (x) : y
@@ -1174,6 +1350,13 @@ void main()\n\
       GLD_CALL(glDrawArrays(GL_TRIANGLES, 0, term->TileDataCount * RLH_VERTICES_PER_TILE));
 
       GLD_END();
+
+      // the tile data is automatically cleared after a draw as of 1.2 version. Reason for this
+      // change is that it is was too easy to forget to clear manually and cause memory leaks.
+      // Retained tui rendering is a rare use case for this library, so enforcing clear on draw is a
+      // good solution to prevent headache. If someone REALLY wants retained rendering, they can
+      // easily edit this file and remove the following line.
+      rlhTermClearTileData(term);
     }
 
     return RLH_RESULT_OK;

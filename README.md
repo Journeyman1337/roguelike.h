@@ -1,10 +1,10 @@
-Header only roguelike rendering library. Support for Opengl33.
+Header only roguelike rendering library. Support for Opengl33. Documentation is provided in the header file at the top of the file and for each function.
 
 This library is designed for participants in the annual 7DRL game jam. If you use roguelike.h in your project, feel free to talk about it in an issue thread!
 
 # Features
 
-- A performant batched rendering system that is similliar to the renderer employed by the video game Dwarf Fortress:
+- A performant batched terminal rendering system that is similliar to the renderer employed by the video game Dwarf Fortress:
   - The entire terminal is rendered in a single draw call.
   - Draw data is passed to the GPU in a giant buffer, which contains elements per tile rather than per vertex.
   - The data buffer is compacted as much as possible to improve latency. It contains only 18 bytes per tile.
