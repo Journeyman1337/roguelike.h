@@ -43,9 +43,9 @@
     HOW TO SETUP:
     The roguelike.h library can be included in your project in one of two different ways:
         - Copy and paste the roguelike.h file directly into your source tree.
-        - Clone the GitHub as a git submodule to your project's repository, and use the roguelike.h.   
-    	  - In bash console from the root directory of your project's repository:
-    	  
+        - Clone the GitHub as a git submodule to your project's repository, and use the roguelike.h.
+          - In bash console from the root directory of your project's repository:
+
                 git submodule add https://github.com/Journeyman-dev/roguelike.h
                 git submodule update -init
 
@@ -138,8 +138,8 @@
     For a detailed example of how to set up an atlas for a 16x16 glyph codepage atlas, look at the
     example on the roguelike.h GitHub repository.
 
-    The atlas also needs raw pixel data for the texture atlas image. You can easily load data from 
-    an image file using a library such as stb_image.h 
+    The atlas also needs raw pixel data for the texture atlas image. You can easily load data from
+    an image file using a library such as stb_image.h
     (https://github.com/nothings/stb/blob/master/stb_image.h).
 
     For the terminal, you need to specify a default pixel size to render tiles to the screen in the
