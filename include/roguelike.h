@@ -83,7 +83,7 @@
     RLH_RESULT_DESCRIPTIONS. To get the string description of a specific result code from this
     array, index the array with the result code.
 
-    This is an example of how to check for errors and print a result code from a function:
+    This is an example of how to check for errors and print the result code from a function:
 
         rlhresult_t result = rlhFunction(arg0, arg1, arg2);
         printf("function result description: %s\n", RLH_RESULT_DESCRIPTIONS[result]);
