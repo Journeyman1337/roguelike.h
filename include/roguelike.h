@@ -198,7 +198,7 @@
     (https://en.cppreference.com/w/cpp/language/raii).
 
     For more information about each roguelike.h function you can call, look for comments above their
-    declaration further down in this header file.
+    declarations further down in this header file.
 
     CHANGELOG:
     - Version 1.2
