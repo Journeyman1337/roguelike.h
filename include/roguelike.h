@@ -115,7 +115,8 @@
         - Initialize the library.
         - Create a window.
         - Load an OpenGL context in the window, usually by passing a function pointer from your
-          OpenGL loading library as an argument (mentioned in "HOW TO SETUP" section).
+          OpenGL loading library as an argument (loading libraries are explained in the"HOW TO
+          SETUP" section).
         - Make the window context "current" so that the next OpenGL function calls will use it.
 
     After the window is set up for rendering, you can initalize all of your roguelike.h objects. To
