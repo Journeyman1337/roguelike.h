@@ -60,6 +60,7 @@
 
             #include <glad/glad.h> // you can use a different opengl loader here (see bellow)
             #include <glDebug.h> // this line is optional (see bellow)
+            #define RLH_RETAINED_MODE // optional (see bellow)
             #define RLH_IMPLEMENTATION
             #include <roguelike.h>
 
@@ -73,6 +74,13 @@
     header only library by including it before implementing roguelike.h. The glDebug.h library is
     avaliable here: https://github.com/Journeyman-dev/glDebug.h. Look at the comment on top of
     that header for more information about its usage.
+
+    By default, roguelike.h will clear the tile buffer after each draw. This requires you to set
+    all tiles over again the next frame from scratch. If you want to instead retain tiles from
+    previous draws unless you explicitly clear the tile buffer with the function
+    rlhTermClearTileData(), define RLH_RETAINED_MODE before implementing the header. If you do this,
+    be very careful! If you forget to clear the tile buffer and keep adding tiles to it over time,
+    this can result in a nasty memory leak.
 
     HOW TO DEBUG
     Many functions in roguelike.h return an enum value of type rlhresult_t. Result codes with
