@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.19)
 
-option(RLH_BUILD_EXAMPLES "Build the example projects" OFF)
+option(RLH_BUILD_EXAMPLE "Build the example project" OFF)
 
 PROJECT(rlh
-    VERSION 1.1
+    VERSION 1.2
     DESCRIPTION "A header only roguelike rendering library."
     LANGUAGES C
 )
@@ -17,6 +17,6 @@ target_include_directories(${PROJECT_NAME}
         "${CMAKE_CURRENT_SOURCE_DIR}/include/"
 )
 
-if (RLH_BUILD_EXAMPLES)
-    add_subdirectory(examples)
+if (RLH_BUILD_EXAMPLE)
+    add_subdirectory(example)
 endif()
