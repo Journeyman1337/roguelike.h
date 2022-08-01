@@ -126,7 +126,7 @@ int main()
     return 6;
   }
 
-  while (!glfwWindowShouldClose(window))
+  while (!glfwWindowShouldClose(window))  // keep looping until the window is closed.
   {
     glfwPollEvents();  // poll for platform events to update the window with user input stuff
 
