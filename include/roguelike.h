@@ -1328,10 +1328,10 @@ void main()\n\
       // DRAW!!!
       GLD_CALL(glDrawArrays(GL_TRIANGLES, 0, term->TileDataCount * RLH_VERTICES_PER_TILE));
 
-      // if we don't want to retain the tiles between each frame, clear them.
-      #if !defined(RLH_RETAINED_MODE)
+// if we don't want to retain the tiles between each frame, clear them.
+#  if !defined(RLH_RETAINED_MODE)
       rlhTermClearTileData(term);
-      #endif
+#  endif
     }
 
     return RLH_RESULT_OK;
