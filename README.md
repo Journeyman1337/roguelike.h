@@ -1,5 +1,7 @@
 Header only roguelike rendering library. Support for Opengl33. Documentation is provided in the header file at the top of the file and for each function.
 
+Want to quickly get the example project up and running? This repository has all you need all ready to go: https://github.com/Journeyman-dev/roguelike.h-example-runner.
+
 This library is designed for participants in the annual 7DRL game jam. If you use roguelike.h in your project, feel free to talk about it in an issue thread!
 
 # Features
