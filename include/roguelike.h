@@ -235,7 +235,7 @@ extern "C"
 #include <stdint.h>
 
 // If glDebug.h is not included, make the debug macros do nothing.
-#ifndef GL_DEBUG_H
+#ifndef GLD_H
 #  define GLD_START()
 #  define GLD_SET_CALLBACK(callback)
 #  define GLD_CALL(glFunc) glFunc;
@@ -834,14 +834,14 @@ void main()\n\
       int gl_vertex_shader, gl_fragment_shader;
       GLD_CALL(gl_vertex_shader = glCreateShader(GL_VERTEX_SHADER));
       GLD_CALL(glShaderSource(gl_vertex_shader, 1, &RLH_VERTEX_SOURCE, NULL));
-      GLD_COMPILE(gl_vertex_shader);
+      GLD_COMPILE(gl_vertex_shader, "rlh vertex shader");
       GLD_CALL(gl_fragment_shader = glCreateShader(GL_FRAGMENT_SHADER));
       GLD_CALL(glShaderSource(gl_fragment_shader, 1, &RLH_FRAGMENT_SOURCE, NULL));
-      GLD_COMPILE(gl_fragment_shader);
+      GLD_COMPILE(gl_fragment_shader, "rlh fragment shader");
       GLD_CALL((*term)->Program = glCreateProgram());
       GLD_CALL(glAttachShader((*term)->Program, gl_vertex_shader));
       GLD_CALL(glAttachShader((*term)->Program, gl_fragment_shader));
-      GLD_LINK((*term)->Program);
+      GLD_LINK((*term)->Program, "rlh shader program");
       GLD_CALL(glDetachShader((*term)->Program, gl_vertex_shader));
       GLD_CALL(glDetachShader((*term)->Program, gl_fragment_shader));
       GLD_CALL(glDeleteShader(gl_vertex_shader));

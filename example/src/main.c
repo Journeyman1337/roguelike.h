@@ -1,11 +1,19 @@
-#include <GLFW/glfw3.h>
 #include <glad/glad.h>
+#include <GLFW/glfw3.h>
+#include <glDebug.h>
 #include <roguelike.h>
 #include <stb_image.h>
 #include <string.h>
 
+void gld_callback(const char* error, const char* func)
+{
+  printf("%s: %s\n", error, func);
+}
+
 int main()
 {
+  GLD_SET_CALLBACK(gld_callback);
+  
   if (!glfwInit())
   {
     printf("GLFW failed to initialize!\n");
