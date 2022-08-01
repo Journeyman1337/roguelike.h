@@ -1328,12 +1328,10 @@ void main()\n\
       // DRAW!!!
       GLD_CALL(glDrawArrays(GL_TRIANGLES, 0, term->TileDataCount * RLH_VERTICES_PER_TILE));
 
-      // the tile data is automatically cleared after a draw as of 1.2 version. Reason for this
-      // change is that it is was too easy to forget to clear manually and cause memory leaks.
-      // Retained tui rendering is a rare use case for this library, so enforcing clear on draw is a
-      // good solution to prevent headache. If someone REALLY wants retained rendering, they can
-      // easily edit this file and remove the following line.
+      // if we don't want to retain the tiles between each frame, clear them.
+      #if !defined(RLH_RETAINED_MODE)
       rlhTermClearTileData(term);
+      #endif
     }
 
     return RLH_RESULT_OK;
