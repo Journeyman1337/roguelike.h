@@ -5,10 +5,7 @@
 #include <stb_image.h>
 #include <string.h>
 
-void gld_callback(const char* error, const char* func)
-{
-  printf("%s: %s\n", error, func);
-}
+void gld_callback(const char* error, const char* func) { printf("%s: %s\n", error, func); }
 
 int main()
 {
