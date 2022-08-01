@@ -22,7 +22,7 @@
     The source for this library can be found on GitHub:
     https://github.com/Journeyman-dev/roguelike.h
 
-    FEATURES:
+    FEATURES
     - A performant batched terminal rendering system that is similliar to the renderer employed by
       the video game Dwarf Fortress:
     - The entire terminal is rendered in a single draw call.
@@ -40,7 +40,7 @@
     - Ability to render tiles offset from gridspace positions.
     - Ability to render tiles with custom width and height per tile.
 
-    HOW TO SETUP:
+    HOW TO SETUP
     The roguelike.h library can be included in your project in one of two different ways:
         - Copy and paste the roguelike.h file directly into your source tree.
         - Clone the GitHub as a git submodule to your project's repository, and use the roguelike.h.
@@ -74,7 +74,7 @@
     avaliable here: https://github.com/Journeyman-dev/glDebug.h. Look at the comment on top of
     that header for more information about its usage.
 
-    HOW TO DEBUG:
+    HOW TO DEBUG
     Many functions in roguelike.h return an enum value of type rlhresult_t. Result codes with
     names that start with RLH_RESULT_ERROR_ are returned if an error occured in the function's
     execution. These values are all greater than RLH_RESULT_LAST_NON_ERROR.
@@ -104,7 +104,7 @@
 
         rlmhColor32_s my_color = RLH_C32(127, 42, 245);
 
-    HOW TO USE:
+    HOW TO USE
     To use roguelike.h, you must bind it to an OpenGL context. There are many open source platform
     libraries for creating a window for rendering, including GLFW (https://www.glfw.org/) and SDL
     (https://www.libsdl.org/). An example of using GLFW is included in the roguelike.h repository on
@@ -200,7 +200,7 @@
     For more information about each roguelike.h function you can call, look for comments above their
     declarations further down in this header file.
 
-    CHANGELOG:
+    CHANGELOG
     - Version 1.2
         Features
             - Added automatic terminal clear after each draw so users don't have to remember
