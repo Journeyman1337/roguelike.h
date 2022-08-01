@@ -128,6 +128,8 @@ int main()
 
   while (!glfwWindowShouldClose(window))
   {
+    glfwPollEvents();  // poll for platform events to update the window with user input stuff
+
     // set the terminal background color to black by pushing a fill tile
     rlhTermPushFillTile(t, 0, RLH_TRANSPARENT, RLH_BLACK);
 
@@ -179,8 +181,6 @@ int main()
     // draw clear color as silver
     rlhClearColor(RLH_SILVER);
     rlhTermDrawCentered(t, a, w_width, w_height);
-
-    glfwPollEvents();
 
     glfwSwapBuffers(window);
   }
