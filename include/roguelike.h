@@ -241,7 +241,6 @@ extern "C"
 #  define GLD_CALL(glFunc) glFunc;
 #  define GLD_COMPILE(shaderHandleVar) glCompileShader(shaderHandleVar);
 #  define GLD_LINK(programHandleVar) glLinkProgram(programHandleVar);
-#  define GLD_END()
 #endif
 
   typedef struct rlhColor32_s
@@ -574,8 +573,6 @@ void main()\n\
     GLD_CALL(glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA8, pixel_width, pixel_height, page_count,
                           0, GL_RGBA, GL_UNSIGNED_BYTE, pixel_rgba));
 
-    GLD_END();
-
     return gl_texture_array;
   }
 
@@ -586,8 +583,6 @@ void main()\n\
     GLD_CALL(glClearColor((float)color.r / 255.0f, (float)color.g / 255.0f, (float)color.b / 255.0f,
                           (float)color.a / 255.0f));
     GLD_CALL(glClear(GL_COLOR_BUFFER_BIT));
-
-    GLD_END();
   }
 
   void rlhViewport(const int x, const int y, const int width, const int height)
@@ -596,8 +591,6 @@ void main()\n\
 
     // set viewport
     GLD_CALL(glViewport(x, y, width, height));
-
-    GLD_END();
   }
 
   rlhresult_t rlhAtlasCreate(const int atlas_pixel_width, const int atlas_pixel_height,
@@ -650,8 +643,6 @@ void main()\n\
     GLD_CALL(glGenTextures(1, &(*atlas)->FontmapTEX));
     GLD_CALL(glBindTexture(GL_TEXTURE_BUFFER, (*atlas)->FontmapTEX));
     GLD_CALL(glTexBuffer(GL_TEXTURE_BUFFER, GL_R32F, (*atlas)->FontmapBUF));
-
-    GLD_END();
 
     return RLH_RESULT_OK;
   }
@@ -715,8 +706,6 @@ void main()\n\
         glBufferData(GL_TEXTURE_BUFFER,
                      sizeof(float) * (GLsizei)atlas_glyph_count * RLH_FONTMAP_ELEMENTS_PER_GLYPH,
                      atlas_glyph_stpqp, GL_DYNAMIC_DRAW));
-
-    GLD_END();
 
     return RLH_RESULT_OK;
   }
@@ -859,8 +848,6 @@ void main()\n\
     GLD_CALL(glUniform1i(glGetUniformLocation((*term)->Program, "Fontmap"), 3));
     GLD_CALL(glUniform1i(glGetUniformLocation((*term)->Program, "Data"), 4));
 
-    GLD_END();
-
     return RLH_RESULT_OK;
   }
 
@@ -893,8 +880,6 @@ void main()\n\
     }
 
     GLD_CALL(glDeleteProgram(term->Program));
-
-    GLD_END();
 
     // free the struct
     free(term);
@@ -1209,8 +1194,6 @@ void main()\n\
     // set scissor
     GLD_CALL(glScissor(cropped_x, cropped_y, cropped_width, cropped_height));
     GLD_CALL(glEnable(GL_SCISSOR_TEST));
-
-    GLD_END();
   }
 
   rlhresult_t rlhTermDrawCentered(rlhTerm_h const term, rlhAtlas_h const atlas,
@@ -1255,8 +1238,6 @@ void main()\n\
     // unset the scissor
     GLD_CALL(glDisable(GL_SCISSOR_TEST));
 
-    GLD_END();
-
     return RLH_RESULT_OK;
   }
 
@@ -1285,8 +1266,6 @@ void main()\n\
 
     // unset the scissor
     GLD_CALL(glDisable(GL_SCISSOR_TEST));
-
-    GLD_END();
 
     return RLH_RESULT_OK;
   }
@@ -1348,8 +1327,6 @@ void main()\n\
 
       // DRAW!!!
       GLD_CALL(glDrawArrays(GL_TRIANGLES, 0, term->TileDataCount * RLH_VERTICES_PER_TILE));
-
-      GLD_END();
 
       // the tile data is automatically cleared after a draw as of 1.2 version. Reason for this
       // change is that it is was too easy to forget to clear manually and cause memory leaks.
