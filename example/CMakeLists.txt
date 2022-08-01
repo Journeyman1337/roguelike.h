@@ -34,5 +34,3 @@ add_custom_command(TARGET rlh_example POST_BUILD
         ${RLH_ASSET_FILES}
         $<TARGET_FILE_DIR:rlh_example>
 )
-# make sure that the asset files are found in Visual Studio
-set_property(TARGET rlh_example PROPERTY VS_DEBUGGER_WORKING_DIRECTORY $<TARGET_FILE_DIR:rlh_example>)
