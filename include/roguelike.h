@@ -47,7 +47,7 @@
           - In bash console from the root directory of your project's repository:
 
                 git submodule add https://github.com/Journeyman-dev/roguelike.h
-                git submodule update -init
+                git submodule update --init
 
           - In your project's top level CMakeLists.txt:
 
