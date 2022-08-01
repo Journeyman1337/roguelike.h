@@ -10,7 +10,7 @@ void gld_callback(const char* error, const char* func) { printf("%s: %s\n", erro
 int main()
 {
   GLD_SET_CALLBACK(gld_callback);
-  
+
   if (!glfwInit())
   {
     printf("GLFW failed to initialize!\n");
