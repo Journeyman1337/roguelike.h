@@ -58,8 +58,8 @@
     actually use it. To implement roguelike.h, create a new .c or .cpp file and write in it the
     following:
 
-            #include <glDebug.h> // this line is optional (see bellow)
             #include <glad/glad.h> // you can use a different opengl loader here (see bellow)
+            #include <glDebug.h> // this line is optional (see bellow)
             #define RLH_IMPLEMENTATION
             #include <roguelike.h>
 
