@@ -209,10 +209,17 @@
     declarations further down in this header file.
 
     CHANGELOG
+    - Version 1.3
+        Features
+            - Added option macro RLH_RETAINED_MODE to to disable automatic tile buffer clearing on each new frame. 
+            - Changed usage of glDebug.h to be consistent with version 1.0.
+        Tooling Changes
+            - Stopped the linter from auto-ordering includes, which was causing bugs to creep in just as fast as
+              they were fixed.
     - Version 1.2
         Features
             - Added automatic terminal clear after each draw so users don't have to remember
-            clear the data themselves to prevent memory leaks.
+              clear the data themselves to prevent memory leaks.
             - Update the header comment in roguelike.h with a detailed explanation of usage.
             - Result codes have been reordered, and RLH_RESULT_LAST_NON_ERROR was added to make it
             easier to determine if a result code is an error or not.
