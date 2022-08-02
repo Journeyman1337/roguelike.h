@@ -11,12 +11,13 @@ void gld_callback(const char* error, const char* func) { printf("%s: %s\n", erro
 int main()
 {
   // calculate some constant values that we will need to size the terminal and the window
-  const int tiles_wide = 40; // the amount of tiles wide and tall we want drawn in the terminal
+  const int tiles_wide = 40;  // the amount of tiles wide and tall we want drawn in the terminal
   const int tiles_tall = 25;
-  const int tile_width = 8; // the width and height of each terimal tile
+  const int tile_width = 8;  // the width and height of each terimal tile
   const int tile_height = 8;
-  const float pixel_scale = 2; // the ratio of terminal pixels to window pixels
-  const int border_pixels = 32; // this is the size of the gap between edges of the terminal and the window edges
+  const float pixel_scale = 2;  // the ratio of terminal pixels to window pixels
+  const int border_pixels =
+      32;  // this is the size of the gap between edges of the terminal and the window edges
   const int w_width = (tiles_wide * tile_width * pixel_scale) + (border_pixels * 2);
   const int w_height = (tiles_tall * tile_height * pixel_scale) + (border_pixels * 2);
 
@@ -149,19 +150,23 @@ int main()
     }
 
     // half tile offset face on bottom right corner of codepage
-    rlhTermPushTileFree(t, 15 * tile_width + (tile_height / 2), 15 * tile_width + (tile_height / 2), 2,
-                        RLH_WHITE, RLH_TRANSPARENT);
+    rlhTermPushTileFree(t, 15 * tile_width + (tile_height / 2), 15 * tile_width + (tile_height / 2),
+                        2, RLH_WHITE, RLH_TRANSPARENT);
 
     // increasingly larger faces
-    rlhTermPushTileGridSized(t, 18, 5, tiletile_width_size * 5, tile_height * 5, 2, RLH_WHITE, RLH_TRANSPARENT);
-    rlhTermPushTileGridSized(t, 23, 5, tile_width * 4, tile_height * 4, 2, RLH_WHITE, RLH_TRANSPARENT);
-    rlhTermPushTileGridSized(t, 27, 5, tile_width * 3, tile_height * 3, 2, RLH_WHITE, RLH_TRANSPARENT);
-    rlhTermPushTileGridSized(t, 30, 5, tile_width * 2, tile_height * 2, 2, RLH_WHITE, RLH_TRANSPARENT);
+    rlhTermPushTileGridSized(t, 18, 5, tiletile_width_size * 5, tile_height * 5, 2, RLH_WHITE,
+                             RLH_TRANSPARENT);
+    rlhTermPushTileGridSized(t, 23, 5, tile_width * 4, tile_height * 4, 2, RLH_WHITE,
+                             RLH_TRANSPARENT);
+    rlhTermPushTileGridSized(t, 27, 5, tile_width * 3, tile_height * 3, 2, RLH_WHITE,
+                             RLH_TRANSPARENT);
+    rlhTermPushTileGridSized(t, 30, 5, tile_width * 2, tile_height * 2, 2, RLH_WHITE,
+                             RLH_TRANSPARENT);
     rlhTermPushTileGridSized(t, 32, 5, tile_width, tile_height, 2, RLH_WHITE, RLH_TRANSPARENT);
 
     // big guy in corner going over edges
-    rlhTermPushTileFreeSized(t, -(tile_width * 3), 18 * tile_height, 15 * tile_width, 8 * tile_height, 2,
-                             RLH_RED, RLH_TRANSPARENT);
+    rlhTermPushTileFreeSized(t, -(tile_width * 3), 18 * tile_height, 15 * tile_width,
+                             8 * tile_height, 2, RLH_RED, RLH_TRANSPARENT);
 
     // print some text to the screen
     // this is easy to do because CP437 glyphs for characters collide with ascii character codes
