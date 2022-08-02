@@ -154,7 +154,7 @@ int main()
                         2, RLH_WHITE, RLH_TRANSPARENT);
 
     // increasingly larger faces
-    rlhTermPushTileGridSized(t, 18, 5, tiletile_width_size * 5, tile_height * 5, 2, RLH_WHITE,
+    rlhTermPushTileGridSized(t, 18, 5, tile_width * 5, tile_height * 5, 2, RLH_WHITE,
                              RLH_TRANSPARENT);
     rlhTermPushTileGridSized(t, 23, 5, tile_width * 4, tile_height * 4, 2, RLH_WHITE,
                              RLH_TRANSPARENT);
