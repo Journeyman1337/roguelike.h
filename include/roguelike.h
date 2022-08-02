@@ -211,7 +211,7 @@
     CHANGELOG
     - Version 1.3
         Features
-            - Added option macro RLH_RETAINED_MODE to to disable automatic tile buffer clearing on each new frame. 
+            - Added option macro RLH_RETAINED_MODE to to disable automatic tile buffer clearing on each new frame.
             - Changed usage of glDebug.h to be consistent with version 1.0.
         Tooling Changes
             - Stopped the linter from auto-ordering includes, which was causing bugs to creep in just as fast as
