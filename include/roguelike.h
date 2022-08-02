@@ -17,12 +17,12 @@
 */
 
 /*
-    roguelike.h version 1.2.0
+    roguelike.h version 1.3.0
     Header only roguelike rendering library.
     The source for this library can be found on GitHub:
     https://github.com/Journeyman-dev/roguelike.h
 
-    FEATURES:
+    FEATURES
     - A performant batched terminal rendering system that is similliar to the renderer employed by
       the video game Dwarf Fortress:
     - The entire terminal is rendered in a single draw call.
@@ -40,7 +40,7 @@
     - Ability to render tiles offset from gridspace positions.
     - Ability to render tiles with custom width and height per tile.
 
-    HOW TO SETUP:
+    HOW TO SETUP
     The roguelike.h library can be included in your project in one of two different ways:
         - Copy and paste the roguelike.h file directly into your source tree.
         - Clone the GitHub as a git submodule to your project's repository.
@@ -58,8 +58,9 @@
     actually use it. To implement roguelike.h, create a new .c or .cpp file and write in it the
     following:
 
-            #include <glDebug.h> // this line is optional (see bellow)
             #include <glad/glad.h> // you can use a different opengl loader here (see bellow)
+            #include <glDebug.h> // this line is optional (see bellow)
+            #define RLH_RETAINED_MODE // optional (see bellow)
             #define RLH_IMPLEMENTATION
             #include <roguelike.h>
 
@@ -74,7 +75,14 @@
     avaliable here: https://github.com/Journeyman-dev/glDebug.h. Look at the comment on top of
     that header for more information about its usage.
 
-    HOW TO DEBUG:
+    By default, roguelike.h will clear the tile buffer after each draw. This requires you to set
+    all tiles over again the next frame from scratch. If you want to instead retain tiles from
+    previous draws unless you explicitly clear the tile buffer with the function
+    rlhTermClearTileData(), define RLH_RETAINED_MODE before implementing the header. If you do this,
+    be very careful! If you forget to clear the tile buffer and keep adding tiles to it over time,
+    this can result in a nasty memory leak.
+
+    HOW TO DEBUG
     Many functions in roguelike.h return an enum value of type rlhresult_t. Result codes with
     names that start with RLH_RESULT_ERROR_ are returned if an error occured in the function's
     execution. These values are all greater than RLH_RESULT_LAST_NON_ERROR.
@@ -104,7 +112,7 @@
 
         rlmhColor32_s my_color = RLH_C32(127, 42, 245);
 
-    HOW TO USE:
+    HOW TO USE
     To use roguelike.h, you must bind it to an OpenGL context. There are many open source platform
     libraries for creating a window for rendering, including GLFW (https://www.glfw.org/) and SDL
     (https://www.libsdl.org/). An example of using GLFW is included in the roguelike.h repository on
@@ -200,11 +208,18 @@
     For more information about each roguelike.h function you can call, look for comments above their
     declarations further down in this header file.
 
-    CHANGELOG:
+    CHANGELOG
+    - Version 1.3
+        Features
+            - Added option macro RLH_RETAINED_MODE to to disable automatic tile buffer clearing on each new frame.
+            - Changed usage of glDebug.h to be consistent with version 1.0.
+        Tooling Changes
+            - Stopped the linter from auto-ordering includes, which was causing bugs to creep in just as fast as
+              they were fixed.
     - Version 1.2
         Features
             - Added automatic terminal clear after each draw so users don't have to remember
-            clear the data themselves to prevent memory leaks.
+              clear the data themselves to prevent memory leaks.
             - Update the header comment in roguelike.h with a detailed explanation of usage.
             - Result codes have been reordered, and RLH_RESULT_LAST_NON_ERROR was added to make it
             easier to determine if a result code is an error or not.
@@ -235,13 +250,12 @@ extern "C"
 #include <stdint.h>
 
 // If glDebug.h is not included, make the debug macros do nothing.
-#ifndef GL_DEBUG_H
+#ifndef GLD_H
 #  define GLD_START()
 #  define GLD_SET_CALLBACK(callback)
 #  define GLD_CALL(glFunc) glFunc;
 #  define GLD_COMPILE(shaderHandleVar) glCompileShader(shaderHandleVar);
 #  define GLD_LINK(programHandleVar) glLinkProgram(programHandleVar);
-#  define GLD_END()
 #endif
 
   typedef struct rlhColor32_s
@@ -574,8 +588,6 @@ void main()\n\
     GLD_CALL(glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA8, pixel_width, pixel_height, page_count,
                           0, GL_RGBA, GL_UNSIGNED_BYTE, pixel_rgba));
 
-    GLD_END();
-
     return gl_texture_array;
   }
 
@@ -586,8 +598,6 @@ void main()\n\
     GLD_CALL(glClearColor((float)color.r / 255.0f, (float)color.g / 255.0f, (float)color.b / 255.0f,
                           (float)color.a / 255.0f));
     GLD_CALL(glClear(GL_COLOR_BUFFER_BIT));
-
-    GLD_END();
   }
 
   void rlhViewport(const int x, const int y, const int width, const int height)
@@ -596,8 +606,6 @@ void main()\n\
 
     // set viewport
     GLD_CALL(glViewport(x, y, width, height));
-
-    GLD_END();
   }
 
   rlhresult_t rlhAtlasCreate(const int atlas_pixel_width, const int atlas_pixel_height,
@@ -650,8 +658,6 @@ void main()\n\
     GLD_CALL(glGenTextures(1, &(*atlas)->FontmapTEX));
     GLD_CALL(glBindTexture(GL_TEXTURE_BUFFER, (*atlas)->FontmapTEX));
     GLD_CALL(glTexBuffer(GL_TEXTURE_BUFFER, GL_R32F, (*atlas)->FontmapBUF));
-
-    GLD_END();
 
     return RLH_RESULT_OK;
   }
@@ -715,8 +721,6 @@ void main()\n\
         glBufferData(GL_TEXTURE_BUFFER,
                      sizeof(float) * (GLsizei)atlas_glyph_count * RLH_FONTMAP_ELEMENTS_PER_GLYPH,
                      atlas_glyph_stpqp, GL_DYNAMIC_DRAW));
-
-    GLD_END();
 
     return RLH_RESULT_OK;
   }
@@ -834,14 +838,14 @@ void main()\n\
       int gl_vertex_shader, gl_fragment_shader;
       GLD_CALL(gl_vertex_shader = glCreateShader(GL_VERTEX_SHADER));
       GLD_CALL(glShaderSource(gl_vertex_shader, 1, &RLH_VERTEX_SOURCE, NULL));
-      GLD_COMPILE(gl_vertex_shader);
+      GLD_COMPILE(gl_vertex_shader, "rlh vertex shader");
       GLD_CALL(gl_fragment_shader = glCreateShader(GL_FRAGMENT_SHADER));
       GLD_CALL(glShaderSource(gl_fragment_shader, 1, &RLH_FRAGMENT_SOURCE, NULL));
-      GLD_COMPILE(gl_fragment_shader);
+      GLD_COMPILE(gl_fragment_shader, "rlh fragment shader");
       GLD_CALL((*term)->Program = glCreateProgram());
       GLD_CALL(glAttachShader((*term)->Program, gl_vertex_shader));
       GLD_CALL(glAttachShader((*term)->Program, gl_fragment_shader));
-      GLD_LINK((*term)->Program);
+      GLD_LINK((*term)->Program, "rlh shader program");
       GLD_CALL(glDetachShader((*term)->Program, gl_vertex_shader));
       GLD_CALL(glDetachShader((*term)->Program, gl_fragment_shader));
       GLD_CALL(glDeleteShader(gl_vertex_shader));
@@ -858,8 +862,6 @@ void main()\n\
     GLD_CALL(glUniform1i(glGetUniformLocation((*term)->Program, "Atlas"), 2));
     GLD_CALL(glUniform1i(glGetUniformLocation((*term)->Program, "Fontmap"), 3));
     GLD_CALL(glUniform1i(glGetUniformLocation((*term)->Program, "Data"), 4));
-
-    GLD_END();
 
     return RLH_RESULT_OK;
   }
@@ -893,8 +895,6 @@ void main()\n\
     }
 
     GLD_CALL(glDeleteProgram(term->Program));
-
-    GLD_END();
 
     // free the struct
     free(term);
@@ -1209,8 +1209,6 @@ void main()\n\
     // set scissor
     GLD_CALL(glScissor(cropped_x, cropped_y, cropped_width, cropped_height));
     GLD_CALL(glEnable(GL_SCISSOR_TEST));
-
-    GLD_END();
   }
 
   rlhresult_t rlhTermDrawCentered(rlhTerm_h const term, rlhAtlas_h const atlas,
@@ -1255,8 +1253,6 @@ void main()\n\
     // unset the scissor
     GLD_CALL(glDisable(GL_SCISSOR_TEST));
 
-    GLD_END();
-
     return RLH_RESULT_OK;
   }
 
@@ -1285,8 +1281,6 @@ void main()\n\
 
     // unset the scissor
     GLD_CALL(glDisable(GL_SCISSOR_TEST));
-
-    GLD_END();
 
     return RLH_RESULT_OK;
   }
@@ -1349,14 +1343,10 @@ void main()\n\
       // DRAW!!!
       GLD_CALL(glDrawArrays(GL_TRIANGLES, 0, term->TileDataCount * RLH_VERTICES_PER_TILE));
 
-      GLD_END();
-
-      // the tile data is automatically cleared after a draw as of 1.2 version. Reason for this
-      // change is that it is was too easy to forget to clear manually and cause memory leaks.
-      // Retained tui rendering is a rare use case for this library, so enforcing clear on draw is a
-      // good solution to prevent headache. If someone REALLY wants retained rendering, they can
-      // easily edit this file and remove the following line.
+// if we don't want to retain the tiles between each frame, clear them.
+#  if !defined(RLH_RETAINED_MODE)
       rlhTermClearTileData(term);
+#  endif
     }
 
     return RLH_RESULT_OK;

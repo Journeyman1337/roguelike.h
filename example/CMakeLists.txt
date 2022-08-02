@@ -1,6 +1,7 @@
 # create the executable for the example
 set(RLH_EXAMPLE_SOURCE_FILES
-	"main.c"
+    "gld_impl.c"
+    "main.c"
 	"rlh_impl.c"
 	"stb_image_impl.c"
 )
@@ -20,6 +21,7 @@ target_link_libraries(rlh_example
         glad
         stb
         rlh
+        gld
 )
 # grab the content file paths
 set(RLH_ASSET_FILES
