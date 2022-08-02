@@ -1,4 +1,4 @@
-Header only roguelike rendering library. Support for Opengl33. Documentation is provided in the header file at the top of the file and for each function.
+roguelike.h is a header only roguelike rendering library with support for Opengl33. Documentation is provided in the header file at the top of the file and for each function.
 
 Want to quickly get the example project up and running? This repository has all you need all ready to go: https://github.com/Journeyman-dev/roguelike.h-example-runner.
 
