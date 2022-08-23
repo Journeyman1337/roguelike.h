@@ -156,12 +156,12 @@
     draw them without resizing, and is the size of each cell in the console grid when you draw your
     glyphs at gridspace positions.
 
-    Terminals need a ratio of a teriminal pixel size to screen pixel size, passed in as the
+    Terminals need a ratio of a terminal pixel size to screen pixel size, passed in as the
     pixel_scale argument. If you want evey teriminal pixel to take up a square of 4 screen pixels,
     you can use 2 for this value. If you want the pixels to match the screen pixels, use 1.
     You can use any value greater than 0 for this scalar, even decimal values such as 1.5f.
     However, if you choose to use decimal values, you glyphs may be distorted, so this is not
-    reccomended.
+    recomended.
 
     Terminals also require you to specify the size of its rendering space. You can do so by either
     specifying the tile dimensions of the tile grid (rlhTermCreateTileDimensions) or by specifying
