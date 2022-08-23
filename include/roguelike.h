@@ -254,8 +254,8 @@ extern "C"
 #  define GLD_START()
 #  define GLD_SET_CALLBACK(callback)
 #  define GLD_CALL(glFunc) glFunc;
-#  define GLD_COMPILE(shaderHandleVar) glCompileShader(shaderHandleVar);
-#  define GLD_LINK(programHandleVar) glLinkProgram(programHandleVar);
+#  define GLD_COMPILE(shaderHandleVar,identifier) glCompileShader(shaderHandleVar);
+#  define GLD_LINK(programHandleVar, identifier) glLinkProgram(programHandleVar);
 #endif
 
   typedef struct rlhColor32_s
