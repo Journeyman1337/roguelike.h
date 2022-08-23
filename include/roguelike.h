@@ -415,7 +415,7 @@ extern "C"
 #  include <stdlib.h>
 #  include <string.h>
 
-  const char* const const RLH_RESULT_DESCRIPTIONS[RLH_RESULT_COUNT] = {
+  const char* const RLH_RESULT_DESCRIPTIONS[RLH_RESULT_COUNT] = {
       "no errors occured", "tile out of terminal", "unexpected null argument",
       "unexpected argument value", "out of memory"};
 
