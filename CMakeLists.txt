@@ -1,7 +1,11 @@
+# SPDX-FileCopyrightText: 2021-2022 Daniel Valcour <fossweeper@gmail.com>
+#
+# SPDX-License-Identifier: MIT
+
 cmake_minimum_required(VERSION 3.19)
 
 PROJECT(rlh
-    VERSION 1.3
+    VERSION 1.4
     DESCRIPTION "A header only roguelike rendering library."
     LANGUAGES C
 )

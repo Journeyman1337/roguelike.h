@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2021-2022 Daniel Valcour <fossweeper@gmail.com>
+//
+// SPDX-License-Identifier: MIT
+
 /*
     Copyright (c) 2021-2022 Daniel Valcour
     Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -17,7 +21,7 @@
 */
 
 /*
-    roguelike.h version 1.3.0
+    roguelike.h version 1.4.0
     Header only roguelike rendering library.
     The source for this library can be found on GitHub:
     https://github.com/Journeyman-dev/roguelike.h
@@ -156,12 +160,12 @@
     draw them without resizing, and is the size of each cell in the console grid when you draw your
     glyphs at gridspace positions.
 
-    Terminals need a ratio of a teriminal pixel size to screen pixel size, passed in as the
+    Terminals need a ratio of a terminal pixel size to screen pixel size, passed in as the
     pixel_scale argument. If you want evey teriminal pixel to take up a square of 4 screen pixels,
     you can use 2 for this value. If you want the pixels to match the screen pixels, use 1.
     You can use any value greater than 0 for this scalar, even decimal values such as 1.5f.
     However, if you choose to use decimal values, you glyphs may be distorted, so this is not
-    reccomended.
+    recomended.
 
     Terminals also require you to specify the size of its rendering space. You can do so by either
     specifying the tile dimensions of the tile grid (rlhTermCreateTileDimensions) or by specifying
@@ -209,6 +213,16 @@
     declarations further down in this header file.
 
     CHANGELOG
+    - Version 1.4
+        Features
+            - Renderer now gets and stores shader uniforms on terminal initialization instead of getting it every
+              frame.
+        Bugfixes
+            - Fixed issue with glDebug.h macros when glDebug.h is not used.
+            - Removed extra const qualifier to RLH_RESULT_DESCRIPTIONS
+            - Various comment typo fixes.
+        Tooling Changes
+            - Adde reuse compliance.
     - Version 1.3
         Features
             - Added option macro RLH_RETAINED_MODE to to disable automatic tile buffer clearing on each new frame.
@@ -254,8 +268,8 @@ extern "C"
 #  define GLD_START()
 #  define GLD_SET_CALLBACK(callback)
 #  define GLD_CALL(glFunc) glFunc;
-#  define GLD_COMPILE(shaderHandleVar) glCompileShader(shaderHandleVar);
-#  define GLD_LINK(programHandleVar) glLinkProgram(programHandleVar);
+#  define GLD_COMPILE(shaderHandleVar, identifier) glCompileShader(shaderHandleVar);
+#  define GLD_LINK(programHandleVar, identifier) glLinkProgram(programHandleVar);
 #endif
 
   typedef struct rlhColor32_s
@@ -415,7 +429,7 @@ extern "C"
 #  include <stdlib.h>
 #  include <string.h>
 
-  const char* const const RLH_RESULT_DESCRIPTIONS[RLH_RESULT_COUNT] = {
+  const char* const RLH_RESULT_DESCRIPTIONS[RLH_RESULT_COUNT] = {
       "no errors occured", "tile out of terminal", "unexpected null argument",
       "unexpected argument value", "out of memory"};
 
@@ -553,6 +567,8 @@ void main()\n\
     GLuint VAO;
     GLuint DataBUF;
     GLuint DataTEX;
+    GLuint ConsolePixelUnitSizeUniformLocation;
+    GLuint MatrixUniformLocation;
   } rlhTerm_s;
 
   typedef struct rlhAtlas_s
@@ -862,6 +878,9 @@ void main()\n\
     GLD_CALL(glUniform1i(glGetUniformLocation((*term)->Program, "Atlas"), 2));
     GLD_CALL(glUniform1i(glGetUniformLocation((*term)->Program, "Fontmap"), 3));
     GLD_CALL(glUniform1i(glGetUniformLocation((*term)->Program, "Data"), 4));
+    // store value uniforms as struct members
+    (*term)->ConsolePixelUnitSizeUniformLocation = glGetUniformLocation((*term)->Program, "ConsolePixelUnitSize");
+    (*term)->MatrixUniformLocation = glGetUniformLocation((*term)->Program, "Matrix");
 
     return RLH_RESULT_OK;
   }
@@ -1329,10 +1348,10 @@ void main()\n\
       GLD_CALL(glBindTexture(GL_TEXTURE_BUFFER, term->DataTEX));
 
       // set the matrix uniform
-      GLD_CALL(glUniformMatrix4fv(glGetUniformLocation(term->Program, "Matrix"), 1, 0, matrix_4x4));
+      GLD_CALL(glUniformMatrix4fv(term->MatrixUniformLocation, 1, 0, matrix_4x4));
 
       // set the screen tile dimensions uniform
-      GLD_CALL(glUniform2f(glGetUniformLocation(term->Program, "ConsolePixelUnitSize"),
+      GLD_CALL(glUniform2f(term->ConsolePixelUnitSizeUniformLocation,
                            term->PixelScale / (float)term->PixelWidth,
                            term->PixelScale / (float)term->PixelHeight));
 
