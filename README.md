@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2021-2022 Daniel Valcour <fossweeper@gmail.com>
+
+SPDX-License-Identifier: MIT
+-->
+
 # roguelike.h
 
 roguelike.h is a header only emulated terminal rendering library with support for Opengl33. Documentation is provided in the header file at the top of the file and for each function.

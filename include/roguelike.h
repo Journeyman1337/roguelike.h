@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2021-2022 Daniel Valcour <fossweeper@gmail.com>
+//
+// SPDX-License-Identifier: MIT
+
 /*
     Copyright (c) 2021-2022 Daniel Valcour
     Permission is hereby granted, free of charge, to any person obtaining a copy of

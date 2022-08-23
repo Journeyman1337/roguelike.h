@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2021-2022 Daniel Valcour <fossweeper@gmail.com>
+#
+# SPDX-License-Identifier: MIT
+
 # create the executable for the example
 set(RLH_EXAMPLE_SOURCE_FILES
     "gld_impl.c"

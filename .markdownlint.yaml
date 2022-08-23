@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2021-2022 Daniel Valcour <fossweeper@gmail.com>
+#
+# SPDX-License-Identifier: MIT
+
 # Autoformatter friendly markdownlint config (all formatting rules disabled)
 default: true
 blank_lines: false
