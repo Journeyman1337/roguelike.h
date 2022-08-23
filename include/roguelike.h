@@ -21,7 +21,7 @@
 */
 
 /*
-    roguelike.h version 1.3.0
+    roguelike.h version 1.4.0
     Header only roguelike rendering library.
     The source for this library can be found on GitHub:
     https://github.com/Journeyman-dev/roguelike.h
@@ -213,6 +213,16 @@
     declarations further down in this header file.
 
     CHANGELOG
+    - Version 1.4
+        Features
+            - Renderer now gets and stores shader uniforms on terminal initialization instead of getting it every
+              frame.
+        Bugfixes
+            - Fixed issue with glDebug.h macros when glDebug.h is not used.
+            - Removed extra const qualifier to RLH_RESULT_DESCRIPTIONS
+            - Various comment typo fixes.
+        Tooling Changes
+            - Adde reuse compliance.
     - Version 1.3
         Features
             - Added option macro RLH_RETAINED_MODE to to disable automatic tile buffer clearing on each new frame.
