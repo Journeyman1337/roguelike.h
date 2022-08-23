@@ -258,7 +258,7 @@ extern "C"
 #  define GLD_START()
 #  define GLD_SET_CALLBACK(callback)
 #  define GLD_CALL(glFunc) glFunc;
-#  define GLD_COMPILE(shaderHandleVar,identifier) glCompileShader(shaderHandleVar);
+#  define GLD_COMPILE(shaderHandleVar, identifier) glCompileShader(shaderHandleVar);
 #  define GLD_LINK(programHandleVar, identifier) glLinkProgram(programHandleVar);
 #endif
 
