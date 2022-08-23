@@ -553,6 +553,8 @@ void main()\n\
     GLuint VAO;
     GLuint DataBUF;
     GLuint DataTEX;
+    GLuint ConsolePixelUnitSizeUniformLocation;
+    GLuint MatrixUniformLocation;
   } rlhTerm_s;
 
   typedef struct rlhAtlas_s
@@ -862,6 +864,9 @@ void main()\n\
     GLD_CALL(glUniform1i(glGetUniformLocation((*term)->Program, "Atlas"), 2));
     GLD_CALL(glUniform1i(glGetUniformLocation((*term)->Program, "Fontmap"), 3));
     GLD_CALL(glUniform1i(glGetUniformLocation((*term)->Program, "Data"), 4));
+    // store value uniforms as struct members
+    (*term)->ConsolePixelUnitSizeUniformLocation = glGetUniformLocation((*term)->Program, "ConsolePixelUnitSize");
+    (*term)->MatrixUniformLocation = glGetUniformLocation((*term)->Program, "Matrix");
 
     return RLH_RESULT_OK;
   }
@@ -1329,10 +1334,10 @@ void main()\n\
       GLD_CALL(glBindTexture(GL_TEXTURE_BUFFER, term->DataTEX));
 
       // set the matrix uniform
-      GLD_CALL(glUniformMatrix4fv(glGetUniformLocation(term->Program, "Matrix"), 1, 0, matrix_4x4));
+      GLD_CALL(glUniformMatrix4fv(term->MatrixUniformLocation, 1, 0, matrix_4x4));
 
       // set the screen tile dimensions uniform
-      GLD_CALL(glUniform2f(glGetUniformLocation(term->Program, "ConsolePixelUnitSize"),
+      GLD_CALL(glUniform2f(term->ConsolePixelUnitSizeUniformLocation,
                            term->PixelScale / (float)term->PixelWidth,
                            term->PixelScale / (float)term->PixelHeight));
 
