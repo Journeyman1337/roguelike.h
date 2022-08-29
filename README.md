@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2021-2022 Daniel Valcour <fossweeper@gmail.com>
+SPDX-FileCopyrightText: 2021-2022 Daniel Valcour <fosssweeper@gmail.com>
 
 SPDX-License-Identifier: MIT
 -->
