@@ -21,7 +21,7 @@
 */
 
 /*
-    roguelike.h version 1.4.0
+    roguelike.h version v1.4.0
     Header only roguelike rendering library.
     The source for this library can be found on GitHub:
     https://github.com/Journeyman-dev/roguelike.h
