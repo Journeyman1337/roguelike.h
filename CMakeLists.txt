@@ -19,25 +19,19 @@
 # IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-cmake_minimum_required(VERSION 3.19)
-
+cmake_minimum_required(VERSION 3.24.1)
 PROJECT(rlh
     VERSION 1.4
     DESCRIPTION "A header only roguelike rendering library."
     LANGUAGES C
 )
-
-option(RLH_BUILD_EXAMPLE "Build the example project" OFF)
-
-add_library(${PROJECT_NAME} INTERFACE
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/roguelike.h"
-)
-
+option(RLH_BUILD_EXAMPLE "Build the example project" ON)
+add_library(${PROJECT_NAME} INTERFACE "")
+add_library(rlh::rlh ALIAS ${PROJECT_NAME})
 target_include_directories(${PROJECT_NAME}
     INTERFACE
         "${CMAKE_CURRENT_SOURCE_DIR}/include/"
 )
-
 if (RLH_BUILD_EXAMPLE)
     add_subdirectory(example)
 endif()

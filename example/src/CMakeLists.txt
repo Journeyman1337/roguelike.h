@@ -19,53 +19,10 @@
 # IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-add_executable(rlh_example "")
-add_executable(rlh::example ALIAS rlh_example)
-add_subdirectory(src)
-Include(FetchContent)
-FetchContent_Declare(
-        glad
-        GIT_REPOSITORY https://github.com/Dav1dde/glad
-        GIT_TAG        v0.1.36
-        FIND_PACKAGE_ARGS
-)
-FetchContent_Declare(
-        stb
-        GIT_REPOSITORY https://github.com/nothings/stb
-)
-FetchContent_Declare(
-        gld
-        GIT_REPOSITORY https://github.com/Journeyman-dev/glDebug.h
-        GIT_TAG        v1.0.0
-)
-FetchContent_Declare(
-    glfw
-    GIT_REPOSITORY https://github.com/glfw/glfw/
-    GIT_TAG        3.3.8
-    FIND_PACKAGE_ARGS
-)
-FetchContent_MakeAvailable(glad stb gld glfw)
-target_link_libraries(rlh_example
+target_sources(rlh_example
     PUBLIC
-        rlh::rlh
-        glad
-        gld::gld
-        glfw
-)
-target_include_directories(rlh_example
-    PUBLIC
-        "${stb_SOURCE_DIR}"
-)
-# grab the content file paths
-set(RLH_ASSET_FILES
-    "cp_8x8_rgba_bg_alpha.png"
-)
-list(
-    TRANSFORM RLH_ASSET_FILES
-    PREPEND "${CMAKE_CURRENT_SOURCE_DIR}/assets/"
-)
-add_custom_command(TARGET rlh_example POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        ${RLH_ASSET_FILES}
-        $<TARGET_FILE_DIR:rlh_example>
+        "gld_impl.c"
+        "main.c"
+        "rlh_impl.c"
+        "stb_image_impl.c"
 )
