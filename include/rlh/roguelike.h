@@ -86,7 +86,7 @@
             #include <glDebug.h> // this line is optional (see bellow)
             #define RLH_RETAINED_MODE // optional (see bellow)
             #define RLH_IMPLEMENTATION
-            #include <roguelike.h>
+            #include <rlh/roguelike.h>
 
     roguelike.h uses the OpenGL API to do its rendering. There are many open source libraries
     avaliable for loading OpenGL bindings, such as glad (https://github.com/Dav1dde/glad) and GLEW
