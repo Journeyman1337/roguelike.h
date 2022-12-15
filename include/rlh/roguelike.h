@@ -57,7 +57,6 @@
 
                 add_subdirectory(roguelike.h)
 
-
           3. Link it with the CMake target of your project:
 
                 target_add_link_libraries(YOUR_TARGET_NAME PRIVATE rlh::rlh)
