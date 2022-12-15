@@ -45,7 +45,7 @@
     - Ability to render tiles with custom width and height per tile.
 
     HOW TO SETUP
-    The roguelike.h library can be included in your project in one of two different ways:
+    The roguelike.h library can be included in your project in one of three different ways:
         - Copy and paste the roguelike.h file directly into your source tree.
         - Clone the GitHub as a git submodule to your project's repository.
           1. In bash console from the root directory of your project's repository:
@@ -53,10 +53,30 @@
                 git submodule add https://github.com/Journeyman-dev/roguelike.h
                 git submodule update --init
 
-          2. In your project's top level CMakeLists.txt:
+          2. Add the submodule folder as a subdirectory in your project's CMakeLists.txt:
 
                 add_subdirectory(roguelike.h)
-                target_add_link_libraries(YOUR_TARGET_NAME PUBLIC rlh)
+
+
+          3. Link it with the CMake target of your project:
+
+                target_add_link_libraries(YOUR_TARGET_NAME PRIVATE rlh::rlh)
+
+        - Fetch it using CMake FetchContent:
+         1. Fetch it in your project's CMakeLists.txt:
+
+                Include(FetchContent)
+                FetchContent_Declare(
+                        rlh
+                        GIT_REPOSITORY https://github.com/Journeyman-dev/roguelike.h
+                        GIT_TAG        v1.0.0 # replace with the version of the library that you want
+                        FIND_PACKAGE_ARGS
+                )
+                FetchContent_MakeAvailable(rlh)
+
+          2. Link it with the CMake target of your project:
+
+              target_link_libraries(YOUR_TARGET_NAME PRIVATE rlh::rlh)
 
     After roguelike.h is included in your project, you must implement the library before you can
     actually use it. To implement roguelike.h, create a new .c or .cpp file and write in it the
