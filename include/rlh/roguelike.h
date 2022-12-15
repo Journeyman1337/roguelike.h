@@ -71,6 +71,7 @@
                         GIT_TAG        v1.0.0 # replace with the version of the library that you want
                         FIND_PACKAGE_ARGS
                 )
+                set(RLH_BUILD_EXAMPLE OFF) # set this to ON if you want to build the rlh example target
                 FetchContent_MakeAvailable(rlh)
 
           2. Link it with the CMake target of your project:
