@@ -21,7 +21,7 @@
 */
 
 /*
-    roguelike.h version v1.4.0
+    roguelike.h version v2.0.0
     Header only roguelike rendering library.
     The source for this library can be found on GitHub:
     https://github.com/Journeyman-dev/roguelike.h
@@ -248,16 +248,10 @@
         Bugfixes
             - Fixed issue with glDebug.h macros when glDebug.h is not used.
             - Removed extra const qualifier to RLH_RESULT_DESCRIPTIONS
-            - Various comment typo fixes.
-        Tooling Changes
-            - Adde reuse compliance.
     - Version 1.3
         Features
             - Added option macro RLH_RETAINED_MODE to to disable automatic tile buffer clearing on each new frame.
             - Changed usage of glDebug.h to be consistent with version 1.0.
-        Tooling Changes
-            - Stopped the linter from auto-ordering includes, which was causing bugs to creep in just as fast as
-              they were fixed.
     - Version 1.2
         Features
             - Added automatic terminal clear after each draw so users don't have to remember
@@ -265,19 +259,9 @@
             - Update the header comment in roguelike.h with a detailed explanation of usage.
             - Result codes have been reordered, and RLH_RESULT_LAST_NON_ERROR was added to make it
             easier to determine if a result code is an error or not.
-        Tooling Changes
-            - Example projects now expect dependency targets to exist already instead of finding
-            them as packages.
     - Version 1.1
         Bugfixes
             - Added missing include to stddef.h
-        Tooling Changes
-            - Renamed the CMake project to 'rlh'
-            - Changed the project's build system so it is no longer monolithic
-            - Removed vcpkg.json
-            - Removed vcpkg toolchain file setting from CMakeLists.txt
-            - Created an interface target the library called 'rlh'
-            - Added code linting using trunk
     - Version 1.0
         Initial Release
 */
