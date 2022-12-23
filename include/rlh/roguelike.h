@@ -275,7 +275,7 @@ extern "C"
 #include <stddef.h>
 #include <stdint.h>
 
-// If glDebug.h is not included, make the debug macros do nothing.
+// If gl_debug.h is not included, define the macros manually so the code still compiles.
 #ifndef GLD_H
 #  define GLD_START()
 #  define GLD_SET_CALLBACK(callback)
