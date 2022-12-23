@@ -406,6 +406,9 @@ extern "C"
 #  include <stdio.h>
 #  include <stdlib.h>
 #  include <string.h>
+#ifndef MAX
+#define MAX(x, y) ((x) > (y)) ? (x) : y
+#endif
 
   const char* const RLH_RESULT_DESCRIPTIONS[RLH_RESULT_COUNT] = {
       "no errors occured", "tile out of terminal", "unexpected null argument",
@@ -1098,7 +1101,6 @@ extern "C"
     matrix[7] -= screenspace_translate_y;
   }
 
-#  define MAX(x, y) ((x) > (y)) ? (x) : y
 
   static void _setTermScissor(const int translate_x, const int translate_y, const int width,
                               const int height)
