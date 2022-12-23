@@ -449,24 +449,31 @@ extern "C"
 
   typedef struct rlhTerm_s
   {
-    size_t PixelWidth;
-    size_t PixelHeight;
-    size_t TilesWide;
-    size_t TilesTall;
-    float PixelScale;
-    size_t TileWidth;
-    size_t TileHeight;
-    size_t TileDataCapacity;
-    size_t TileDataCount;
-    uint8_t* TileData;
+    size_t pixel_width;
+    size_t pixel_height;
+    size_t tiles_wide;
+    size_t tiles_tall;
+    float pixel_scale;
+    size_t tile_width;
+    size_t tile_height;
+    size_t tile_data_capacity;
+    size_t tile_data_count;
+    float* tile_data;
+    size_t atlas_width;
+    size_t atlas_height;
+    size_t atlas_pages;
+    size_t glyph_count;
+    float* glyph_stpqp;
+    size_t element_count;
+    unsigned int* element_data;
 
-    // Opengl33 handles
-    GLuint Program;
-    GLuint VAO;
-    GLuint DataBUF;
-    GLuint DataTEX;
-    GLuint ConsolePixelUnitSizeUniformLocation;
-    GLuint MatrixUniformLocation;
+    // OpenGL
+    GLuint gl_program;
+    GLuint gl_vertex_array;
+    GLuint gl_vertex_buffer;
+    GLuint gl_element_buffer;
+    GLuint matrix_uniform_location;
+    GLuint gl_atlas_texture_2d_array;
   } rlhTerm_s;
 
   {
