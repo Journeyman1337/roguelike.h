@@ -21,7 +21,7 @@
 
 cmake_minimum_required(VERSION 3.24.1)
 PROJECT(rlh
-    VERSION 1.4
+    VERSION 2.0.0
     DESCRIPTION "A header only roguelike rendering library."
     LANGUAGES C
 )
