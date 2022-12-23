@@ -565,10 +565,7 @@ extern "C"
     GLD_CALL(glViewport(x, y, width, height));
   }
 
-
-  rlhresult_t rlhTermCreateTileDimensions(const int tiles_wide, const int tiles_tall,
-                                          const float pixel_scale, const int tile_width,
-                                          const int tile_height, rlhTerm_h* const term)
+  rlhresult_t rlhTermCreateTileDimensions(const int tiles_wide, const int tiles_tall, const float pixel_scale, const int tile_width, const int tile_height, rlhTerm_h* const term)
   {
     if (term == NULL)
     {
@@ -579,19 +576,13 @@ extern "C"
     {
       return RLH_RESULT_ERROR_INVALID_VALUE;
     }
-
     const int pixel_width = tiles_wide * tile_width * pixel_scale;
     const int pixel_height = tiles_tall * tile_height * pixel_scale;
 
-    return rlhTermCreatePixelDimensions(pixel_width, pixel_height, pixel_scale, tile_width,
-                                        tile_height, RLH_FALSE, term);
+    return rlhTermCreatePixelDimensions(pixel_width, pixel_height, pixel_scale, tile_width, tile_height, RLH_FALSE, term);
   }
 
-  rlhresult_t rlhTermCreatePixelDimensions(const int pixel_width, const int pixel_height,
-                                           const float pixel_scale, const int tile_width,
-                                           const int tile_height,
-                                           const rlhbool_t floor_pixels_to_tiles,
-                                           rlhTerm_h* const term)
+  rlhresult_t rlhTermCreatePixelDimensions(const int pixel_width, const int pixel_height, const float pixel_scale, const int tile_width, const int tile_height, const rlhbool_t floor_pixels_to_tiles, rlhTerm_h* const term)
   {
     if (term == NULL)
     {
@@ -607,85 +598,50 @@ extern "C"
     {
       return RLH_RESULT_ERROR_OUT_OF_MEMORY;
     }
-
     memset(*term, 0, sizeof(rlhTerm_s));  // set all struct properties to 0 by default.
-
-    (*term)->PixelScale = pixel_scale;
-    (*term)->TilesWide = (size_t)pixel_width / ((size_t)tile_width * pixel_scale);
-    (*term)->TilesTall = (size_t)pixel_height / ((size_t)tile_height * pixel_scale);
-    (*term)->TileWidth = (size_t)tile_width;
-    (*term)->TileHeight = (size_t)tile_height;
+    (*term)->pixel_scale = pixel_scale;
+    (*term)->tiles_wide = (size_t)pixel_width / ((size_t)tile_width * pixel_scale);
+    (*term)->tiles_tall = (size_t)pixel_height / ((size_t)tile_height * pixel_scale);
+    (*term)->tile_width = (size_t)tile_width;
+    (*term)->tile_height = (size_t)tile_height;
     if (floor_pixels_to_tiles)
     {
-      (*term)->PixelWidth = (*term)->TilesWide * (*term)->TileWidth * pixel_scale;
-      (*term)->PixelHeight = (*term)->TilesTall * (*term)->TileHeight * pixel_scale;
+      (*term)->pixel_width = (*term)->tiles_wide * (*term)->tile_width * pixel_scale;
+      (*term)->pixel_height = (*term)->tiles_tall * (*term)->tile_height * pixel_scale;
     }
-    else
-    {
-      (*term)->PixelWidth = (size_t)pixel_width;
-      (*term)->PixelHeight = (size_t)pixel_height;
-    }
-    (*term)->TileDataCapacity = (*term)->TilesWide * (*term)->TilesTall;
+    (*term)->tile_data_capacity = (*term)->tiles_wide * (*term)->tiles_tall;
     const size_t reserved_data_size =
-        sizeof(uint8_t) * (*term)->TileDataCapacity * RLH_DATA_BYTES_PER_TILE;
-    (*term)->TileData = (uint8_t*)malloc(reserved_data_size);
-    if ((*term)->TileData == NULL)
+        sizeof(uint8_t) * (*term)->tile_data_capacity * RLH_DATA_BYTES_PER_TILE;
+    (*term)->tile_data = (uint8_t*)malloc(reserved_data_size);
+    if ((*term)->tile_data == NULL)
     {
       free(*term);
       return RLH_RESULT_ERROR_OUT_OF_MEMORY;
     }
-
     GLD_START();
-
-    // generate and bind vertex array object
-    GLD_CALL(glGenVertexArrays(1, &(*term)->VAO));
-    GLD_CALL(glBindVertexArray((*term)->VAO));
-
-    // set shader uniforms
-    GLD_CALL(glUseProgram((*term)->Program));
-    // texture slots
-    GLD_CALL(glUniform1i(glGetUniformLocation((*term)->Program, "Atlas"), 2));
-    GLD_CALL(glUniform1i(glGetUniformLocation((*term)->Program, "Fontmap"), 3));
-    GLD_CALL(glUniform1i(glGetUniformLocation((*term)->Program, "Data"), 4));
-    // store value uniforms as struct members
-    (*term)->ConsolePixelUnitSizeUniformLocation = glGetUniformLocation((*term)->Program, "ConsolePixelUnitSize");
-    (*term)->MatrixUniformLocation = glGetUniformLocation((*term)->Program, "Matrix");
-
     (*term->gl_program) = _rlhCreateGlProgram();
+    GLD_CALL(glGenVertexArrays(1, &(*term)->gl_vertex_array));
+    GLD_CALL(glBindVertexArray((*term)->gl_vertex_array));
+    GLD_CALL(glUseProgram((*term)->gl_program));
+    GLD_CALL(glUniform1i(glGetUniformLocation((*term)->gl_program, "u_atlas"), RLH_ATLAS_TEXTURE_SLOT));
+    (*term)->matrix_uniform_location = glGetUniformLocation((*term)->gl_program, "u_matrix");
     return RLH_RESULT_OK;
   }
 
   void rlhTermDestroy(rlhTerm_h const term)
   {
     if (term == NULL) return;
-
-    // free allocated memory
-    free(term->TileData);
-
+    free(term->tile_data);
     GLD_START();
-
-    // destroy vertex array object
-    if (term->VAO != 0)
+    if (term->gl_vertex_array != GL_NONE)
     {
-      GLD_CALL(glDeleteVertexArrays(1, &term->VAO));
-      term->VAO = 0;
+      GLD_CALL(glDeleteVertexArrays(1, &term->gl_vertex_array));
+      term->gl_vertex_array = GL_NONE;
     }
-
-    // free data texture buffer object
-    if (term->DataBUF != 0)
+    if (term->gl_program != GL_NONE)
     {
-      GLD_CALL(glDeleteBuffers(1, &term->DataBUF));
-      term->DataBUF = 0;
+      GLD_CALL(glDeleteProgram(term->gl_program));
     }
-    if (term->DataTEX != 0)
-    {
-      GLD_CALL(glDeleteTextures(1, &term->DataTEX));
-      term->DataTEX = 0;
-    }
-
-    GLD_CALL(glDeleteProgram(term->Program));
-
-    // free the struct
     free(term);
   }
 
@@ -695,61 +651,54 @@ extern "C"
     {
       return 0.0f;
     }
-
-    return term->PixelScale;
+    return term->pixel_scale;
   }
 
-  void rlhTermGetTileGridDimensions(rlhTerm_h const term, int* const tiles_wide,
-                                    int* const tiles_tall)
+  void rlhTermGetTileGridDimensions(rlhTerm_h const term, int* const tiles_wide, int* const tiles_tall)
   {
     if (term == NULL)
     {
       return;
     }
-
     if (tiles_wide != NULL)
     {
-      *tiles_wide = term->TilesWide;
+      *tiles_wide = term->tiles_wide;
     }
     if (tiles_tall != NULL)
     {
-      *tiles_tall = term->TilesTall;
+      *tiles_tall = term->tiles_tall;
     }
   }
 
-  void rlhTermGetPixelDimensions(rlhTerm_h const term, int* const pixel_width,
-                                 int* const pixel_height)
+  void rlhTermGetPixelDimensions(rlhTerm_h const term, int* const pixel_width, int* const pixel_height)
   {
     if (term == NULL)
     {
       return;
     }
-
     if (pixel_width != NULL)
     {
-      *pixel_width = (int)term->PixelWidth;
+      *pixel_width = (int)term->pixel_width;
     }
     if (pixel_height != NULL)
     {
-      *pixel_height = (int)term->PixelHeight;
+      *pixel_height = (int)term->pixel_height;
     }
   }
 
-  void rlhTermGetTileDimensions(rlhTerm_h const term, size_t* const tile_width,
-                                size_t* const tile_height)
+  void rlhTermGetTileDimensions(rlhTerm_h const term, size_t* const tile_width, size_t* const tile_height)
   {
     if (term == NULL)
     {
       return;
     }
-
     if (tile_width != NULL)
     {
-      *tile_width = term->TileWidth;
+      *tile_width = term->tile_width;
     }
     if (tile_height != NULL)
     {
-      *tile_height = term->TileHeight;
+      *tile_height = term->tile_height;
     }
   }
 
@@ -759,9 +708,7 @@ extern "C"
     {
       return RLH_RESULT_ERROR_NULL_ARGUMENT;
     }
-
-    term->TileDataCount = 0;
-
+    term->tile_data_count = 0;
     return RLH_RESULT_OK;
   }
 
@@ -771,13 +718,10 @@ extern "C"
     {
       return 0;
     }
-
-    return term->TileDataCount;
+    return term->tile_data_count;
   }
 
-  rlhresult_t rlhTermResizeTileDimensions(rlhTerm_h const term, const int tiles_wide,
-                                          const int tiles_tall, const float pixel_scale,
-                                          const int tile_width, const int tile_height)
+  rlhresult_t rlhTermResizeTileDimensions(rlhTerm_h const term, const int tiles_wide, const int tiles_tall, const float pixel_scale, const int tile_width, const int tile_height)
   {
     if (term == NULL)
     {
@@ -788,17 +732,13 @@ extern "C"
     {
       return RLH_RESULT_ERROR_INVALID_VALUE;
     }
-
     const int pixel_width = tiles_wide * tile_width * pixel_scale;
     const int pixel_height = tiles_tall * tile_height * pixel_scale;
     return rlhTermResizePixelDimensions(term, pixel_width, pixel_height, pixel_scale, tile_width,
                                         tile_height, RLH_FALSE);
   }
 
-  rlhresult_t rlhTermResizePixelDimensions(rlhTerm_h const term, const int pixel_width,
-                                           const int pixel_height, const float pixel_scale,
-                                           const int tile_width, const int tile_height,
-                                           const rlhbool_t floor_pixels_to_tiles)
+  rlhresult_t rlhTermResizePixelDimensions(rlhTerm_h const term, const int pixel_width, const int pixel_height, const float pixel_scale, const int tile_width, const int tile_height, const rlhbool_t floor_pixels_to_tiles)
   {
     if (term == NULL)
     {
@@ -809,43 +749,39 @@ extern "C"
     {
       return RLH_RESULT_ERROR_INVALID_VALUE;
     }
-
-    term->PixelScale = pixel_scale;
-    term->TilesWide = (size_t)pixel_width / ((size_t)tile_width * pixel_scale);
-    term->TilesTall = (size_t)pixel_height / ((size_t)tile_height * pixel_scale);
-    term->TileWidth = (size_t)tile_width;
-    term->TileHeight = (size_t)tile_height;
+    term->pixel_scale = pixel_scale;
+    term->tiles_wide = (size_t)pixel_width / ((size_t)tile_width * pixel_scale);
+    term->tiles_tall = (size_t)pixel_height / ((size_t)tile_height * pixel_scale);
+    term->tile_width = (size_t)tile_width;
+    term->tile_height = (size_t)tile_height;
     if (floor_pixels_to_tiles)
     {
-      term->PixelWidth = term->TilesWide * term->TileWidth * pixel_scale;
-      term->PixelHeight = term->TilesTall * term->TileHeight * pixel_scale;
+      term->pixel_width = term->tiles_wide * term->tile_width * pixel_scale;
+      term->pixel_height = term->tiles_tall * term->tile_height * pixel_scale;
     }
     else
     {
-      term->PixelWidth = (size_t)pixel_width;
-      term->PixelHeight = (size_t)pixel_height;
+      term->pixel_width = (size_t)pixel_width;
+      term->pixel_height = (size_t)pixel_height;
     }
-
-    // clear tile data because it may no longer fit
-    term->TileDataCount = 0;
-
+    term->tile_data_count = 0;
     return RLH_RESULT_OK;
   }
 
   static inline uint8_t _rlhTermTryReserve(rlhTerm_h const term)
   {
-    if (term->TileDataCount == term->TileDataCapacity)  // If we hit the reserved tile count, double
+    if (term->tile_data_count == term->tile_data_capacity)  // If we hit the reserved tile count, double
                                                         // the amount of reserved space.
     {
-      size_t new_capacity = term->TileDataCapacity * 2;
-      uint8_t* new_data_ptr =
-          (uint8_t*)realloc(term->TileData, new_capacity * RLH_DATA_BYTES_PER_TILE);
+      size_t new_capacity = term->tile_data_capacity * 2;
+      float* new_data_ptr =
+          (float**)realloc(term->tile_data, new_capacity * RLH_DATA_ATTRIBUTES_PER_TILE * sizeof(float));
       if (new_data_ptr == NULL)
       {
         return RLH_FALSE;  // out of memory
       }
-      term->TileData = new_data_ptr;
-      term->TileDataCapacity = new_capacity;
+      term->tile_data = new_data_ptr;
+      term->tile_data_capacity = new_capacity;
     }
     return RLH_TRUE;
   }
@@ -937,7 +873,7 @@ extern "C"
                                   const rlhColor32_s bg)
   {
     if (!_rlhTermTryReserve(term)) return RLH_RESULT_ERROR_OUT_OF_MEMORY;
-    _rlhTermPushTile(term, 0, 0, term->PixelWidth, term->PixelHeight, glyph, fg, bg);
+    _rlhTermPushTile(term, 0, 0, term->pixel_width, term->pixel_height, glyph, fg, bg);
     return RLH_RESULT_OK;
   }
 
@@ -945,12 +881,12 @@ extern "C"
                                   const uint16_t glyph, const rlhColor32_s fg,
                                   const rlhColor32_s bg)
   {
-    if (grid_x < 0 || grid_y < 0 || grid_x > term->TilesWide || grid_y > term->TilesTall)
+    if (grid_x < 0 || grid_y < 0 || grid_x > term->tiles_wide || grid_y > term->tiles_tall)
       return RLH_RESULT_TILE_OUT_OF_TERMINAL;
-    const int pixel_x = grid_x * term->TileWidth;
-    const int pixel_y = grid_y * term->TileHeight;
+    const int pixel_x = grid_x * term->tile_width;
+    const int pixel_y = grid_y * term->tile_height;
     if (!_rlhTermTryReserve(term)) return RLH_RESULT_ERROR_OUT_OF_MEMORY;
-    _rlhTermPushTile(term, pixel_x, pixel_y, term->TileWidth, term->TileHeight, glyph, fg, bg);
+    _rlhTermPushTile(term, pixel_x, pixel_y, term->tile_width, term->tile_height, glyph, fg, bg);
     return RLH_RESULT_OK;
   }
 
@@ -959,14 +895,14 @@ extern "C"
                                        const uint16_t glyph, const rlhColor32_s fg,
                                        const rlhColor32_s bg)
   {
-    if (grid_x < 0 || grid_y < 0 || grid_x > term->TilesWide || grid_y > term->TilesTall)
+    if (grid_x < 0 || grid_y < 0 || grid_x > term->tiles_wide || grid_y > term->tiles_tall)
       return RLH_RESULT_TILE_OUT_OF_TERMINAL;
     if (tile_pixel_width <= 0 || tile_pixel_height <= 0 || tile_pixel_width > RLH_MAX_TILE_SIZE ||
         tile_pixel_height > RLH_MAX_TILE_SIZE)
       return RLH_RESULT_TILE_OUT_OF_TERMINAL;
     if (!_rlhTermTryReserve(term)) return RLH_RESULT_ERROR_OUT_OF_MEMORY;
-    const unsigned int pixel_x = (unsigned int)grid_x * term->TileWidth;
-    const unsigned int pixel_y = (unsigned int)grid_y * term->TileHeight;
+    const unsigned int pixel_x = (unsigned int)grid_x * term->tile_width;
+    const unsigned int pixel_y = (unsigned int)grid_y * term->tile_height;
     const unsigned int pixel_w_u = (unsigned int)tile_pixel_width;
     const unsigned int pixel_h_u = (unsigned int)tile_pixel_height;
     _rlhTermPushTile(term, pixel_x, pixel_y, pixel_w_u, pixel_h_u, glyph, fg, bg);
@@ -977,14 +913,14 @@ extern "C"
                                   const int screen_pixel_y, const uint16_t glyph,
                                   const rlhColor32_s fg, const rlhColor32_s bg)
   {
-    const int negative_default_width = -(int)term->TileWidth;
-    const int negative_default_height = -(int)term->TileHeight;
+    const int negative_default_width = -(int)term->tile_width;
+    const int negative_default_height = -(int)term->tile_height;
     if (screen_pixel_x < negative_default_width || screen_pixel_y < negative_default_height ||
-        screen_pixel_x > (int)term->TileWidth || screen_pixel_y > (int)term->TileHeight)
+        screen_pixel_x > (int)term->tile_width || screen_pixel_y > (int)term->tile_height)
       return RLH_RESULT_TILE_OUT_OF_TERMINAL;
     if (!_rlhTermTryReserve(term)) return RLH_RESULT_ERROR_OUT_OF_MEMORY;
     _rlhTermPushTile(term, (unsigned int)screen_pixel_x, (unsigned int)screen_pixel_y,
-                     term->TileWidth, term->TileHeight, glyph, fg, bg);
+                     term->tile_width, term->tile_height, glyph, fg, bg);
     return RLH_RESULT_OK;
   }
 
@@ -994,7 +930,7 @@ extern "C"
                                        const rlhColor32_s fg, const rlhColor32_s bg)
   {
     if (screen_pixel_x < -tile_pixel_width || screen_pixel_y < -tile_pixel_height ||
-        screen_pixel_x > (int)term->PixelWidth || screen_pixel_y > (int)term->PixelHeight)
+        screen_pixel_x > (int)term->pixel_width || screen_pixel_y > (int)term->pixel_height)
       return RLH_RESULT_TILE_OUT_OF_TERMINAL;
     if (tile_pixel_width <= 0 || tile_pixel_height <= 0 || tile_pixel_width > RLH_MAX_TILE_SIZE ||
         tile_pixel_height > RLH_MAX_TILE_SIZE)
@@ -1019,7 +955,7 @@ extern "C"
 
   // Translate an opengl screen matrix so that a rectangle using it is flat facing the screen and
   // its 2d edges match the screen space pixel coordinates given.
-  static inline void _TransformMatrix(float* matrix, int screen_width, int screen_height,
+  static inline void _rlhTransformMatrix(float* matrix, int screen_width, int screen_height,
                                       int translate_x, int translate_y, int console_width,
                                       int console_height)
   {
@@ -1033,8 +969,7 @@ extern "C"
     matrix[7] -= screenspace_translate_y;
   }
 
-
-  static void _setTermScissor(const int translate_x, const int translate_y, const int width,
+  static void _rlhSetTermScissor(const int translate_x, const int translate_y, const int width,
                               const int height)
   {
     GLD_START();
@@ -1062,8 +997,8 @@ extern "C"
       return RLH_RESULT_ERROR_NULL_ARGUMENT;
     }
 
-    const int width_difference = viewport_width - term->PixelWidth;
-    const int height_difference = viewport_height - term->PixelHeight;
+    const int width_difference = viewport_width - term->pixel_width;
+    const int height_difference = viewport_height - term->pixel_height;
     const int translate_x = width_difference / 2;
     const int translate_y = height_difference / 2;
 
@@ -1081,12 +1016,12 @@ extern "C"
       return RLH_RESULT_ERROR_NULL_ARGUMENT;
     }
 
-    float matrix[16];
-    memcpy(matrix, RLH_OPENGL_SCREEN_MATRIX, sizeof(float) * 16);
+    float matrix[RLH_MATRIX_FLOAT_COUNT];
+    memcpy(matrix, RLH_OPENGL_SCREEN_MATRIX, sizeof(float) * RLH_MATRIX_FLOAT_COUNT);
     _TransformMatrix(matrix, viewport_width, viewport_height, translate_x, translate_y,
-                     term->PixelWidth, term->PixelHeight);
+                     term->pixel_width, term->pixel_height);
 
-    _setTermScissor(translate_x, translate_y, term->PixelWidth, term->PixelHeight);
+    _setTermScissor(translate_x, translate_y, term->pixel_width, term->pixel_height);
 
     // draw
     rlhTermDrawMatrix(term, atlas, matrix);
@@ -1109,13 +1044,13 @@ extern "C"
       return RLH_RESULT_ERROR_NULL_ARGUMENT;
     }
 
-    float matrix[16];
-    memcpy(matrix, RLH_OPENGL_SCREEN_MATRIX, sizeof(float) * 16);
+    float matrix[RLH_MATRIX_FLOAT_COUNT];
+    memcpy(matrix, RLH_OPENGL_SCREEN_MATRIX, sizeof(float) * RLH_MATRIX_FLOAT_COUNT);
     _TransformMatrix(matrix, viewport_width, viewport_height, translate_x, translate_y,
-                     term->PixelWidth * scale_x, term->PixelHeight * scale_y);
+                     term->pixel_width * scale_x, term->pixel_height * scale_y);
 
-    _setTermScissor(translate_x, translate_y, term->PixelWidth * scale_x,
-                    term->PixelHeight * scale_y);
+    _setTermScissor(translate_x, translate_y, term->pixel_width * scale_x,
+                    term->pixel_height * scale_y);
 
     // draw
     rlhTermDrawMatrix(term, atlas, matrix);
@@ -1140,56 +1075,26 @@ extern "C"
     {
       GLD_START();
 
-      // bind objects
-      GLD_CALL(glBindVertexArray(term->VAO));
-      GLD_CALL(glUseProgram(term->Program));
+      // Update vertex buffer and element buffer data. Create objects if they don't exist yet.
+      // TODO
 
-      // fill data texture buffer with new data, and create if not yet exist
-      if (term->DataBUF == 0)
-      {
-        GLD_CALL(glGenBuffers(1, &term->DataBUF));
-      }
-      GLD_CALL(glBindBuffer(GL_TEXTURE_BUFFER, term->DataBUF));
-      GLD_CALL(glBufferData(GL_TEXTURE_BUFFER, term->TileDataCount * RLH_DATA_BYTES_PER_TILE,
-                            term->TileData, GL_STREAM_DRAW));
-      if (term->DataTEX == 0)
-      {
-        GLD_CALL(glGenTextures(1, &term->DataTEX));
-        GLD_CALL(glBindTexture(GL_TEXTURE_BUFFER, term->DataTEX));
-        GLD_CALL(glTexBuffer(GL_TEXTURE_BUFFER, GL_R8UI, term->DataBUF));
-      }
+      // Bind objects
+      GLD_CALL(glBindVertexArray(term->gl_vertex_array));
+      GLD_CALL(glUseProgram(term->gl_program));
 
       // bind the atlas texture
-      GLD_CALL(glActiveTexture(GL_TEXTURE2));
-      GLD_CALL(glBindTexture(GL_TEXTURE_2D_ARRAY, atlas->AtlasTEX));
-
-      // bind the fontmap
-      GLD_CALL(glActiveTexture(GL_TEXTURE3));
-      GLD_CALL(glBindTexture(GL_TEXTURE_BUFFER, atlas->FontmapTEX));
-
-      // bind data texture buffer
-      GLD_CALL(glActiveTexture(GL_TEXTURE4));
-      GLD_CALL(glBindTexture(GL_TEXTURE_BUFFER, term->DataTEX));
+      GLD_CALL(glActiveTexture(GL_TEXTURE0 + RLH_ATLAS_TEXTURE_SLOT));
+      GLD_CALL(glBindTexture(GL_TEXTURE_2D_ARRAY, atlas->gl_atlas_texture_2d_array));
 
       // set the matrix uniform
       GLD_CALL(glUniformMatrix4fv(term->MatrixUniformLocation, 1, 0, matrix_4x4));
-
-      // set the screen tile dimensions uniform
-      GLD_CALL(glUniform2f(term->ConsolePixelUnitSizeUniformLocation,
-                           term->PixelScale / (float)term->PixelWidth,
-                           term->PixelScale / (float)term->PixelHeight));
 
       // set blend mode
       GLD_CALL(glEnable(GL_BLEND));
       GLD_CALL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 
       // DRAW!!!
-      GLD_CALL(glDrawArrays(GL_TRIANGLES, 0, term->TileDataCount * RLH_VERTICES_PER_TILE));
-
-// if we don't want to retain the tiles between each frame, clear them.
-#  if !defined(RLH_RETAINED_MODE)
-      rlhTermClearTileData(term);
-#  endif
+      GLD_CALL(glDrawElements(GL_TRIANGLES, element_count, GL_UNSIGNED_INT, NULL));
     }
 
     return RLH_RESULT_OK;
