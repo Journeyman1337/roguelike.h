@@ -498,7 +498,6 @@ extern "C"
 
   static inline GLuint _rlhColorTypeToGlInternalFormat(const rlhcolortype_t color)
   {
-    GLuint gl_texture_array = 0;
     switch (color)
     {
       case RLH_COLOR_G:
