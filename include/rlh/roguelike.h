@@ -977,27 +977,82 @@ extern "C"
                                       const int pixel_w, const int pixel_h, const uint16_t glyph,
                                       const rlhColor32_s fg, const rlhColor32_s bg)
   {
-    const unsigned int offset_pixel_x = (unsigned int)(pixel_x + RLH_TILE_POSITION_OFFSET);
-    const unsigned int offset_pixel_y = (unsigned int)(pixel_y + RLH_TILE_POSITION_OFFSET);
-    size_t index = term->TileDataCount * RLH_DATA_BYTES_PER_TILE;
-    term->TileData[index++] = offset_pixel_x & 0xff;
-    term->TileData[index++] = (offset_pixel_x >> 8) & 0xff;
-    term->TileData[index++] = offset_pixel_y & 0xff;
-    term->TileData[index++] = (offset_pixel_y >> 8) & 0xff;
-    term->TileData[index++] = pixel_w & 0xff;
-    term->TileData[index++] = (pixel_w >> 8) & 0xff;
-    term->TileData[index++] = pixel_h & 0xff;
-    term->TileData[index++] = (pixel_h >> 8) & 0xff;
-    term->TileData[index++] = (glyph)&0xff;
-    term->TileData[index++] = (glyph >> 8) & 0xff;
-    term->TileData[index++] = fg.r;
-    term->TileData[index++] = fg.g;
-    term->TileData[index++] = fg.b;
-    term->TileData[index++] = fg.a;
-    term->TileData[index++] = bg.r;
-    term->TileData[index++] = bg.g;
-    term->TileData[index++] = bg.b;
-    term->TileData[index++] = bg.a;
+    if (glyph > term->atlas_glyph_count) return;
+    const float position_s = (float)pixel_x / (float)term->pixel_width;
+    const float position_t = pos_s + ((float)pixel_w / (float)term->pixel_width);
+    const float position_p = (float)pixel_y / (float)term->pixel_height;
+    const float position_q = pos_p + ((float)pixel_h / (float)term->pixel_height);
+    size_t atlas_stpqp_i = glyph * RLH_ATLAS_COORDINATES_PER_GLYPH;
+    const float atlas_s = term->atlas_stpqp[atlas_stpqp_i++];
+    const float atlas_t = term->atlas_stpqp[atlas_stpqp_i++];
+    const float atlas_p = term->atlas_stpqp[atlas_stpqp_i++];
+    const float atlas_q = term->atlas_stpqp[atlas_stpqp_i++];
+    const float atlas_page = term->atlas_stpqp[atlas_stpqp_i];
+    const float fg_r = (float)fg.r / 255.0f;
+    const float fg_g = (float)fg.g / 255.0f;
+    const float fg_b = (float)fg.b / 255.0f;
+    const float fg_a = (float)fg.a / 255.0f;
+    const float bg_r = (float)bg.r / 255.0f;
+    const float bg_g = (float)bg.g / 255.0f;
+    const float bg_b = (float)bg.b / 255.0f;
+    const float bg_a = (float)bg.a / 255.0f;
+    size_t index = term->TileDataCount * RLH_ATTRIBUTES_PER_TILE;
+    // v0
+    term->tile_data[index++] = position_s;
+    term->tile_data[index++] = position_p;
+    term->tile_data[index++] = atlas_s;
+    term->tile_data[index++] = atlas_p;
+    term->tile_data[index++] = atlas_page;
+    term->tile_data[index++] = fg_r;
+    term->tile_data[index++] = fg_g;
+    term->tile_data[index++] = fg_b;
+    term->tile_data[index++] = fg_a;
+    term->tile_data[index++] = bg_r;
+    term->tile_data[index++] = bg_g;
+    term->tile_data[index++] = bg_b;
+    term->tile_data[index++] = bg_a;
+    // v1
+    term->tile_data[index++] = position_t;
+    term->tile_data[index++] = position_p;
+    term->tile_data[index++] = atlas_t;
+    term->tile_data[index++] = atlas_p;
+    term->tile_data[index++] = atlas_page;
+    term->tile_data[index++] = fg_r;
+    term->tile_data[index++] = fg_g;
+    term->tile_data[index++] = fg_b;
+    term->tile_data[index++] = fg_a;
+    term->tile_data[index++] = bg_r;
+    term->tile_data[index++] = bg_g;
+    term->tile_data[index++] = bg_b;
+    term->tile_data[index++] = bg_a;
+    // v2
+    term->tile_data[index++] = position_s;
+    term->tile_data[index++] = position_q;
+    term->tile_data[index++] = atlas_s;
+    term->tile_data[index++] = atlas_q;
+    term->tile_data[index++] = atlas_page;
+    term->tile_data[index++] = fg_r;
+    term->tile_data[index++] = fg_g;
+    term->tile_data[index++] = fg_b;
+    term->tile_data[index++] = fg_a;
+    term->tile_data[index++] = bg_r;
+    term->tile_data[index++] = bg_g;
+    term->tile_data[index++] = bg_b;
+    term->tile_data[index++] = bg_a;
+    // v3
+    term->tile_data[index++] = position_t;
+    term->tile_data[index++] = position_q;
+    term->tile_data[index++] = atlas_t;
+    term->tile_data[index++] = atlas_q;
+    term->tile_data[index++] = atlas_page;
+    term->tile_data[index++] = fg_r;
+    term->tile_data[index++] = fg_g;
+    term->tile_data[index++] = fg_b;
+    term->tile_data[index++] = fg_a;
+    term->tile_data[index++] = bg_r;
+    term->tile_data[index++] = bg_g;
+    term->tile_data[index++] = bg_b;
+    term->tile_data[index++] = bg_a;
     term->TileDataCount++;
   }
 
