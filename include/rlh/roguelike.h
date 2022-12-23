@@ -469,22 +469,7 @@ extern "C"
     GLuint MatrixUniformLocation;
   } rlhTerm_s;
 
-  typedef struct rlhAtlas_s
   {
-    size_t PixelWidth;
-    size_t PixelHeight;
-    size_t PageCount;
-    size_t GlyphCount;
-
-    // Opengl33 handles
-    GLuint AtlasTEX;
-    GLuint FontmapBUF;
-    GLuint FontmapTEX;
-  } rlhAtlas_s;
-
-  static inline GLuint _rlhCreateGlTextureArray(const size_t pixel_width, const size_t pixel_height,
-                                                const size_t page_count,
-                                                const uint8_t* const pixel_rgba)
   {
     GLuint gl_texture_array = 0;
 
