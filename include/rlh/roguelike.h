@@ -415,113 +415,33 @@ extern "C"
                                                  0.0f, 0.0f, 1.0f, 0.0f,  0.0f, 0.0f,  0.0f, 1.0f};
 
   const char* RLH_VERTEX_SOURCE =
-      "#version 330 core\n\
-\n\
-uniform vec2 ConsolePixelUnitSize;\n\
-uniform usamplerBuffer Data; //batch data buffer.\n\
-uniform samplerBuffer Fontmap; //the coordinate uv buffer if not uv grid\n\
-uniform mat4 Matrix; //transform matrix for entire batch\n\
-out vec3 UV; //uv texture position\n\
-out vec4 FG; //foreground color\n\
-out vec4 BG; //background color\n\
-vec3 getVertexUV(int ch, int tile_vertex)\n\
-{\n\
-    int index = ch * 5;\n\
-    float s = texelFetch(Fontmap, index).r;\n\
-    index += 1;\n\
-    float t = texelFetch(Fontmap, index).r;\n\
-    index += 1;\n\
-    float p = 1.0f - texelFetch(Fontmap, index).r;\n\
-    index += 1;\n\
-    float q = 1.0f - texelFetch(Fontmap, index).r;\n\
-    index += 1;\n\
-    float page = texelFetch(Fontmap, index).r;\n\
-    vec4 uv_square = vec4(s, t, p, q);\n\
-    vec2 vert_uvs[6] = vec2[](uv_square.sp, uv_square.sq, uv_square.tq, uv_square.sp, uv_square.tq, uv_square.tp);\n\
-    vec3 uv = vec3(vert_uvs[tile_vertex], page);\n\
-    return uv;\n\
-}\n\
-vec4 getVertexPosition(int tile, int tile_vertex, inout int buffer_offset)\n\
-{\n\
-    uint x_pixel = texelFetch(Data, buffer_offset).r;\n\
-    buffer_offset += 1;\n\
-    x_pixel += texelFetch(Data, buffer_offset).r * 256u;\n\
-    buffer_offset += 1;\n\
-    uint y_pixel = texelFetch(Data, buffer_offset).r;\n\
-    buffer_offset += 1;\n\
-    y_pixel += texelFetch(Data, buffer_offset).r * 256u;\n\
-    buffer_offset += 1;\n\
-    uint tile_pixel_width = texelFetch(Data, buffer_offset).r;\n\
-    buffer_offset += 1;\n\
-    tile_pixel_width += texelFetch(Data, buffer_offset).r * 256u;\n\
-    buffer_offset += 1;\n\
-    uint tile_pixel_height = texelFetch(Data, buffer_offset).r;\n\
-    buffer_offset += 1;\n\
-    tile_pixel_height += texelFetch(Data, buffer_offset).r * 256u;\n\
-    buffer_offset += 1;\n\
-    float actual_x_pixel = float(int(x_pixel) - 16384);\n\
-    float actual_y_pixel = float(int(y_pixel) - 16384);\n\
-    float tile_screen_lx = actual_x_pixel * ConsolePixelUnitSize.x;\n\
-    float tile_screen_by = actual_y_pixel * ConsolePixelUnitSize.y;\n\
-    float tile_screen_width = float(tile_pixel_width) * ConsolePixelUnitSize.x;\n\
-    float tile_screen_height = float(tile_pixel_height) * ConsolePixelUnitSize.y;\n\
-    float tile_screen_rx = tile_screen_lx + tile_screen_width;\n\
-    float tile_screen_ty = tile_screen_by + tile_screen_height;\n\
-    vec4 position_square = vec4(tile_screen_lx, tile_screen_rx, tile_screen_ty, tile_screen_by);\n\
-    vec2 vert_positions[6] = vec2[](position_square.sp, position_square.sq, position_square.tq, position_square.sp, position_square.tq, position_square.tp);\n\
-    vec2 position = vert_positions[tile_vertex];\n\
-    return vec4(position, 0.0, 1.0) * Matrix;\n\
-}\n\
-vec4 getColor32(inout int buffer_offset)\n\
-{\n\
-    float r = float(texelFetch(Data, buffer_offset).r) / 255.0;\n\
-    buffer_offset += 1;\n\
-    float g = float(texelFetch(Data, buffer_offset).r) / 255.0;\n\
-    buffer_offset += 1;\n\
-    float b = float(texelFetch(Data, buffer_offset).r) / 255.0;\n\
-    buffer_offset += 1;\n\
-    float a = float(texelFetch(Data, buffer_offset).r) / 255.0;\n\
-    buffer_offset += 1;\n\
-    return vec4(r, g, b, a);\n\
-}\n\
-int getGlyph16(inout int buffer_offset)\n\
-{\n\
-    int glyph = int(texelFetch(Data, buffer_offset).r);\n\
-    buffer_offset += 1;\n\
-    glyph += int(texelFetch(Data, buffer_offset).r * 256u);\n\
-    buffer_offset += 1;\n\
-    return glyph;\n\
-}\n\
-void main()\n\
-{\n\
-    int tile = gl_VertexID / 6;\n\
-    int tile_vertex = gl_VertexID % 6;\n\
-    int buffer_offset = 18 * tile;\n\
-    gl_Position = getVertexPosition(tile, tile_vertex, buffer_offset);\n\
-    int glyph = getGlyph16(buffer_offset);\n\
-    UV = getVertexUV(glyph, tile_vertex);\n\
-    FG = getColor32(buffer_offset);\n\
-    BG = getColor32(buffer_offset);\n\
-}";
+    "#version 330 core\n"
+    "in vec3 a_pos;\n"
+    "in vec3 a_uvp;\n"
+    "in vec4 a_color;\n"
+    "out vec3 v_uvp;\n"
+    "out vec4 v_color;\n"
+    "uniform mat4 u_matrix;\n"
+    "void main()\n"
+    "{\n"
+    "  gl_Position = u_matrix * vec4(a_pos, 1.0);\n"
+    "  v_uvp = a_uvp;\n"
+    "  v_color = a_color;\n"
+    "}";
 
   const char* RLH_FRAGMENT_SOURCE =
-      "#version 330 core\n\
-\n\
-uniform sampler2DArray Atlas;\n\
-in vec3 UV;\n\
-in vec4 FG;\n\
-in vec4 BG;\n\
-out vec4 FragColor;\n\
-\n\
-void main()\n\
-{\n\
-    vec4 c = texture(Atlas, UV);\n\
-    c = mix(BG, FG * vec4(c.rgb, 1.0), c.a);\n\
-    FragColor = c;\n\
-}";
+    "#version 330 core\n"
+    "in vec3 v_uvp;\n"
+    "in vec4 v_color;\n"
+    "out vec4 f_color;\n"
+    "uniform sampler2DArray u_atlas;\n"
+    "void main()\n"
+    "{\n"
+    "  vec4 tex_color = texture(u_atlas, v_uvp);\n"
+    "  f_color = tex_color * v_color;\n"
+    "}";
 
-  const size_t RLH_DATA_BYTES_PER_TILE = 18;
-  const size_t RLH_ATLAS_CHANNELS_PER_PIXEL = 4;
+  const size_t RLH_DATA_ATTRIBUTES_PER_TILE = 10;
   const size_t RLH_FONTMAP_ELEMENTS_PER_GLYPH = 5;
   const size_t RLH_VERTICES_PER_TILE = 6;
   const int RLH_TILE_POSITION_OFFSET = 16384;
