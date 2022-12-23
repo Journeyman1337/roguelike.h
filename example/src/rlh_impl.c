@@ -21,6 +21,6 @@
 */
 
 #include <glad/glad.h>
-#include <glDebug.h>
+#include <gld/gl_debug.h>
 #define RLH_IMPLEMENTATION
 #include <rlh/roguelike.h>
