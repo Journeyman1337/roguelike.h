@@ -406,6 +406,7 @@ extern "C"
 #  include <stdio.h>
 #  include <stdlib.h>
 #  include <string.h>
+
 #ifndef MAX
 #define MAX(x, y) ((x) > (y)) ? (x) : y
 #endif
@@ -514,8 +515,6 @@ extern "C"
   }
 
     GLD_START();
-
-    // load texture array
     GLD_CALL(glGenTextures(1, &gl_texture_array));
     GLD_CALL(glBindTexture(GL_TEXTURE_2D_ARRAY, gl_texture_array));
     GLD_CALL(glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
@@ -524,8 +523,7 @@ extern "C"
     GLD_CALL(glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
     GLD_CALL(glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_BASE_LEVEL, 0));
     GLD_CALL(glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAX_LEVEL, 0));
-    GLD_CALL(glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA8, pixel_width, pixel_height, page_count,
-                          0, GL_RGBA, GL_UNSIGNED_BYTE, pixel_rgba));
+    GLD_CALL(glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, internal_format, width, height, pages, 0, format, GL_UNSIGNED_BYTE, pixel_rgba));
 
     return gl_texture_array;
   }
@@ -533,17 +531,13 @@ extern "C"
   void rlhClearColor(const rlhColor32_s color)
   {
     GLD_START();
-
-    GLD_CALL(glClearColor((float)color.r / 255.0f, (float)color.g / 255.0f, (float)color.b / 255.0f,
-                          (float)color.a / 255.0f));
+    GLD_CALL(glClearColor((float)color.r / 255.0f, (float)color.g / 255.0f, (float)color.b / 255.0f, (float)color.a / 255.0f));
     GLD_CALL(glClear(GL_COLOR_BUFFER_BIT));
   }
 
   void rlhViewport(const int x, const int y, const int width, const int height)
   {
     GLD_START();
-
-    // set viewport
     GLD_CALL(glViewport(x, y, width, height));
   }
 
@@ -735,9 +729,7 @@ extern "C"
     {
       return RLH_RESULT_ERROR_INVALID_VALUE;
     }
-
     *term = (rlhTerm_h)malloc(sizeof(rlhTerm_s));
-
     if (*term == NULL)
     {
       return RLH_RESULT_ERROR_OUT_OF_MEMORY;
@@ -760,7 +752,6 @@ extern "C"
       (*term)->PixelWidth = (size_t)pixel_width;
       (*term)->PixelHeight = (size_t)pixel_height;
     }
-
     (*term)->TileDataCapacity = (*term)->TilesWide * (*term)->TilesTall;
     const size_t reserved_data_size =
         sizeof(uint8_t) * (*term)->TileDataCapacity * RLH_DATA_BYTES_PER_TILE;
