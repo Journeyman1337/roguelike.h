@@ -526,6 +526,24 @@ extern "C"
     GLD_CALL(glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, internal_format, width, height, pages, 0, format, GL_UNSIGNED_BYTE, pixel_rgba));
 
     return gl_texture_array;
+  static inline GLuint _rlhCreateGlProgram()
+  {
+      GLint gl_program, gl_vertex_shader, gl_fragment_shader;
+      GLD_CALL(gl_vertex_shader = glCreateShader(GL_VERTEX_SHADER));
+      GLD_CALL(glShaderSource(gl_vertex_shader, 1, &RLH_VERTEX_SOURCE, NULL));
+      GLD_COMPILE(gl_vertex_shader, "rlh vertex shader");
+      GLD_CALL(gl_fragment_shader = glCreateShader(GL_FRAGMENT_SHADER));
+      GLD_CALL(glShaderSource(gl_fragment_shader, 1, &RLH_FRAGMENT_SOURCE, NULL));
+      GLD_COMPILE(gl_fragment_shader, "rlh fragment shader");
+      GLD_CALL(gl_program = glCreateProgram());
+      GLD_CALL(glAttachShader(gl_program, gl_vertex_shader));
+      GLD_CALL(glAttachShader(gl_program, gl_fragment_shader));
+      GLD_LINK(gl_program, "rlh shader program");
+      GLD_CALL(glDetachShader(gl_program, gl_vertex_shader));
+      GLD_CALL(glDetachShader(gl_program, gl_fragment_shader));
+      GLD_CALL(glDeleteShader(gl_vertex_shader));
+      GLD_CALL(glDeleteShader(gl_fragment_shader));
+      return gl_program;
   }
 
   void rlhClearColor(const rlhColor32_s color)
@@ -764,24 +782,6 @@ extern "C"
 
     GLD_START();
 
-    {  // load shader program
-      int gl_vertex_shader, gl_fragment_shader;
-      GLD_CALL(gl_vertex_shader = glCreateShader(GL_VERTEX_SHADER));
-      GLD_CALL(glShaderSource(gl_vertex_shader, 1, &RLH_VERTEX_SOURCE, NULL));
-      GLD_COMPILE(gl_vertex_shader, "rlh vertex shader");
-      GLD_CALL(gl_fragment_shader = glCreateShader(GL_FRAGMENT_SHADER));
-      GLD_CALL(glShaderSource(gl_fragment_shader, 1, &RLH_FRAGMENT_SOURCE, NULL));
-      GLD_COMPILE(gl_fragment_shader, "rlh fragment shader");
-      GLD_CALL((*term)->Program = glCreateProgram());
-      GLD_CALL(glAttachShader((*term)->Program, gl_vertex_shader));
-      GLD_CALL(glAttachShader((*term)->Program, gl_fragment_shader));
-      GLD_LINK((*term)->Program, "rlh shader program");
-      GLD_CALL(glDetachShader((*term)->Program, gl_vertex_shader));
-      GLD_CALL(glDetachShader((*term)->Program, gl_fragment_shader));
-      GLD_CALL(glDeleteShader(gl_vertex_shader));
-      GLD_CALL(glDeleteShader(gl_fragment_shader));
-    }
-
     // generate and bind vertex array object
     GLD_CALL(glGenVertexArrays(1, &(*term)->VAO));
     GLD_CALL(glBindVertexArray((*term)->VAO));
@@ -796,6 +796,7 @@ extern "C"
     (*term)->ConsolePixelUnitSizeUniformLocation = glGetUniformLocation((*term)->Program, "ConsolePixelUnitSize");
     (*term)->MatrixUniformLocation = glGetUniformLocation((*term)->Program, "Matrix");
 
+    (*term->gl_program) = _rlhCreateGlProgram();
     return RLH_RESULT_OK;
   }
 
