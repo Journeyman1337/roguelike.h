@@ -444,8 +444,8 @@ extern "C"
   const size_t RLH_DATA_ATTRIBUTES_PER_TILE = 10;
   const size_t RLH_FONTMAP_ELEMENTS_PER_GLYPH = 5;
   const size_t RLH_VERTICES_PER_TILE = 6;
-  const int RLH_TILE_POSITION_OFFSET = 16384;
-  const int RLH_MAX_TILE_SIZE = 65565;
+  const size_t RLH_MATRIX_FLOAT_COUNT = 16;
+  GLint RLH_ATLAS_TEXTURE_SLOT = 0;
 
   typedef struct rlhTerm_s
   {
