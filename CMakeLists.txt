@@ -19,7 +19,7 @@
 # IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-cmake_minimum_required(VERSION 3.24.1)
+cmake_minimum_required(VERSION 3.25.0)
 PROJECT(rlh
     VERSION 2.0.0
     DESCRIPTION "A header only roguelike rendering library."
