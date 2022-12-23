@@ -403,9 +403,9 @@ extern "C"
 
 #ifdef RLH_IMPLEMENTATION
 
-#  include <stdio.h>
-#  include <stdlib.h>
-#  include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #ifndef MAX
 #define MAX(x, y) ((x) > (y)) ? (x) : y
