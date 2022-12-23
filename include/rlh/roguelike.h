@@ -233,6 +233,14 @@
     declarations further down in this header file.
 
     CHANGELOG
+    - Version 2.0
+        Features
+            - Depreciated rlhAtlas_s, and all atlas manipulation is done directly with rlhTerminal_s.
+            - Extended maximum glyph count for atlases from 65535 to as many that memory can contain.
+            - Added support for G, GA, RGBA, and BGRA atlas bitmaps.
+            - Switched from using glDebug.h to the newly made gl_debug.h library.
+            - Modified the OpenGL renderer to use a vertex buffer object for storing tile data.
+            - Added support for OpenGL ES 2 so roguelike.h now works in emscripten and mobile platforms.
     - Version 1.4
         Features
             - Renderer now gets and stores shader uniforms on terminal initialization instead of getting it every
