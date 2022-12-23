@@ -323,7 +323,6 @@ extern "C"
   typedef uint16_t rlhglyph_t;
 
   typedef struct rlhTerm_s* rlhTerm_h;
-  typedef struct rlhAtlas_s* rlhAtlas_h;
 
   typedef enum rlhresult_t
   {
