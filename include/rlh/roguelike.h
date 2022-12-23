@@ -337,6 +337,17 @@ extern "C"
 
   extern const char* const RLH_RESULT_DESCRIPTIONS[RLH_RESULT_COUNT];
 
+  typedef enum rlhcolortype_t
+  {
+    RLH_COLOR_G,
+    RLH_COLOR_GA,
+    RLH_COLOR_RGBA,
+    RLH_COLOR_BGRA,
+    RLH_COLOR_TYPE_COUNT
+  } rlhcolortype_t;
+
+  extern const char* const RLH_COLOR_TYPE_NAMES[RLH_COLOR_TYPE_COUNT];
+
   // Clear the color of the console area with a solid color.
   void rlhClearColor(const rlhColor32_s color);
   // Set viewport area to draw to.
