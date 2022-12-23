@@ -514,9 +514,14 @@ extern "C"
     }
   }
 
+  static inline GLuint _rlhCreateGlTextureArray(const size_t width, const size_t height, const size_t pages, const uint8_t* const pixel_bytes, const rlhcolortype_t color)
+  {
+    GLint gl_texture_2d_array = 0;
+    const GLenum format = _rlhColorTypeToGlFormat(color);
+    const GLenum internal_format = _rlhColorTypeToGlInternalFormat(color);
     GLD_START();
-    GLD_CALL(glGenTextures(1, &gl_texture_array));
-    GLD_CALL(glBindTexture(GL_TEXTURE_2D_ARRAY, gl_texture_array));
+    GLD_CALL(glGenTextures(1, &gl_texture_2d_array));
+    GLD_CALL(glBindTexture(GL_TEXTURE_2D_ARRAY, gl_texture_2d_array));
     GLD_CALL(glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
     GLD_CALL(glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
     GLD_CALL(glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
@@ -524,8 +529,9 @@ extern "C"
     GLD_CALL(glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_BASE_LEVEL, 0));
     GLD_CALL(glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAX_LEVEL, 0));
     GLD_CALL(glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, internal_format, width, height, pages, 0, format, GL_UNSIGNED_BYTE, pixel_rgba));
+    return gl_texture_2d_array;
+  }
 
-    return gl_texture_array;
   static inline GLuint _rlhCreateGlProgram()
   {
       GLint gl_program, gl_vertex_shader, gl_fragment_shader;
