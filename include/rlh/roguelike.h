@@ -479,9 +479,40 @@ extern "C"
     GLuint gl_atlas_texture_2d_array;
   } rlhTerm_s;
 
+  static inline GLuint _rlhColorTypeToGlFormat(const rlhcolortype_t color)
   {
+    switch (color)
+    {
+      case RLH_COLOR_G:
+        return GL_R;
+      case RLH_COLOR_GA:
+        return GL_RA;
+      case RLH_COLOR_RGBA:
+        return GL_RGBA;
+      case RLH_COLOR_BGRA:
+        return GL_BGRA;
+      default:
+        return GL_NONE;
+    }
+  }
+
+  static inline GLuint _rlhColorTypeToGlInternalFormat(const rlhcolortype_t color)
   {
     GLuint gl_texture_array = 0;
+    switch (color)
+    {
+      case RLH_COLOR_G:
+        return GL_R8;
+      case RLH_COLOR_GA:
+        return GL_RA8;
+      case RLH_COLOR_RGBA:
+        return GL_RGBA8;
+      case RLH_COLOR_BGRA:
+        return GL_BGRA8;
+      default:
+        return GL_NONE;
+    }
+  }
 
     GLD_START();
 
