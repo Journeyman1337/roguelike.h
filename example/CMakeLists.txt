@@ -35,7 +35,7 @@ FetchContent_Declare(
 )
 FetchContent_Declare(
         gld
-        GIT_REPOSITORY https://github.com/Journeyman-dev/glDebug.h
+        GIT_REPOSITORY https://github.com/Journeyman-dev/gl_debug.h
         GIT_TAG        v1.0.0
 )
 FetchContent_Declare(
