@@ -346,7 +346,43 @@ extern "C"
     RLH_COLOR_TYPE_COUNT
   } rlhcolortype_t;
 
-  extern const char* const RLH_COLOR_TYPE_NAMES[RLH_COLOR_TYPE_COUNT];
+  extern const char *const RLH_COLOR_TYPE_NAMES[RLH_COLOR_TYPE_COUNT];
+
+  typedef enum rlhsizemode_t
+  {
+    RLH_SIZE_TILES,
+    RLH_SIZE_PIXELS,
+    RLH_SIZE_MODE_COUNT
+  } rlhsizemode_t;
+
+  typedef struct rlhAtlasCreateInfo_t
+  {
+    int width;
+    int height;
+    int pages;
+    int channel_size;
+    rlhcolortype_t color;
+    uint8_t *pixel_data;
+    int glyph_count;
+    float *glyph_stpqp;
+    int tile_width;
+    int tile_height;
+  } rlhAtlasCreateInfo_t;
+
+  typedef struct rlhTermSizeInfo_t
+  {
+    int width;
+    int height;
+    rlhsizemode_t size_mode;
+    rlhbool_t floor_pixels_to_tiles;
+    float pixel_scale;
+  } rlhTermSizeInfo_t;
+
+  typedef struct rlhTermCreateInfo_t
+  {
+    rlhTermSizeInfo_t *size_info;
+    rlhAtlasCreateInfo_t *atlas_info;
+  } rlhTermCreateInfo_t;
 
   // Clear the color of the console area with a solid color.
   void rlhClearColor(const rlhColor32_s color);
