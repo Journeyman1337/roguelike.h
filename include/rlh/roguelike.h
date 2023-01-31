@@ -383,57 +383,51 @@ extern "C"
   } rlhTermCreateInfo_t;
 
   // Clear the color of the console area with a solid color.
-  void rlhClearColor(const rlhColor32_s color);
+  void rlhClearColor(const rlhColor_s color);
   // Set viewport area to draw to.
   void rlhViewport(int x, int y, int width, int height);
-  // Create a terminal object sized based on tile dimensions.
-  rlhresult_t rlhTermCreateTileDimensions(const int tiles_wide, const int tiles_tall, const float pixel_scale, const int tile_width, const int tile_height, rlhTerm_h* const term);
-  // Create a terminal object sized with the specified pixel dimensions.
-  rlhresult_t rlhTermCreatePixelDimensions(const int pixel_width, const int pixel_height, const float pixel_scale, const int tile_width, const int tile_height, const rlhbool_t floor_pixels_to_tiles, rlhTerm_h* const term);
+  // Create a terminal.
+  rlhresult_t rlhTermCreate(rlhTermCreateInfo_t *term_info, rlhTerm_h *term);
   // Destroy a term object and free all of its resources.
   void rlhTermDestroy(rlhTerm_h const term);
   // Set the atlas of a terminal.
-  rlhresult_t rlhTermSetAtlas(rlhTerm_h const term, const int width, const int height, const int pages, const uint8_t* pixels, rlhcolortype_t color, const int glyph_count, const float* glyph_stpqp);
-  // Get the pixel dimension and page count of an atlas.
-  void rlhTermGetAtlasDimensions(rlhTerm_h const term, int* const width, int* const height, int* const pages);
+  rlhresult_t rlhTermSetAtlas(rlhTerm_h const term, rlhAtlasCreateInfo_t *atlas_info);
   // Get the amount of glyphs in a terminal's atlas.
-  int rlhTermGetAtlasGlyphCount(rlhTerm_h const term, int* const glyph_count);
+  int rlhTermGetGlyphCount(rlhTerm_h const term);
   // Get the size ratio of a terminal pixel per screen pixel.
   float rlhTermGetPixelScale(rlhTerm_h const term);
   // Get the tile dimensions of a console.
-  void rlhTermGetTileGridDimensions(rlhTerm_h const term, int* const tiles_wide, int* const tiles_tall);
+  void rlhTermGetTerminalSize(rlhTerm_h const term, int *const tiles_wide, int *const tiles_tall);
   // Get the pixel dimensions of a console.
-  void rlhTermGetPixelDimensions(rlhTerm_h const term, int* const pixel_width, int* const pixel_height);
+  void rlhTermGetPixelSize(rlhTerm_h const term, int *const pixel_width, int *const pixel_height);
   // Get the pixel dimensions of a single tile.
-  void rlhTermGetTilePixelDimensions(rlhTerm_h const term, int* const tile_width, int* const tile_height);
-  // Resize a terminal object sized based on tile dimensions.
-  rlhresult_t rlhTermResizeTileDimensions(rlhTerm_h const term, const int tiles_wide, const int tiles_tall, const float pixel_scale, const int tile_width, const int tile_height);
-  // Resize a terminal object sized based on pixel dimensions.
-  rlhresult_t rlhTermResizePixelDimensions(rlhTerm_h const term, const int pixel_width, const int pixel_height, const float pixel_scale, const int tile_width, const int tile_height, const rlhbool_t floor_pixels_to_tiles);
+  void rlhTermGetTileSize(rlhTerm_h const term, int *const tile_width, int *const tile_height);
+  // Resize a terminal object.
+  rlhresult_t rlhTermSetSize(rlhTerm_h const term, rlhTermSizeInfo_t *const size_info);
   // Clear a terminal's data buffer.
   rlhresult_t rlhTermClearTileData(rlhTerm_h const term);
   // Get how many tiles have been set since the last clear.
-  size_t rlhTermGetTileCount(rlhTerm_h const term);
+  int rlhTermGetTileDataCount(rlhTerm_h const term);
   // Push a tile to the terminal that is stretched over the entire terminal area.
-  rlhresult_t rlhTermPushFillTile(rlhTerm_h const term, const uint16_t glyph, const rlhColor32_s fg, const rlhColor32_s bg);
+  rlhresult_t rlhTermPushFill(rlhTerm_h const term, const uint16_t glyph, const rlhColor_s fg, const rlhColor_s bg);
   // Push a tile to a terminal in a grid cell position with default pixel width and pixel height.
-  rlhresult_t rlhTermPushTileGrid(rlhTerm_h const term, const int grid_x, const int grid_y, const uint16_t glyph, const rlhColor32_s fg, const rlhColor32_s bg);
+  rlhresult_t rlhTermPushGrid(rlhTerm_h const term, const int grid_x, const int grid_y, const uint16_t glyph, const rlhColor_s fg, const rlhColor_s bg);
   // Push a tile to a terminal in a grid cell position with a custom pixel width and pixel height.
-  rlhresult_t rlhTermPushTileGridSized(rlhTerm_h const term, const int grid_x, const int grid_y, const int tile_pixel_width, const int tile_pixel_height, const uint16_t glyph, const rlhColor32_s fg, const rlhColor32_s bg);
+  rlhresult_t rlhTermPushGridSized(rlhTerm_h const term, const int grid_x, const int grid_y, const int tile_pixel_width, const int tile_pixel_height, const uint16_t glyph, const rlhColor_s fg, const rlhColor_s bg);
   // Push a tile to a terminal in a pixel position with a default pixel width and pixel height.
-  rlhresult_t rlhTermPushTileFree(rlhTerm_h const term, const int screen_pixel_x, const int screen_pixel_y, const rlhglyph_t glyph, const rlhColor32_s fg, const rlhColor32_s bg);
+  rlhresult_t rlhTermPushFree(rlhTerm_h const term, const int screen_pixel_x, const int screen_pixel_y, const rlhglyph_t glyph, const rlhColor_s fg, const rlhColor_s bg);
   // Push a tile to a terminal in a pixel position with a custom pixel width and pixel height.
-  rlhresult_t rlhTermPushTileFreeSized(rlhTerm_h const term, const int screen_pixel_x, const int screen_pixel_y, const int tile_pixel_width, const int tile_pixel_height, const rlhglyph_t glyph, const rlhColor32_s fg, const rlhColor32_s bg);
+  rlhresult_t rlhTermPushFreeSized(rlhTerm_h const term, const int screen_pixel_x, const int screen_pixel_y, const int tile_pixel_width, const int tile_pixel_height, const rlhglyph_t glyph, const rlhColor_s fg, const rlhColor_s bg);
   // Draw a terminal to the current bound framebuffer of the current graphics context. Draws it to fit the viewport, which might distort pixels.
-  rlhresult_t rlhTermDraw(rlhTerm_h const term, , rlhbool_t retained);
+  rlhresult_t rlhTermDraw(rlhTerm_h const term);
   // Draw a terminal pixel perfect, centered in the viewport.
-  rlhresult_t rlhTermDrawCentered(rlhTerm_h const term, const int viewport_width, const int viewport_height, rlhbool_t retained );
+  rlhresult_t rlhTermDrawCentered(rlhTerm_h const term, const int viewport_width, const int viewport_height);
   // Draw a terminal pixel perfect, translated to by a 2d pixel vector.
-  rlhresult_t rlhTermDrawTranslated(rlhTerm_h const term, const int translate_x, const int translate_y, const int viewport_width, const int viewport_height, rlhbool_t retained);
+  rlhresult_t rlhTermDrawTranslated(rlhTerm_h const term, const int translate_x, const int translate_y, const int viewport_width, const int viewport_height);
   // Draw a terminal translated to by a 2d pixel vector and scaled by a 2d float vector.
-  rlhresult_t rlhTermDrawTransformed(rlhTerm_h const term, const int translate_x, const int translate_y, const float scale_x, const float scale_y, const int viewport_width, const int viewport_height, rlhbool_t retained);
+  rlhresult_t rlhTermDrawTransformed(rlhTerm_h const term, const int translate_x, const int translate_y, const float scale_x, const float scale_y, const int viewport_width, const int viewport_height);
   // Draw a terminal transformed by a matrix 4x4 (with 16 floats)
-  rlhresult_t rlhTermDrawMatrix(rlhTerm_h const term, const float* const matrix_4x4, rlhbool_t retained);
+  rlhresult_t rlhTermDrawMatrix(rlhTerm_h const term, const float *const matrix_4x4);
 
 #ifdef RLH_IMPLEMENTATION
 
