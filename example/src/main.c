@@ -21,7 +21,7 @@
 */
 
 #include <glad/glad.h>
-#include <glDebug.h>
+#include <gld/gl_debug.h>
 #include <GLFW/glfw3.h>
 #include <rlh/roguelike.h>
 #include <stb_image.h>

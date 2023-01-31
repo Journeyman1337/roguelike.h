@@ -22,4 +22,4 @@
 
 #include <glad/glad.h>
 #define GLD_IMPLEMENTATION
-#include <gl_debug.h.h>
+#include <gld/gl_debug.h>
