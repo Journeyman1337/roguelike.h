@@ -327,15 +327,13 @@ extern "C"
   typedef enum rlhresult_t
   {
     RLH_RESULT_OK = 0,
-    RLH_RESULT_TILE_OUT_OF_TERMINAL = 1,
-    RLH_RESULT_LAST_NON_ERROR = RLH_RESULT_TILE_OUT_OF_TERMINAL,
-    RLH_RESULT_ERROR_NULL_ARGUMENT = 2,
-    RLH_RESULT_ERROR_INVALID_VALUE = 3,
-    RLH_RESULT_ERROR_OUT_OF_MEMORY = 4,
+    RLH_RESULT_ERROR_NULL_ARGUMENT = 1,
+    RLH_RESULT_ERROR_INVALID_VALUE = 2,
+    RLH_RESULT_ERROR_OUT_OF_MEMORY = 3,
     RLH_RESULT_COUNT
   } rlhresult_t;
 
-  extern const char* const RLH_RESULT_DESCRIPTIONS[RLH_RESULT_COUNT];
+  extern const char *const RLH_RESULT_DESCRIPTIONS[RLH_RESULT_COUNT];
 
   typedef enum rlhcolortype_t
   {
@@ -447,8 +445,8 @@ extern "C"
 #define MAX(x, y) ((x) > (y)) ? (x) : y
 #endif
 
-  const char* const RLH_RESULT_DESCRIPTIONS[RLH_RESULT_COUNT] = {
-      "no errors occured", "tile out of terminal", "unexpected null argument",
+  const char *const RLH_RESULT_DESCRIPTIONS[RLH_RESULT_COUNT] = {
+      "no errors occured", "unexpected null argument",
       "unexpected argument value", "out of memory"};
 
   const float RLH_OPENGL_SCREEN_MATRIX[4 * 4] = {2.0f, 0.0f, 0.0f, -1.0f, 0.0f, -2.0f, 0.0f, 1.0f,
