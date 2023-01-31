@@ -548,16 +548,16 @@ extern "C"
   {
     switch (color)
     {
-      case RLH_COLOR_G:
-        return GL_R;
-      case RLH_COLOR_GA:
-        return GL_RA;
-      case RLH_COLOR_RGBA:
-        return GL_RGBA;
-      case RLH_COLOR_BGRA:
-        return GL_BGRA;
-      default:
-        return GL_NONE;
+    case RLH_COLOR_G:
+      return GL_R;
+    case RLH_COLOR_GA:
+      return GL_RG;
+    case RLH_COLOR_RGBA:
+      return GL_RGBA;
+    case RLH_COLOR_BGRA:
+      return GL_BGRA;
+    default:
+      return GL_NONE;
     }
   }
 
@@ -565,16 +565,15 @@ extern "C"
   {
     switch (color)
     {
-      case RLH_COLOR_G:
-        return GL_R8;
-      case RLH_COLOR_GA:
-        return GL_RA8;
-      case RLH_COLOR_RGBA:
-        return GL_RGBA8;
-      case RLH_COLOR_BGRA:
-        return GL_BGRA8;
-      default:
-        return GL_NONE;
+    case RLH_COLOR_G:
+      return GL_R8;
+    case RLH_COLOR_GA:
+      return GL_RG;
+    case RLH_COLOR_RGBA:
+    case RLH_COLOR_BGRA:
+      return GL_RGBA;
+    default:
+      return GL_NONE;
     }
   }
 
