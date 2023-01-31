@@ -444,38 +444,74 @@ extern "C"
       "unexpected argument value", "out of memory"};
 
   const float RLH_OPENGL_SCREEN_MATRIX[4 * 4] = {2.0f, 0.0f, 0.0f, -1.0f, 0.0f, -2.0f, 0.0f, 1.0f,
-                                                 0.0f, 0.0f, 1.0f, 0.0f,  0.0f, 0.0f,  0.0f, 1.0f};
+                                                 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f};
 
-  const char* RLH_VERTEX_SOURCE =
-    "#version 330 core\n"
-    "in vec3 a_pos;\n"
-    "in vec3 a_uvp;\n"
-    "in vec4 a_color;\n"
-    "out vec3 v_uvp;\n"
-    "out vec4 v_color;\n"
-    "uniform mat4 u_matrix;\n"
-    "void main()\n"
-    "{\n"
-    "  gl_Position = u_matrix * vec4(a_pos, 1.0);\n"
-    "  v_uvp = a_uvp;\n"
-    "  v_color = a_color;\n"
-    "}";
+  const char *RLH_VERTEX_SOURCE =
+      "#version 330 core\n"
+      "in vec3 a_pos;\n"
+      "in vec3 a_uvp;\n"
+      "in vec4 a_fg;\n"
+      "in vec4 a_bg;\n"
+      "out vec3 v_uvp;\n"
+      "out vec4 v_fg;\n"
+      "out vec4 v_bg;"
+      "uniform mat4 u_matrix;\n"
+      "void main()\n"
+      "{\n"
+      "  gl_Position = u_matrix * vec4(a_pos, 1.0);\n"
+      "  v_uvp = a_uvp;\n"
+      "  v_fg = a_fg;\n"
+      "  v_bg = a_bg;"
+      "}";
 
-  const char* RLH_FRAGMENT_SOURCE =
-    "#version 330 core\n"
-    "in vec3 v_uvp;\n"
-    "in vec4 v_color;\n"
-    "out vec4 f_color;\n"
-    "uniform sampler2DArray u_atlas;\n"
-    "void main()\n"
-    "{\n"
-    "  vec4 tex_color = texture(u_atlas, v_uvp);\n"
-    "  f_color = tex_color * v_color;\n"
-    "}";
+  const char *RLH_FRAGMENT_ALPHA_BG_SOURCE =
+      "#version 330 core\n"
+      "in vec3 v_uvp;\n"
+      "in vec4 v_fg;\n"
+      "in vec4 v_bg;\n"
+      "out vec4 f_color;\n"
+      "uniform sampler2DArray u_atlas;\n"
+      "void main()\n"
+      "{\n"
+      "  vec4 tex_color = texture(u_atlas, v_uvp);\n"
+      "  vec4 actual_tex_color = vec4(tex_color.rgb, 1.0);\n"
+      "  f_color = mix(v_bg, v_fg * actual_tex_color, tex_color.a);\n"
+      "}";
 
-  const size_t RLH_DATA_ATTRIBUTES_PER_TILE = 10;
-  const size_t RLH_FONTMAP_ELEMENTS_PER_GLYPH = 5;
-  const size_t RLH_VERTICES_PER_TILE = 6;
+  const char *RLH_FRAGMENT_GREEN_BG_SOURCE =
+      "#version 330 core\n"
+      "in vec3 v_uvp;\n"
+      "in vec4 v_fg;\n"
+      "in vec4 v_bg;\n"
+      "out vec4 f_color;\n"
+      "uniform sampler2DArray u_atlas;\n"
+      "void main()\n"
+      "{\n"
+      "  vec4 tex_color = texture(u_atlas, v_uvp);\n"
+      "  vec4 actual_tex_color = vec4(tex_color.r, tex_color.r, tex_color.r, 1.0);\n"
+      "  f_color = mix(v_bg, v_fg * actual_tex_color, tex_color.g);\n"
+      "}";
+
+  const char *RLH_FRAGMENT_STENCIL_SOURCE =
+      "#version 330 core\n"
+      "in vec3 v_uvp;\n"
+      "in vec4 v_color;\n"
+      "out vec4 f_color;\n"
+      "uniform sampler2DArray u_atlas;\n"
+      "void main()\n"
+      "{\n"
+      "  vec4 tex_color = texture(u_atlas, v_uvp);\n"
+      "  f_color = mix(v_bg, v_fg, tex_color.r);\n"
+      "}";
+
+  typedef enum rlhfragmenttype_t
+  {
+    RLH_FRAGMENT_NONE,
+    RLH_FRAGMENT_STENCIL,
+    RLH_FRAGMENT_GREEN_BG,
+    RLH_FRAGMENT_ALPHA_BG,
+    RLH_FRAGMENT_COUNT
+  } rlhfragmenttype_t;
   const size_t RLH_MATRIX_FLOAT_COUNT = 16;
   GLint RLH_ATLAS_TEXTURE_SLOT = 0;
 
