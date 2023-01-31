@@ -307,7 +307,7 @@ extern "C"
     RLH_FRAGMENT_COUNT
   } rlhfragmenttype_t;
 
-  const size_t RLH_VERTEX_DATA_ATTRIBUTES_PER_VERTEX = 10;
+  const size_t RLH_VERTEX_DATA_ATTRIBUTES_PER_VERTEX = 13;
   const size_t RLH_FONTMAP_COORDINATES_PER_GLYPH = 5;
   const size_t RLH_VERTICES_PER_TILE = 4;
   const size_t RLH_ELEMENTS_PER_TILE = 6;
@@ -940,8 +940,6 @@ extern "C"
                               const int screen_pixel_y, const uint16_t glyph,
                               const rlhColor_s fg, const rlhColor_s bg)
   {
-    const int negative_default_width = -(int)term->tile_width;
-    const int negative_default_height = -(int)term->tile_height;
     if (!_rlhTermTryReserveVertexData(term))
       return RLH_RESULT_ERROR_OUT_OF_MEMORY;
     _rlhTermPushTile(term, (unsigned int)screen_pixel_x, (unsigned int)screen_pixel_y,
