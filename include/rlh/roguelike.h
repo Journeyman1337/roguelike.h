@@ -284,35 +284,35 @@ extern "C"
 #  define GLD_LINK(programHandleVar, identifier) glLinkProgram(programHandleVar);
 #endif
 
-  typedef struct rlhColor32_s
+  typedef struct rlhColor_s
   {
-    uint8_t r;
-    uint8_t g;
-    uint8_t b;
-    uint8_t a;
-  } rlhColor32_s;
+    float r;
+    float g;
+    float b;
+    float a;
+  } rlhColor_s;
 
-// custom color macro
-#define RLH_C32(red, green, blue, alpha) ((rlhColor32_s){(red), (green), (blue), (alpha)})
+// custom color macros
+#define RLH_COLOR(red, green, blue, alpha) ((rlhColor_s){(red), (green), (blue), (alpha)})
 
 // standard color macros
-#define RLH_RED ((rlhColor32_s){(255), (0), (0), (255)})
-#define RLH_LIME ((rlhColor32_s){(0), (255), (0), (255)})
-#define RLH_BLUE ((rlhColor32_s){(0), (0), (255), (255)})
-#define RLH_WHITE ((rlhColor32_s){(255), (255), (255), (255)})
-#define RLH_BLACK ((rlhColor32_s){(0), (0), (0), (255)})
-#define RLH_SILVER ((rlhColor32_s){(192), (192), (192), (255)})
-#define RLH_GRAY ((rlhColor32_s){(128), (128), (128), (255)})
-#define RLH_MAROON ((rlhColor32_s){(128), (0), (0), (255)})
-#define RLH_YELLOW ((rlhColor32_s){(255), (255), (0), (255)})
-#define RLH_OLIVE ((rlhColor32_s){(128), (128), (0), (255)})
-#define RLH_GREEN ((rlhColor32_s){(0), (128), (0), (255)})
-#define RLH_AQUA ((rlhColor32_s){(0), (255), (255), (255)})
-#define RLH_TEAL ((rlhColor32_s){(0), (128), (128), (255)})
-#define RLH_NAVY ((rlhColor32_s){(0), (0), (128), (255)})
-#define RLH_FUCHSIA ((rlhColor32_s){(255), (0), (255), (255)})
-#define RLH_PURPLE ((rlhColor32_s){(128), (0), (128), (255)})
-#define RLH_TRANSPARENT ((rlhColor32_s){(0), (0), (0), (0)})
+#define RLH_RED ((rlhColor_s){(1.0f), (0.0f), (0.0f), (1.0f)})
+#define RLH_LIME ((rlhColor_s){(0.0f), (1.0f), (0.0f), (1.0f)})
+#define RLH_BLUE ((rlhColor_s){(0.0f), (0.0f), (1.0f), (1.0f)})
+#define RLH_WHITE ((rlhColor_s){(1.0f), (1.0f), (1.0f), (1.0f)})
+#define RLH_BLACK ((rlhColor_s){(0.0f), (0.0f), (0.0f), (1.0f)})
+#define RLH_SILVER ((rlhColor_s){(0.752941f), (0.752941f), (0.752941f), (1.0f)})
+#define RLH_GRAY ((rlhColor_s){(0.5f), (0.5f), (0.5f), (1.0f)})
+#define RLH_MAROON ((rlhColor_s){(0.5f), (0.0f), (0.0f), (1.0f)})
+#define RLH_YELLOW ((rlhColor_s){(1.0f), (1.0f), (0.0f), (1.0f)})
+#define RLH_OLIVE ((rlhColor_s){(0.5f), (0.5f), (0.0f), (1.0f)})
+#define RLH_GREEN ((rlhColor_s){(0.0f), (0.5f), (0.0f), (1.0f)})
+#define RLH_AQUA ((rlhColor_s){(0.0f), (1.0f), (1.0f), (1.0f)})
+#define RLH_TEAL ((rlhColor_s){(0.0f), (0.5f), (0.5f), (1.0f)})
+#define RLH_NAVY ((rlhColor_s){(0.0f), (0.0f), (0.5f), (1.0f)})
+#define RLH_FUCHSIA ((rlhColor_s){(1.0f), (0.0f), (1.0f), (1.0f)})
+#define RLH_PURPLE ((rlhColor_s){(0.5f), (0.0f), (0.5f), (1.0f)})
+#define RLH_TRANSPARENT ((rlhColor_s){(0.0f), (0.0f), (0.0f), (0.0f)})
 
   typedef enum rlhbool_t
   {
