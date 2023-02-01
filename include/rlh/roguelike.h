@@ -143,9 +143,26 @@ extern "C"
   typedef enum rlhsizemode_t
   {
     RLH_SIZE_TILES,
-    RLH_SIZE_PIXELS,
+    RLH_SIZE_SCALED_PIXELS,
+    RLH_SIZE_UNSCALED_PIXELS,
     RLH_SIZE_MODE_COUNT
   } rlhsizemode_t;
+
+  typedef enum rlhtermhalign_t
+  {
+    RLH_HALIGN_LEFT,
+    RLH_HALIGN_RIGHT,
+    RLH_HALIGN_CENTER,
+    RLH_HALIGN_COUNT
+  } rlhtermhalign_t;
+
+  typedef enum rlhtermvalign_t
+  {
+    RLH_VALIGN_TOP,
+    RLH_VALIGN_BOTTOM,
+    RLH_VALIGN_CENTER,
+    RLH_VALIGN_COUNT
+  } rlhtermvalign_t;
 
   typedef struct rlhAtlasCreateInfo_t
   {
@@ -157,8 +174,6 @@ extern "C"
     uint8_t *pixel_data;
     int glyph_count;
     float *glyph_stpqp;
-    int tile_width;
-    int tile_height;
   } rlhAtlasCreateInfo_t;
 
   typedef struct rlhTermSizeInfo_t
@@ -167,7 +182,9 @@ extern "C"
     int height;
     rlhsizemode_t size_mode;
     rlhbool_t floor_pixels_to_tiles;
-    float pixel_scale;
+    int pixel_scale;
+    int tile_width;
+    int tile_height;
   } rlhTermSizeInfo_t;
 
   typedef struct rlhTermCreateInfo_t
@@ -193,7 +210,9 @@ extern "C"
   // Get the tile dimensions of a console.
   void rlhTermGetTerminalSize(rlhTerm_h const term, int *const tiles_wide, int *const tiles_tall);
   // Get the pixel dimensions of a console.
-  void rlhTermGetPixelSize(rlhTerm_h const term, int *const pixel_width, int *const pixel_height);
+  void rlhTermGetScaledPixelSize(rlhTerm_h const term, int *const pixel_width, int *const pixel_height);
+  // Get the actual pixel dimensions before is applied.
+  void rlhTermGetUnscaledPixelSize(rlhTerm_h const term, int *const pixel_width, int *const pixel_height);
   // Get the pixel dimensions of a single tile.
   void rlhTermGetTileSize(rlhTerm_h const term, int *const tile_width, int *const tile_height);
   // Resize a terminal object.
@@ -215,7 +234,7 @@ extern "C"
   // Draw a terminal to the current bound framebuffer of the current graphics context. Draws it to fit the viewport, which might distort pixels.
   rlhresult_t rlhTermDraw(rlhTerm_h const term);
   // Draw a terminal pixel perfect, centered in the viewport.
-  rlhresult_t rlhTermDrawCentered(rlhTerm_h const term, const int viewport_width, const int viewport_height);
+  rlhresult_t rlhTermDrawAligned(rlhTerm_h const term, const int viewport_width, const int viewport_height, rlhtermhalign_t h_align, rlhtermvalign_t v_align);
   // Draw a terminal pixel perfect, translated to by a 2d pixel vector.
   rlhresult_t rlhTermDrawTranslated(rlhTerm_h const term, const int translate_x, const int translate_y, const int viewport_width, const int viewport_height);
   // Draw a terminal translated to by a 2d pixel vector and scaled by a 2d float vector.
@@ -228,6 +247,7 @@ extern "C"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 #ifndef MAX
 #define MAX(x, y) ((x) > (y)) ? (x) : y
@@ -316,11 +336,13 @@ extern "C"
 
   typedef struct rlhTerm_s
   {
-    size_t pixel_width;
-    size_t pixel_height;
+    size_t unscaled_pixel_width;
+    size_t unscaled_pixel_height;
+    size_t scaled_pixel_width;
+    size_t scaled_pixel_height;
     size_t tiles_wide;
     size_t tiles_tall;
-    float pixel_scale;
+    int pixel_scale;
     size_t tile_width;
     size_t tile_height;
     size_t vertex_data_tile_capacity;
@@ -507,7 +529,9 @@ extern "C"
         size_info->width <= 0 ||
         size_info->height <= 0 ||
         size_info->size_mode < RLH_SIZE_TILES ||
-        size_info->size_mode >= RLH_SIZE_MODE_COUNT)
+        size_info->size_mode >= RLH_SIZE_MODE_COUNT ||
+        size_info->tile_width <= 0 ||
+        size_info->tile_height <= 0)
     {
       return RLH_RESULT_ERROR_INVALID_VALUE;
     }
@@ -528,9 +552,7 @@ extern "C"
         atlas_info->pages <= 0 ||
         atlas_info->color < RLH_COLOR_G ||
         atlas_info->color >= RLH_COLOR_TYPE_COUNT ||
-        atlas_info->glyph_count <= 0 ||
-        atlas_info->tile_width <= 0 ||
-        atlas_info->tile_height <= 0)
+        atlas_info->glyph_count <= 0)
     {
       return RLH_RESULT_ERROR_INVALID_VALUE;
     }
@@ -552,27 +574,47 @@ extern "C"
     return _rlhAtlasInfoCheck(term_info->atlas_info);
   }
 
-  static inline void _rlhTermSetPixelSize(rlhTerm_h term, rlhTermSizeInfo_t *size_info, int tile_width, int tile_height)
+  static inline void _rlhTermSetPixelSize(rlhTerm_h term, rlhTermSizeInfo_t *size_info)
   {
-    term->pixel_width = size_info->width;
-    term->pixel_height = size_info->height;
     if (size_info->size_mode == RLH_SIZE_TILES)
     {
-      term->pixel_width *= tile_width;
-      term->pixel_height *= tile_height;
+      term->unscaled_pixel_width = size_info->tile_width * size_info->width;
+      term->unscaled_pixel_height = size_info->tile_height * size_info->height;
+      term->scaled_pixel_width = term->unscaled_pixel_width * size_info->pixel_scale;
+      term->scaled_pixel_height = term->unscaled_pixel_height * size_info->pixel_scale;
     }
-    else if (size_info->floor_pixels_to_tiles)
+    else if (size_info->size_mode == RLH_SIZE_SCALED_PIXELS)
     {
-      term->pixel_width -= term->pixel_width % tile_width;
-      term->pixel_height -= term->pixel_height % tile_height;
+      term->scaled_pixel_width = size_info->width;
+      term->scaled_pixel_height = size_info->height;
+      term->unscaled_pixel_width = term->scaled_pixel_width / size_info->pixel_scale;
+      term->unscaled_pixel_height = term->scaled_pixel_height / size_info->pixel_scale;
+      if (size_info->floor_pixels_to_tiles)
+      {
+        term->unscaled_pixel_width -= term->unscaled_pixel_width % (size_info->tile_width * size_info->pixel_scale);
+        term->unscaled_pixel_height -= term->unscaled_pixel_height % (size_info->tile_height * size_info->pixel_scale);
+      }
+      // cut off pixels in situations the given width and height is not perfectly divisible by pixel scale.
+      term->scaled_pixel_width = term->unscaled_pixel_width * size_info->pixel_scale;
+      term->scaled_pixel_height = term->unscaled_pixel_height * size_info->pixel_scale;
     }
-    term->pixel_width *= size_info->pixel_scale;
-    term->pixel_height *= size_info->pixel_scale;
+    else if (size_info->size_mode == RLH_SIZE_UNSCALED_PIXELS)
+    {
+      term->unscaled_pixel_width = size_info->width;
+      term->unscaled_pixel_height = size_info->height;
+      if (size_info->floor_pixels_to_tiles)
+      {
+        term->unscaled_pixel_width -= term->unscaled_pixel_width % (size_info->tile_width * size_info->pixel_scale);
+        term->unscaled_pixel_height -= term->unscaled_pixel_height % (size_info->tile_height * size_info->pixel_scale);
+      }
+      term->scaled_pixel_width = term->unscaled_pixel_width * size_info->pixel_scale;
+      term->scaled_pixel_height = term->unscaled_pixel_height * size_info->pixel_scale;
+    }
     term->pixel_scale = size_info->pixel_scale;
-    term->tile_width = tile_width;
-    term->tile_height = tile_height;
-    term->tiles_wide = term->pixel_width / (tile_height * term->pixel_scale);
-    term->tiles_tall = term->pixel_height / (tile_height * term->pixel_scale);
+    term->tile_width = size_info->tile_width;
+    term->tile_height = size_info->tile_height;
+    term->tiles_wide = term->unscaled_pixel_width / size_info->tile_width;
+    term->tiles_tall = term->unscaled_pixel_height / size_info->tile_height;
   }
 
   static inline rlhresult_t _rlhTermSetAtlas(rlhTerm_h term, rlhAtlasCreateInfo_t *atlas_info)
@@ -601,7 +643,10 @@ extern "C"
       }
       const char *fragment_source = _rlhFragmentSourceFromFragmentType(fragment_type);
       term->gl_program = _rlhCreateGlProgram(RLH_VERTEX_SOURCE, fragment_source);
+      GLD_CALL(glUseProgram(term->gl_program));
       term->gl_matrix_uniform_location = GLD_CALL(glGetUniformLocation(term->gl_program, "u_matrix"));
+      GLuint atlas_slot_uniform = GLD_CALL(glGetUniformLocation(term->gl_program, "u_atlas"));
+      GLD_CALL(glUniform1i(atlas_slot_uniform, RLH_ATLAS_TEXTURE_SLOT));
     }
     term->fragment_type = fragment_type;
     if (term->gl_atlas_texture_2d_array != GL_NONE)
@@ -648,9 +693,7 @@ extern "C"
     memset(term_h, 0, sizeof(rlhTerm_s));
     _rlhTermSetPixelSize(
         term_h,
-        term_info->size_info,
-        term_info->atlas_info->tile_width,
-        term_info->atlas_info->tile_height);
+        term_info->size_info);
     term_h->vertex_data_tile_capacity = term_h->tiles_wide * term_h->tiles_tall;
     const size_t vertex_data_size = _rlhGetVertexDataSize(term_h->vertex_data_tile_capacity);
     term_h->vertex_data = malloc(vertex_data_size);
@@ -755,7 +798,7 @@ extern "C"
     }
   }
 
-  void rlhTermGetPixelSize(rlhTerm_h const term, int *const pixel_width, int *const pixel_height)
+  void rlhTermGetScaledPixelSize(rlhTerm_h const term, int *const pixel_width, int *const pixel_height)
   {
     if (term == NULL)
     {
@@ -763,11 +806,27 @@ extern "C"
     }
     if (pixel_width != NULL)
     {
-      *pixel_width = (int)term->pixel_width;
+      *pixel_width = (int)term->scaled_pixel_width;
     }
     if (pixel_height != NULL)
     {
-      *pixel_height = (int)term->pixel_height;
+      *pixel_height = (int)term->scaled_pixel_height;
+    }
+  }
+
+  void rlhTermGetUnscaledPixelSize(rlhTerm_h const term, int *const pixel_width, int *const pixel_height)
+  {
+    if (term == NULL)
+    {
+      return;
+    }
+    if (pixel_width != NULL)
+    {
+      *pixel_width = (int)term->unscaled_pixel_width;
+    }
+    if (pixel_height != NULL)
+    {
+      *pixel_height = (int)term->unscaled_pixel_height;
     }
   }
 
@@ -785,6 +844,22 @@ extern "C"
     {
       *tile_height = (int)term->tile_height;
     }
+  }
+
+  rlhresult_t rlhTermSetSize(rlhTerm_h const term, rlhTermSizeInfo_t *const size_info)
+  {
+    if (term == NULL || size_info == NULL)
+    {
+      return RLH_RESULT_ERROR_NULL_ARGUMENT;
+    }
+    rlhresult_t result = _rlhSizeInfoCheck(size_info);
+    if (result != RLH_RESULT_OK)
+    {
+      return result;
+    }
+    _rlhTermSetPixelSize(
+        term,
+        size_info);
   }
 
   rlhresult_t rlhTermClearTileData(rlhTerm_h term)
@@ -830,14 +905,18 @@ extern "C"
   {
     if (glyph > term->glyph_count)
       return;
-    float position_s = (float)pixel_x / (float)term->pixel_width;
-    float position_t = position_s + ((float)pixel_w / (float)term->pixel_width);
-    float position_p = (float)pixel_y / (float)term->pixel_height;
-    float position_q = position_p + ((float)pixel_h / (float)term->pixel_height);
-    position_s *= term->pixel_scale;
-    position_t *= term->pixel_scale;
-    position_p *= term->pixel_scale;
-    position_q *= term->pixel_scale;
+    if (!(
+            pixel_x + pixel_w > 0 &&
+            pixel_x < term->unscaled_pixel_width &&
+            pixel_y + pixel_h > 0 &&
+            pixel_y < term->unscaled_pixel_height))
+    {
+      return;
+    }
+    float position_s = (float)pixel_x / (float)term->unscaled_pixel_width;
+    float position_t = position_s + ((float)pixel_w / (float)term->unscaled_pixel_width);
+    float position_p = (float)pixel_y / (float)term->unscaled_pixel_height;
+    float position_q = position_p + ((float)pixel_h / (float)term->unscaled_pixel_height);
     size_t glyph_stpqp_i = glyph * RLH_FONTMAP_COORDINATES_PER_GLYPH;
     const float atlas_s = term->glyph_stpqp[glyph_stpqp_i++];
     const float atlas_t = term->glyph_stpqp[glyph_stpqp_i++];
@@ -910,7 +989,7 @@ extern "C"
   {
     if (!_rlhTermTryReserveVertexData(term))
       return RLH_RESULT_ERROR_OUT_OF_MEMORY;
-    _rlhTermPushTile(term, 0, 0, term->pixel_width, term->pixel_height, glyph, fg, bg);
+    _rlhTermPushTile(term, 0, 0, term->unscaled_pixel_width, term->unscaled_pixel_height, glyph, fg, bg);
     return RLH_RESULT_OK;
   }
 
@@ -918,11 +997,11 @@ extern "C"
                               const uint16_t glyph, const rlhColor_s fg,
                               const rlhColor_s bg)
   {
-    const int pixel_x = grid_x * term->tile_width;
-    const int pixel_y = grid_y * term->tile_height;
+    const int pixel_x = grid_x * term->tile_width * term->pixel_scale;
+    const int pixel_y = grid_y * term->tile_height * term->pixel_scale;
     if (!_rlhTermTryReserveVertexData(term))
       return RLH_RESULT_ERROR_OUT_OF_MEMORY;
-    _rlhTermPushTile(term, pixel_x, pixel_y, term->tile_width, term->tile_height, glyph, fg, bg);
+    _rlhTermPushTile(term, pixel_x, pixel_y, term->tile_width * term->pixel_scale, term->tile_height * term->pixel_scale, glyph, fg, bg);
     return RLH_RESULT_OK;
   }
 
@@ -933,10 +1012,10 @@ extern "C"
   {
     if (!_rlhTermTryReserveVertexData(term))
       return RLH_RESULT_ERROR_OUT_OF_MEMORY;
-    const unsigned int pixel_x = (unsigned int)grid_x * term->tile_width;
-    const unsigned int pixel_y = (unsigned int)grid_y * term->tile_height;
-    const unsigned int pixel_w_u = (unsigned int)tile_pixel_width;
-    const unsigned int pixel_h_u = (unsigned int)tile_pixel_height;
+    const unsigned int pixel_x = (unsigned int)grid_x * term->tile_width * term->pixel_scale;
+    const unsigned int pixel_y = (unsigned int)grid_y * term->tile_height * term->pixel_scale;
+    const unsigned int pixel_w_u = (unsigned int)tile_pixel_width * term->pixel_scale;
+    const unsigned int pixel_h_u = (unsigned int)tile_pixel_height * term->pixel_scale;
     _rlhTermPushTile(term, pixel_x, pixel_y, pixel_w_u, pixel_h_u, glyph, fg, bg);
     return RLH_RESULT_OK;
   }
@@ -947,8 +1026,8 @@ extern "C"
   {
     if (!_rlhTermTryReserveVertexData(term))
       return RLH_RESULT_ERROR_OUT_OF_MEMORY;
-    _rlhTermPushTile(term, (unsigned int)screen_pixel_x, (unsigned int)screen_pixel_y,
-                     term->tile_width, term->tile_height, glyph, fg, bg);
+    _rlhTermPushTile(term, (unsigned int)screen_pixel_x * term->pixel_scale, (unsigned int)screen_pixel_y * term->pixel_scale,
+                     term->tile_width * term->pixel_scale, term->tile_height * term->pixel_scale, glyph, fg, bg);
     return RLH_RESULT_OK;
   }
 
@@ -959,7 +1038,7 @@ extern "C"
   {
     if (!_rlhTermTryReserveVertexData(term))
       return RLH_RESULT_ERROR_OUT_OF_MEMORY;
-    _rlhTermPushTile(term, screen_pixel_x, screen_pixel_y, tile_pixel_width, tile_pixel_height,
+    _rlhTermPushTile(term, screen_pixel_x * term->pixel_scale, screen_pixel_y * term->pixel_scale, tile_pixel_width * term->pixel_scale, tile_pixel_height * term->pixel_scale,
                      glyph, fg, bg);
     return RLH_RESULT_OK;
   }
@@ -993,35 +1072,62 @@ extern "C"
   }
 
   static void _rlhSetTermScissor(const int translate_x, const int translate_y, const int width,
-                                 const int height)
+                                 const int height, const int viewport_height)
   {
     GLD_START();
+    const int actual_translate_y = viewport_height - (translate_x + height);
     // crop the scissor area so the position is not less than 0 (this causes opengl error)
     const int cropped_x = MAX(translate_x, 0);
-    const int cropped_y = MAX(translate_y, 0);
-    const int translate_x_difference = cropped_x - translate_x;
-    const int translate_y_difference = cropped_y - translate_y;
-    const int cropped_width = width - translate_x_difference;
-    const int cropped_height = height - translate_y_difference;
+    const int cropped_y = MAX(actual_translate_y, 0);
+    int cropped_width = width;
+    int cropped_height = height;
+    if (cropped_x != translate_x)
+    {
+      cropped_width += translate_x;
+    }
+    if (cropped_y != actual_translate_y)
+    {
+      cropped_height += actual_translate_y;
+    }
     // set scissor
     GLD_CALL(glScissor(cropped_x, cropped_y, cropped_width, cropped_height));
     GLD_CALL(glEnable(GL_SCISSOR_TEST));
   }
 
-  rlhresult_t rlhTermDrawCentered(rlhTerm_h const term,
-                                  const int viewport_width, const int viewport_height)
+  rlhresult_t rlhTermDrawAligned(rlhTerm_h const term, const int viewport_width, const int viewport_height, rlhtermhalign_t h_align, rlhtermvalign_t v_align)
   {
     if (term == NULL)
     {
       return RLH_RESULT_ERROR_NULL_ARGUMENT;
     }
-    const int width_difference = viewport_width - term->pixel_width;
-    const int height_difference = viewport_height - term->pixel_height;
-    const int translate_x = width_difference / 2;
-    const int translate_y = height_difference / 2;
-
+    const int width_difference = viewport_width - term->scaled_pixel_width;
+    const int height_difference = viewport_height - term->scaled_pixel_height;
+    int translate_x, translate_y;
+    switch (h_align)
+    {
+    case RLH_HALIGN_LEFT:
+      translate_x = 0;
+      break;
+    case RLH_HALIGN_RIGHT:
+      translate_x = width_difference;
+      break;
+    case RLH_HALIGN_CENTER:
+    default:
+      translate_x = width_difference / 2;
+    }
+    switch (v_align)
+    {
+    case RLH_VALIGN_TOP:
+      translate_y = 0;
+      break;
+    case RLH_VALIGN_BOTTOM:
+      translate_y = height_difference;
+      break;
+    case RLH_VALIGN_CENTER:
+    default:
+      translate_y = height_difference / 2;
+    }
     rlhTermDrawTranslated(term, translate_x, translate_y, viewport_width, viewport_height);
-
     return RLH_RESULT_OK;
   }
 
@@ -1036,8 +1142,8 @@ extern "C"
     float matrix[RLH_MATRIX_FLOAT_COUNT];
     memcpy(matrix, RLH_OPENGL_SCREEN_MATRIX, sizeof(float) * RLH_MATRIX_FLOAT_COUNT);
     _rlhTransformMatrix(matrix, viewport_width, viewport_height, translate_x, translate_y,
-                        term->pixel_width, term->pixel_height);
-    _rlhSetTermScissor(translate_x, translate_y, term->pixel_width, term->pixel_height);
+                        term->scaled_pixel_width, term->scaled_pixel_height);
+    _rlhSetTermScissor(translate_x, translate_y, term->scaled_pixel_width, term->scaled_pixel_height, viewport_height);
     // draw
     rlhTermDrawMatrix(term, matrix);
     GLD_START();
@@ -1059,9 +1165,9 @@ extern "C"
     float matrix[RLH_MATRIX_FLOAT_COUNT];
     memcpy(matrix, RLH_OPENGL_SCREEN_MATRIX, sizeof(float) * RLH_MATRIX_FLOAT_COUNT);
     _rlhTransformMatrix(matrix, viewport_width, viewport_height, translate_x, translate_y,
-                        term->pixel_width * scale_x, term->pixel_height * scale_y);
-    _rlhSetTermScissor(translate_x, translate_y, term->pixel_width * scale_x,
-                       term->pixel_height * scale_y);
+                        term->scaled_pixel_width * scale_x, term->scaled_pixel_height * scale_y);
+    _rlhSetTermScissor(translate_x, translate_y, term->scaled_pixel_width * scale_x,
+                       term->scaled_pixel_height * scale_y, viewport_height);
     // draw
     rlhTermDrawMatrix(term, matrix);
     GLD_START();
