@@ -93,7 +93,6 @@ int main()
   }
   // load the atlas image from secondary storage
   int i_width, i_height;
-  stbi_set_flip_vertically_on_load(1);
   uint8_t *pixels = stbi_load("cp_8x8_rgba_bg_alpha.png", &i_width, &i_height, NULL, 4);
   if (!pixels)
   {
@@ -130,10 +129,10 @@ int main()
             stpqp[i++] = uvtilesize * x + uvtilesize; // the t coordinate (right x)
             break;
           case 2:
-            stpqp[i++] = uvtilesize * y + uvtilesize; // the p coordinate (top y)
+            stpqp[i++] = uvtilesize * y; // the p coordinate (top y)
             break;
           case 3:
-            stpqp[i++] = uvtilesize * y; // the q coordinate (bottom y)
+            stpqp[i++] = uvtilesize * y + uvtilesize; // the q coordinate (bottom y)
             break;
           case 4:
             stpqp[i++] = 0; // the 2nd p coordinate (texture page id)
