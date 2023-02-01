@@ -1229,13 +1229,13 @@ extern "C"
       glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, stride, (void *)0);
       glEnableVertexAttribArray(0);
       // uvp
-      glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride, (void *)2);
+      glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride, (void *)(2 * sizeof(float)));
       glEnableVertexAttribArray(1);
       // forground color
-      glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, stride, (void *)5);
+      glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, stride, (void *)(5 * sizeof(float)));
       glEnableVertexAttribArray(2);
       // background color
-      glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, stride, (void *)8);
+      glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, stride, (void *)(9 * sizeof(float)));
       glEnableVertexAttribArray(3);
     }
     // Bind objects
