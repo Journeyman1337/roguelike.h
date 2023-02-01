@@ -227,7 +227,7 @@ int main()
     // note that we made the terminal smaller than the window, so there will be space outside of it
     rlhTermDrawCentered(t, w_width, w_height);
     // clearing the terminal is required to prevent memory leaks
-    // rlhTermClearTileData(t);
+    rlhTermClearTileData(t);
     // swap the window buffers. this presents the frame to the screen and reuses the framebuffer
     // from the previous frame for the next draw
     glfwSwapBuffers(window);
