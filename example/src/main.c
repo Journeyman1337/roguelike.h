@@ -30,6 +30,19 @@
 // if glDebug.h comes across an error, we want it sent to this callback for printing
 void gld_callback(const char *error) { printf("%s\n", error); }
 
+void framebuffer_size_callback(GLFWwindow *window, int width, int height)
+{
+  rlhTerm_h term = glfwGetWindowUserPointer(window);
+  rlhTermSizeInfo_t size_info;
+  size_info.width = width;
+  size_info.height = height;
+  size_info.pixel_scale = rlhTermGetPixelScale(term);
+  size_info.size_mode = RLH_SIZE_SCALED_PIXELS;
+  size_info.floor_pixels_to_tiles = RLH_TRUE;
+  rlhTermGetTileSize(term, &size_info.tile_width, &size_info.tile_height);
+  rlhTermSetSize(term, &size_info);
+}
+
 int main()
 {
   // calculate some constant values that we will need to size the terminal and the window
@@ -40,8 +53,6 @@ int main()
   const float pixel_scale = 2; // the ratio of terminal pixels to window pixels
   const int border_pixels =
       32; // this is the size of the gap between edges of the terminal and the window edges
-  const int w_width = (tiles_wide * tile_width * pixel_scale) + (border_pixels * 2);
-  const int w_height = (tiles_tall * tile_height * pixel_scale) + (border_pixels * 2);
 
   // set the debug callback for glDebug.h
   GLD_SET_CALLBACK(gld_callback);
@@ -60,9 +71,10 @@ int main()
 #ifdef __APPLE__
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
 #endif
-  glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+  glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
+  glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
   // create the window
-  GLFWwindow *window = glfwCreateWindow(w_width, w_height, "rlh test", NULL, NULL);
+  GLFWwindow *window = glfwCreateWindow(1, 1, "rlh test", NULL, NULL);
   glfwMakeContextCurrent(window);
   if (!window)
   {
@@ -141,8 +153,6 @@ int main()
   atlas_info.pixel_data = pixels;
   atlas_info.glyph_count = sheet_sprite_count;
   atlas_info.glyph_stpqp = stpqp;
-  atlas_info.tile_width = i_width / sheet_sprite_dimensions;
-  atlas_info.tile_height = i_height / sheet_sprite_dimensions;
   // create the size info
   rlhTermSizeInfo_t size_info;
   memset(&size_info, 0, sizeof(rlhTermSizeInfo_t));
@@ -150,6 +160,8 @@ int main()
   size_info.height = tiles_tall;
   size_info.pixel_scale = pixel_scale;
   size_info.size_mode = RLH_SIZE_TILES;
+  size_info.tile_width = i_width / sheet_sprite_dimensions;
+  size_info.tile_height = i_height / sheet_sprite_dimensions;
   // create the term info
   rlhTermCreateInfo_t term_info;
   term_info.atlas_info = &atlas_info;
@@ -157,12 +169,20 @@ int main()
   // create the terminal
   rlhTerm_h t = NULL;
   rlhresult_t result = rlhTermCreate(&term_info, &t);
+  int t_width, t_height;
+  rlhTermGetScaledPixelSize(t, &t_width, &t_height);
+  int w_width = t_width + border_pixels * 2;
+  int w_height = t_height + border_pixels * 2;
+  glfwSetWindowSize(window, w_width, w_height);
+  glfwShowWindow(window);
   if (result != RLH_RESULT_OK)
   {
     glfwTerminate();
     printf("Error creating terminal: %s\n", RLH_RESULT_DESCRIPTIONS[result]);
     return 6;
   }
+  glfwSetWindowUserPointer(window, t);
+  glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
   // the game loop
   while (!glfwWindowShouldClose(window)) // keep looping until the window is closed.
   {
@@ -219,13 +239,15 @@ int main()
       rlhTermPushGrid(t, x + label_x, label_2_y, label_2[x], RLH_RED, RLH_GREEN);
     }
 
+    // get the current window size
+    glfwGetFramebufferSize(window, &w_width, &w_height);
     // set the viewport to the window dimensions
     rlhViewport(0, 0, w_width, w_height);
     // draw clear color as silver
     rlhClearColor(RLH_SILVER);
-    // draw the terminal centered within the viewport.
+    // draw the terminal aligned within the viewport.
     // note that we made the terminal smaller than the window, so there will be space outside of it
-    rlhTermDrawCentered(t, w_width, w_height);
+    rlhTermDrawAligned(t, w_width, w_height, RLH_HALIGN_LEFT, RLH_VALIGN_TOP);
     // clearing the terminal is required to prevent memory leaks
     rlhTermClearTileData(t);
     // swap the window buffers. this presents the frame to the screen and reuses the framebuffer
