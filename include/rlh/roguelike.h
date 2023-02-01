@@ -242,7 +242,7 @@ extern "C"
 
   const char *RLH_VERTEX_SOURCE =
       "#version 330 core\n"
-      "in vec3 a_pos;\n"
+      "in vec2 a_pos;\n"
       "in vec3 a_uvp;\n"
       "in vec4 a_fg;\n"
       "in vec4 a_bg;\n"
@@ -252,7 +252,7 @@ extern "C"
       "uniform mat4 u_matrix;\n"
       "void main()\n"
       "{\n"
-      "  gl_Position = u_matrix * vec4(a_pos, 1.0);\n"
+      "  gl_Position = u_matrix * vec4(a_pos, 0.0, 1.0);\n"
       "  v_uvp = a_uvp;\n"
       "  v_fg = a_fg;\n"
       "  v_bg = a_bg;"
@@ -326,12 +326,13 @@ extern "C"
     size_t vertex_data_tile_capacity;
     size_t vertex_data_tile_count;
     float *vertex_data;
+    rlhbool_t vertex_data_changed;
     size_t atlas_width;
     size_t atlas_height;
     size_t atlas_pages;
     size_t glyph_count;
     float *glyph_stpqp;
-    size_t elements_glyph_count;
+    size_t element_glyph_count;
     GLuint *element_data;
     rlhcolortype_t atlas_color;
     rlhfragmenttype_t fragment_type;
@@ -448,21 +449,20 @@ extern "C"
            RLH_ELEMENTS_PER_TILE;
   }
 
-  static inline rlhresult_t _rlhTermTryAppendElements(rlhTerm_h const term, size_t elements_glyph_count)
+  static inline rlhresult_t _rlhTermTryAppendElements(rlhTerm_h const term)
   {
-    if (term->elements_glyph_count >= elements_glyph_count)
+    if (term->element_glyph_count >= term->vertex_data_tile_count)
       return RLH_RESULT_OK;
-    unsigned int *new_element_data = realloc(term->element_data, _rlhGetElementDataSize(elements_glyph_count));
+    unsigned int *new_element_data = realloc(term->element_data, _rlhGetElementDataSize(term->vertex_data_tile_count));
     if (new_element_data == NULL)
     {
       return RLH_RESULT_ERROR_OUT_OF_MEMORY;
     }
     term->element_data = new_element_data;
-    term->elements_glyph_count = elements_glyph_count;
-    for (; term->elements_glyph_count < elements_glyph_count; term->elements_glyph_count++)
+    for (; term->element_glyph_count < term->vertex_data_tile_count; term->element_glyph_count++)
     {
-      const GLuint vert0 = term->elements_glyph_count * RLH_VERTICES_PER_TILE;
-      size_t element_data_i = term->elements_glyph_count * RLH_ELEMENTS_PER_TILE;
+      const GLuint vert0 = term->element_glyph_count * RLH_VERTICES_PER_TILE;
+      size_t element_data_i = term->element_glyph_count * RLH_ELEMENTS_PER_TILE;
       term->element_data[element_data_i++] = vert0;
       term->element_data[element_data_i++] = vert0 + 1;
       term->element_data[element_data_i++] = vert0 + 2;
@@ -830,10 +830,14 @@ extern "C"
   {
     if (glyph > term->glyph_count)
       return;
-    const float position_s = (float)pixel_x / (float)term->pixel_width;
-    const float position_t = position_s + ((float)pixel_w / (float)term->pixel_width);
-    const float position_p = (float)pixel_y / (float)term->pixel_height;
-    const float position_q = position_p + ((float)pixel_h / (float)term->pixel_height);
+    float position_s = (float)pixel_x / (float)term->pixel_width;
+    float position_t = position_s + ((float)pixel_w / (float)term->pixel_width);
+    float position_p = (float)pixel_y / (float)term->pixel_height;
+    float position_q = position_p + ((float)pixel_h / (float)term->pixel_height);
+    position_s *= term->pixel_scale;
+    position_t *= term->pixel_scale;
+    position_p *= term->pixel_scale;
+    position_q *= term->pixel_scale;
     size_t glyph_stpqp_i = glyph * RLH_FONTMAP_COORDINATES_PER_GLYPH;
     const float atlas_s = term->glyph_stpqp[glyph_stpqp_i++];
     const float atlas_t = term->glyph_stpqp[glyph_stpqp_i++];
@@ -898,6 +902,7 @@ extern "C"
     term->vertex_data[index++] = bg.b;
     term->vertex_data[index] = bg.a;
     term->vertex_data_tile_count++;
+    term->vertex_data_changed = RLH_TRUE;
   }
 
   rlhresult_t rlhTermPushFill(rlhTerm_h const term, const uint16_t glyph, const rlhColor_s fg,
@@ -1072,28 +1077,74 @@ extern "C"
     {
       return RLH_RESULT_ERROR_NULL_ARGUMENT;
     }
-
-    if (term->vertex_data_tile_count > 0) // only render if there are tiles to render
+    if (term->vertex_data_tile_count == 0)
     {
-      GLD_START();
-      // Update vertex buffer and element buffer data. Create objects if they don't exist yet.
-      _rlhTermTryAppendElements(term, term->vertex_data_tile_count);
-      // TODO
-      // Bind objects
-      GLD_CALL(glBindVertexArray(term->gl_vertex_array));
-      GLD_CALL(glUseProgram(term->gl_program));
-      // bind the atlas texture
-      GLD_CALL(glActiveTexture(GL_TEXTURE0 + RLH_ATLAS_TEXTURE_SLOT));
-      GLD_CALL(glBindTexture(GL_TEXTURE_2D_ARRAY, term->gl_atlas_texture_2d_array));
-      // set the matrix uniform
-      GLD_CALL(glUniformMatrix4fv(term->gl_matrix_uniform_location, 1, 0, matrix_4x4));
-      // set blend mode
-      GLD_CALL(glEnable(GL_BLEND));
-      GLD_CALL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
-      // DRAW!!!
-      GLD_CALL(glDrawElements(GL_TRIANGLES, _rlhGetElementCount(term->vertex_data_tile_count), GL_UNSIGNED_INT, NULL));
+      return RLH_RESULT_OK;
     }
-
+    GLD_START();
+    // Update vertex buffer and element buffer data. Create objects if they don't exist yet.
+    const size_t before_element_glyph_count = term->element_glyph_count;
+    rlhresult_t result = _rlhTermTryAppendElements(term);
+    if (result != RLH_RESULT_OK)
+    {
+      return result;
+    }
+    rlhbool_t create_vertex_array = term->gl_vertex_array == GL_NONE;
+    if (create_vertex_array)
+    {
+      GLD_CALL(glGenVertexArrays(1, &term->gl_vertex_array));
+      GLD_CALL(glGenBuffers(1, &term->gl_vertex_buffer));
+      GLD_CALL(glGenBuffers(1, &term->gl_element_buffer));
+    }
+    if (term->vertex_data_changed)
+    {
+      GLD_CALL(glBindVertexArray(term->gl_vertex_array));
+      GLD_CALL(glBindBuffer(GL_ARRAY_BUFFER, term->gl_vertex_buffer));
+      GLD_CALL(glBufferData(
+          GL_ARRAY_BUFFER,
+          _rlhGetVertexDataSize(term->vertex_data_tile_count),
+          term->vertex_data,
+          GL_STREAM_DRAW));
+      term->vertex_data_changed = RLH_FALSE;
+    }
+    if (before_element_glyph_count != term->element_glyph_count)
+    {
+      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, term->gl_element_buffer);
+      glBufferData(
+          GL_ELEMENT_ARRAY_BUFFER,
+          _rlhGetElementDataSize(term->element_glyph_count),
+          term->element_data,
+          GL_DYNAMIC_DRAW);
+    }
+    if (create_vertex_array)
+    {
+      const size_t stride = RLH_VERTEX_DATA_ATTRIBUTES_PER_VERTEX * sizeof(float);
+      // position
+      glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, stride, (void *)0);
+      glEnableVertexAttribArray(0);
+      // uvp
+      glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride, (void *)2);
+      glEnableVertexAttribArray(1);
+      // forground color
+      glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, stride, (void *)5);
+      glEnableVertexAttribArray(2);
+      // background color
+      glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, stride, (void *)8);
+      glEnableVertexAttribArray(3);
+    }
+    // Bind objects
+    GLD_CALL(glBindVertexArray(term->gl_vertex_array));
+    GLD_CALL(glUseProgram(term->gl_program));
+    // bind the atlas texture
+    GLD_CALL(glActiveTexture(GL_TEXTURE0 + RLH_ATLAS_TEXTURE_SLOT));
+    GLD_CALL(glBindTexture(GL_TEXTURE_2D_ARRAY, term->gl_atlas_texture_2d_array));
+    // set the matrix uniform
+    GLD_CALL(glUniformMatrix4fv(term->gl_matrix_uniform_location, 1, GL_TRUE, matrix_4x4));
+    // set blend mode
+    GLD_CALL(glEnable(GL_BLEND));
+    GLD_CALL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+    // DRAW!!!
+    GLD_CALL(glDrawElements(GL_TRIANGLES, _rlhGetElementCount(term->vertex_data_tile_count), GL_UNSIGNED_INT, NULL));
     return RLH_RESULT_OK;
   }
 #endif
