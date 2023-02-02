@@ -26,15 +26,188 @@
     The source for this library can be found on GitHub:
     https://github.com/Journeyman-dev/roguelike.h
 
+    HOW TO SETUP
+    The roguelike.h library can be included in your project in one of three different ways:
+        1. Copy and paste the roguelike.h file directly into your source tree.
+        2. Clone the GitHub as a git submodule to your project's repository.
+          - In bash console from the root directory of your project's repository:
+                git submodule add https://github.com/Journeyman-dev/roguelike.h
+                git submodule update --init
+          - In your project's top level CMakeLists.txt:
+                add_subdirectory(roguelike.h)
+                target_add_link_libraries(YOUR_TARGET_NAME PUBLIC rlh::rlh)
+        3. Fetch it using CMake FetchContent:
+          - Fetch it in your project's CMakeLists.txt:
+                Include(FetchContent)
+                FetchContent_Declare(
+                        rlh
+                        GIT_REPOSITORY https://github.com/Journeyman-dev/roguelike.h
+                        GIT_TAG        v1.0.0 # replace with the version that you want
+                        FIND_PACKAGE_ARGS
+                )
+                set(RLH_BUILD_EXAMPLE OFF) # Set to ON to build the example target.
+                set(RLH_EXAMPLE_AUTO_FETCH OFF) # Set to ON to fetch the example dependencies (see bellow).
+                FetchContent_MakeAvailable(rlh)
+          - Link it with the CMake target of your project:
+                target_link_libraries(YOUR_TARGET_NAME PRIVATE rlh::rlh)
+
+    After roguelike.h is included in your project, you must implement the library before you can
+    actually use it. To implement roguelike.h, create a new .c or .cpp file and write in it the
+    following:
+
+            #include <glad/glad.h> // you can use a different opengl loader here (see bellow)
+            #include <gl_debug.h> // this line is optional (see bellow)
+            #define RLH_RETAINED_MODE // optional (see bellow)
+            #define RLH_IMPLEMENTATION
+            #include <rlh/roguelike.h>
+
+    roguelike.h uses the OpenGL API to do its rendering. There are many open source libraries
+    avaliable for loading OpenGL bindings, such as glad (https://github.com/Dav1dde/glad) and GLEW
+    (http://glew.sourceforge.net/). It does not matter which loading library you use, but it must
+    support at least OpenGL 3.3 core version. A pre-generated glad CMake project targeting this
+    version of OpenGL can be found here: https://github.com/Journeyman-dev/glad-opengl33-core.
+
+    If you want to debug the OpenGL API calls within roguelike.h, you can use the gl_debug.h
+    header only library by including it before implementing roguelike.h. The gl_debug.h library is
+    avaliable here: https://github.com/Journeyman-dev/glDebug.h. Look at the comment on top of
+    that header for more information about its usage.
+
+    By default, roguelike.h will clear the tile buffer after each draw. This requires you to set
+    all tiles over again the next frame from scratch. If you want to instead retain tiles from
+    previous draws unless you explicitly clear the tile buffer with the function
+    rlhTermClearTileData(), define RLH_RETAINED_MODE before implementing the header. If you do this,
+    be very careful! If you forget to clear the tile buffer and keep adding tiles to it over time,
+    this can result in a nasty memory leak.
+
+    HOW TO DEBUG
+    Many functions in roguelike.h return an enum value of type rlhresult_t. Result codes with
+    names that start with RLH_RESULT_ERROR_ are returned if an error occured in the function's
+    execution. These values are all greater than RLH_RESULT_LAST_NON_ERROR.
+    String descriptions of result codes are stored in the constant string array variable
+    RLH_RESULT_DESCRIPTIONS. To get the string description of a specific result code from this
+    array, index the array with the result code.
+    This is an example of how to check for errors and print the result code from a function:
+
+        rlhresult_t result = rlhFunction(arg0, arg1, arg2);
+        printf("function result description: %s\n", RLH_RESULT_DESCRIPTIONS[result]);
+        if (result > RLH_RESULT_LAST_NON_ERROR)
+        {
+            printf("that was an error!\n");
+            return 1;
+        }
+
+    As explained above, the OpenGL calls in roguelike.h is also debuggable using glDebug.h library.
+    Look in the "HOW TO SETUP" section for more details.
+
+    HOW TO MAKE COLORS
+    Colors in roguelike.h are floating point RGBA colors, with a each color channel represented by a float
+    value between 0.0f and 1.0f. Colors are stored in structs of type rlhColor_s. To quickly create
+    a color struct, you can use the included macros such as RLH_RED() or RLH_TRANSPARENT(). You can
+    also use the RLH_COLOR() macro to quickly create a color with the given rgba values, like:
+
+        rlmhColor_s my_color = RLH_COLOR(0.5f, 0.2f, 1.0f);
+
+    HOW TO USE
+    To use roguelike.h, you must bind it to an OpenGL context. There are many open source platform
+    libraries for creating a window for rendering, including GLFW (https://www.glfw.org/) and SDL
+    (https://www.libsdl.org/). An example of using GLFW is included in the roguelike.h repository on
+    GitHub in the example folder.
+
+    The general initialization steps for platform libraries are:
+
+        - Initialize the library.
+        - Create a window.
+        - Load an OpenGL context in the window, usually by passing a function pointer from your
+          OpenGL loading library as an argument (loading libraries are explained in the"HOW TO
+          SETUP" section).
+        - Make the window context "current" so that the next OpenGL function calls will use it.
+
+    After the window is set up for rendering, you can initalize all of your roguelike.h objects. To
+    render with roguelike.h, you require a terminal object (rlhTerm_h), which represents the rectangle
+    on the window you want to draw to. This terminal is created with the function rlhTermCreate(),
+    which accepts a pointer to a rlhTermCreateInfo_s struct as its first argument. This struct has two
+    pointer arguments that point to two other info structs.
+
+    The property of rlhTermCreateInfo_s is a pointer to a rlhAtlasCreateInfo_s, which is for defining
+    the atlas to render in the terminal. The atlas requires information about the image to use,
+    including its width, height, page count, channel byte size, and color type. You can use a texture
+    with multiple texture pages which has glyphs spread across them. The atlas also requires the "stpqp"
+    coordinates of each glyph. The "stpqp" texture coordinates are floating point coordinates within
+    the entire atlas texture that surround each glyph. The coordinates used go from (0,0) in the upper
+    left corner of the entire atlas image, to (1,1) in the bottom right corner. Each glyph requires 5
+    floating point coordinates, each represented by one of the letters in stpqp. The s coordinate is
+    the left side of the glyph on the x axis, the t is the right side of the glyph on the x axis,
+    the p is the top side of the glyph on the y axis, and the q is the bottom side of the glyph
+    on the y axis. If you want to, you can utilize store multiple texture pages of the same size
+    into the bitmap array. The final p coordinate is the page number that the glyph exists on. If
+    you have only one page, this coordinate will always be 0, which is the index for the first page.
+    For a detailed example of how to set up an atlas for a 16x16 glyph codepage atlas, look at the
+    example on the roguelike.h GitHub repository.
+
+    The second property of rlhTermCreateInfo_s is a pointer to a rlhSizeInfo_s, which contains
+    properties that define how a terminal should be sized. With the pixel scale property, it is
+    possible to scale every pixel within the terminal so that they take up multiple screen pixels.
+    You can also specify the pixel width and height of each tile in the terminal, and you can size
+    the entire terminal based on specified tile dimensions, a specified pixel width and height
+    before scaling, or a specified pixel width and height after scaling. If you choose to scale the
+    terminal based on a pixel size, you can also floor the terminal dimensions to the next lowest
+    value that divides evenly into tiles wide and tall.
+
+    Terminals do not have to be sized to perfectly match the viewport that you are drawing too. If
+    the terminal is smaller than the viewport, you can use the function rlhTermDrawAligned() to draw
+    the terminal within the viewport aligned to the center or specific edges, with the extra space
+    left over on the opposite edges if there is any. This extra space be filled with the clear color,
+    which you can draw to the screen with the function rlhClearColor(). If you wish for the terminal
+    background color to be different from the clear color, you can start filling your terminal with tiles
+    by calling rlhTermPushFill() to push a tile that covers the entire terminal. If you use a glyph that
+    is entirely transparent, you can use this to draw a solid color across the entire background of the
+    terminal.
+
+    Next you need to create a "render loop", or a loop which will repeat over and over again until
+    the window is closed. Usually, this kind of loop can look like the following (platform libary
+    specific stuff is in pseudocode):
+
+        while (!windowShouldClose(window)) // platform library specific function to keep looping
+        // until the window is closed
+        {
+          pollEvents(); // Platform library specific function to update the window and its buttons
+          // based on mouse clicks, mouse movements, etc.
+          // Do your roguelike.h glyph render push functions and game logic per frame here.
+          // To draw tiles, use the rlhTermPushTileX functions.
+          rlhViewport(0, 0, window_width, window_height); // Always do this before the actual
+          // drawing so opengl knows the window size.
+          rlhClearColor(RLH_BLACK); // Color the entire viewport to
+          // clear it of anything left over from previous frames.
+          rlhTermDraw(terminal, atlas); // You can use a different rlhTermDrawX function to draw the
+          // terminal to the viewport in different ways.
+          // When you call an rlhTermDrawX function, the tile data is automatically cleared of all
+          // tiles.
+          swapBuffers(window); // platform library specific function to swap the window's buffers
+        }
+
+    After this loop, you need to delete the resources from both roguelike.h and the platform
+    library. Use rlhAtlasDestroy to free the atlas, and then use rlhTermDestroy to free the
+    terminal. If you want, you can easily wrap all of this stuff in a C++ class, and
+    automatically free all this automatically when the class goes out of scope using RAII
+    (https://en.cppreference.com/w/cpp/language/raii).
+
+    For more information about each roguelike.h function you can call, look for comments above their
+    declarations further down in this header file.
+
     CHANGELOG
     - Version 2.0
         Features
             - Depreciated rlhAtlas_s, and all atlas manipulation is done directly with rlhTerminal_s.
             - Extended maximum glyph count for atlases from 65535 to as many that memory can contain.
             - Added support for G, GA, RGBA, and BGRA atlas bitmaps.
+            - Simplify creation and sizing functions with info structs to pass as arguments.
+            - Refactor terminal sizing API a new enum to size the terminal based on tile dimensions, pixel dimensions before
+              scaling, and pixel dimensions after scaling.
+            - Change pixel scale to be integral to prevent pixel distortion and weird bugs from decimal scales.
+            - Replaced rlhTermDrawCentered with rlhTermDrawAligned which allows for drawing the
+            terminal aligned to the edges of the viewport as well as center.
             - Switched from using glDebug.h to the newly made gl_debug.h library.
             - Modified the OpenGL renderer to use a vertex buffer object for storing tile data.
-            - Added support for OpenGL ES 2 so roguelike.h now works in emscripten and mobile platforms.
     - Version 1.4
         Features
             - Renderer now gets and stores shader uniforms on terminal initialization instead of getting it every
