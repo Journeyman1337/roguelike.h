@@ -482,7 +482,8 @@ extern "C"
   const char *RLH_FRAGMENT_STENCIL_SOURCE =
       "#version 330 core\n"
       "in vec3 v_uvp;\n"
-      "in vec4 v_color;\n"
+      "in vec4 v_fg;\n"
+      "in vec4 v_bg;\n"
       "out vec4 f_color;\n"
       "uniform sampler2DArray u_atlas;\n"
       "void main()\n"
@@ -541,12 +542,12 @@ extern "C"
     GLuint gl_atlas_texture_2d_array;
   } rlhTerm_s;
 
-  static inline GLuint _rlhColorTypeToGlFormat(const rlhcolortype_t color)
+  static inline GLenum _rlhColorTypeToGlFormat(const rlhcolortype_t color)
   {
     switch (color)
     {
     case RLH_COLOR_G:
-      return GL_R;
+      return GL_RED;
     case RLH_COLOR_GA:
       return GL_RG;
     case RLH_COLOR_RGBA:
@@ -558,7 +559,7 @@ extern "C"
     }
   }
 
-  static inline GLuint _rlhColorTypeToGlInternalFormat(const rlhcolortype_t color)
+  static inline GLenum _rlhColorTypeToGlInternalFormat(const rlhcolortype_t color)
   {
     switch (color)
     {
@@ -574,11 +575,27 @@ extern "C"
     }
   }
 
+  static inline GLenum _rlhChannelSizeToType(const size_t channel_size)
+  {
+    switch (channel_size)
+    {
+    case 1:
+      return GL_UNSIGNED_BYTE;
+    case 2:
+      return GL_UNSIGNED_SHORT;
+    case 4:
+      return GL_UNSIGNED_INT;
+    default:
+      return GL_NONE;
+    }
+  }
+
   static inline rlhresult_t _rlhCreateGlTextureArray(const rlhAtlasCreateInfo_t *const atlas_info, GLint *const gl_texture_2d_array)
   {
     *gl_texture_2d_array = GL_NONE;
     const GLenum format = _rlhColorTypeToGlFormat(atlas_info->color);
     const GLenum internal_format = _rlhColorTypeToGlInternalFormat(atlas_info->color);
+    const GLenum pixel_type = _rlhChannelSizeToType(atlas_info->channel_size);
     if (internal_format == GL_NONE || format == GL_NONE)
     {
       return RLH_RESULT_ERROR_INVALID_VALUE;
@@ -592,7 +609,7 @@ extern "C"
     GLD_CALL(glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
     GLD_CALL(glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_BASE_LEVEL, 0));
     GLD_CALL(glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAX_LEVEL, 0));
-    GLD_CALL(glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, internal_format, atlas_info->width, atlas_info->height, atlas_info->pages, 0, format, GL_UNSIGNED_BYTE, atlas_info->pixel_data));
+    GLD_CALL(glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, internal_format, atlas_info->width, atlas_info->height, atlas_info->pages, 0, format, pixel_type, atlas_info->pixel_data));
     return RLH_RESULT_OK;
   }
 
