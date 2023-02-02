@@ -1,29 +1,61 @@
-// SPDX-FileCopyrightText: 2021-2022 Daniel Valcour <fosssweeper@gmail.com>
+// SPDX-FileCopyrightText: 2021-2023 Daniel Aimé Valcour <fosssweeper@gmail.com>
 //
 // SPDX-License-Identifier: MIT
 
+/*
+    Copyright (c) 2021-2023  Daniel Aimé Valcour
+    Permission is hereby granted, free of charge, to any person obtaining a copy of
+    this software and associated documentation files (the "Software"), to deal in
+    the Software without restriction, including without limitation the rights to
+    use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+    the Software, and to permit persons to whom the Software is furnished to do so,
+    subject to the following conditions:
+    The above copyright notice and this permission notice shall be included in all
+    copies or substantial portions of the Software.
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+    FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+    COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+    IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+    CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*/
+
 #include <glad/glad.h>
-#include <glDebug.h>
+#include <gld/gl_debug.h>
 #include <GLFW/glfw3.h>
-#include <roguelike.h>
-#include <stb_image.h>
+#include <rlh/roguelike.h>
+#include <cp/cp437.h>
+#include <pngw/png_wrapper.h>
 #include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 // if glDebug.h comes across an error, we want it sent to this callback for printing
-void gld_callback(const char* error, const char* func) { printf("%s: %s\n", error, func); }
+void gld_callback(const char *error) { printf("%s\n", error); }
+
+void framebuffer_size_callback(GLFWwindow *window, int width, int height)
+{
+  rlhTerm_h term = glfwGetWindowUserPointer(window);
+  rlhTermSizeInfo_t size_info;
+  size_info.width = width;
+  size_info.height = height;
+  size_info.pixel_scale = rlhTermGetPixelScale(term);
+  size_info.size_mode = RLH_SIZE_SCALED_PIXELS;
+  size_info.floor_pixels_to_tiles = RLH_TRUE;
+  rlhTermGetTileSize(term, &size_info.tile_width, &size_info.tile_height);
+  rlhTermSetSize(term, &size_info);
+}
 
 int main()
 {
   // calculate some constant values that we will need to size the terminal and the window
-  const int tiles_wide = 40;  // the amount of tiles wide and tall we want drawn in the terminal
+  const int tiles_wide = 40; // the amount of tiles wide and tall we want drawn in the terminal
   const int tiles_tall = 25;
-  const int tile_width = 8;  // the width and height of each terimal tile
+  const int tile_width = 8; // the width and height of each terimal tile
   const int tile_height = 8;
-  const float pixel_scale = 2;  // the ratio of terminal pixels to window pixels
+  const float pixel_scale = 2; // the ratio of terminal pixels to window pixels
   const int border_pixels =
-      32;  // this is the size of the gap between edges of the terminal and the window edges
-  const int w_width = (tiles_wide * tile_width * pixel_scale) + (border_pixels * 2);
-  const int w_height = (tiles_tall * tile_height * pixel_scale) + (border_pixels * 2);
+      32; // this is the size of the gap between edges of the terminal and the window edges
 
   // set the debug callback for glDebug.h
   GLD_SET_CALLBACK(gld_callback);
@@ -42,9 +74,10 @@ int main()
 #ifdef __APPLE__
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
 #endif
-  glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+  glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
+  glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
   // create the window
-  GLFWwindow* window = glfwCreateWindow(w_width, w_height, "rlh test", NULL, NULL);
+  GLFWwindow *window = glfwCreateWindow(1, 1, "rlh test", NULL, NULL);
   glfwMakeContextCurrent(window);
   if (!window)
   {
@@ -55,25 +88,45 @@ int main()
   // load opengl bindings
   if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
   {
-    glfwDestroyWindow(window);
-    window = NULL;
-    glfwTerminate();
     printf("failed to load opengl bindings!\n");
     return 3;
   }
   // load the atlas image from secondary storage
-  int i_width, i_height;
-  stbi_set_flip_vertically_on_load(1);
-  uint8_t* pixels = stbi_load("cp_8x8_rgba_bg_alpha.png", &i_width, &i_height, NULL, 4);
+  const char *image_path = "cp_8x8_rgba_bg_alpha.png";
+  size_t i_width, i_height, file_depth;
+  pngwcolor_t file_color;
+  pngwresult_t pngw_result = pngwFileInfo(image_path, &i_width, &i_height, &file_depth, &file_color);
+  if (pngw_result != PNGW_RESULT_OK)
+  {
+    printf("an error has occured getting png file info: %s\n", PNGW_RESULT_DESCRIPTIONS[pngw_result]);
+    return 4;
+  }
+  size_t size;
+  // If you change the channel_size to 2 and it should work fine
+  // roguelike.h also supports a channel size of 4, but png_wrapper.h can not load images like that.
+  const size_t image_load_channel_size = 1;
+  const size_t bits_per_byte = 8;
+  const size_t image_load_depth = image_load_channel_size * bits_per_byte;
+  // if you change the load_color to PNGW_COLOR_G or PNGW_COLOR_GA and it will work fine with roguelike.h.
+  const pngwcolor_t image_load_color = PNGW_COLOR_RGBA;
+  pngw_result = pngwDataSize(i_width, i_height, image_load_depth, image_load_color, &size);
+  if (pngw_result != PNGW_RESULT_OK)
+  {
+    printf("an error has occured getting image data size: %s\n", PNGW_RESULT_DESCRIPTIONS[pngw_result]);
+    return 5;
+  }
+  pngwb_t *pixels = malloc(size);
   if (!pixels)
   {
-    glfwDestroyWindow(window);
-    window = NULL;
-    glfwTerminate();
-    printf(
-        "Failed to load texture atlas image. Make sure that the image is in the same directory as "
-        "the built executable.\n");
-    return 4;
+    printf("an error has occured reading png file data: out of memory\n");
+    return 6;
+  }
+  pngw_result = pngwReadFile(image_path, pixels, PNGW_DEFAULT_ROW_OFFSET, i_width, i_height, image_load_depth,
+                             image_load_color);
+  if (pngw_result != PNGW_RESULT_OK)
+  {
+    printf("an error has occured loading image bytes: %s\n", PNGW_RESULT_DESCRIPTIONS[pngw_result]);
+    return 7;
   }
 
   // setup the stpqp coordinates for the atlas
@@ -81,7 +134,7 @@ int main()
   const int sheet_sprite_dimensions = 16;
   const int sheet_sprite_count = sheet_sprite_dimensions * sheet_sprite_dimensions;
   const size_t stpqp_arr_size = sheet_sprite_count * sizeof(float) * 5;
-  float* stpqp = (float*)malloc(stpqp_arr_size);
+  float *stpqp = (float *)malloc(stpqp_arr_size);
   {
     const float uvtilesize = 1.0f / (float)sheet_sprite_dimensions;
     size_t i = 0;
@@ -94,118 +147,150 @@ int main()
           switch (q)
           {
           case 0:
-            stpqp[i++] = uvtilesize * x;  // the s coordinate (left x)
+            stpqp[i++] = uvtilesize * x; // the s coordinate (left x)
             break;
           case 1:
-            stpqp[i++] = uvtilesize * x + uvtilesize;  // the t coordinate (right x)
+            stpqp[i++] = uvtilesize * x + uvtilesize; // the t coordinate (right x)
             break;
           case 2:
-            stpqp[i++] = uvtilesize * y + uvtilesize;  // the p coordinate (top y)
+            stpqp[i++] = uvtilesize * y; // the p coordinate (top y)
             break;
           case 3:
-            stpqp[i++] = uvtilesize * y;  // the q coordinate (bottom y)
+            stpqp[i++] = uvtilesize * y + uvtilesize; // the q coordinate (bottom y)
             break;
           case 4:
-            stpqp[i++] = 0;  // the 2nd p coordinate (texture page id)
+            stpqp[i++] = 0; // the 2nd p coordinate (texture page id)
           }
         }
       }
     }
   }
-  // create the roguelike.h atlas object
-  rlhAtlas_h a = NULL;
-  rlhresult_t result = rlhAtlasCreate(i_width, i_height, 1, pixels, 256, stpqp, &a);
-  free(stpqp);
-  stbi_image_free(pixels);
-  if (result > RLH_RESULT_LAST_NON_ERROR)
+  // create the atlas info
+  rlhAtlasCreateInfo_t atlas_info;
+  memset(&atlas_info, 0, sizeof(rlhAtlasCreateInfo_t));
+  atlas_info.width = i_width;
+  atlas_info.height = i_height;
+  atlas_info.pages = 1;
+  atlas_info.channel_size = image_load_channel_size;
+  switch (image_load_color)
   {
-    glfwTerminate();
-    printf("Error creating atlas: %s\n", RLH_RESULT_DESCRIPTIONS[result]);
-    return 5;
+  case PNGW_COLOR_G:
+    atlas_info.color = RLH_COLOR_G;
+    break;
+  case PNGW_COLOR_GA:
+    atlas_info.color = RLH_COLOR_GA;
+    break;
+  case PNGW_COLOR_RGBA:
+    atlas_info.color = RLH_COLOR_RGBA;
+    break;
+  default:
+    printf("invalid image color type");
+    return 8;
   }
-  // create the roguelike.h terminal object
+  atlas_info.pixel_data = pixels;
+  atlas_info.glyph_count = sheet_sprite_count;
+  atlas_info.glyph_stpqp = stpqp;
+  // create the size info
+  rlhTermSizeInfo_t size_info;
+  memset(&size_info, 0, sizeof(rlhTermSizeInfo_t));
+  size_info.width = tiles_wide;
+  size_info.height = tiles_tall;
+  size_info.pixel_scale = pixel_scale;
+  size_info.size_mode = RLH_SIZE_TILES;
+  size_info.tile_width = i_width / sheet_sprite_dimensions;
+  size_info.tile_height = i_height / sheet_sprite_dimensions;
+  // create the term info
+  rlhTermCreateInfo_t term_info;
+  term_info.atlas_info = &atlas_info;
+  term_info.size_info = &size_info;
+  // create the terminal
   rlhTerm_h t = NULL;
-  result =
-      rlhTermCreateTileDimensions(tiles_wide, tiles_tall, pixel_scale, tile_width, tile_height, &t);
-  if (result > RLH_RESULT_LAST_NON_ERROR)
+  rlhresult_t result = rlhTermCreate(&term_info, &t);
+  int t_width, t_height;
+  rlhTermGetScaledPixelSize(t, &t_width, &t_height);
+  int w_width = t_width + border_pixels * 2;
+  int w_height = t_height + border_pixels * 2;
+  glfwSetWindowSize(window, w_width, w_height);
+  glfwShowWindow(window);
+  if (result != RLH_RESULT_OK)
   {
-    rlhAtlasDestroy(a);
-    a = NULL;
     glfwTerminate();
     printf("Error creating terminal: %s\n", RLH_RESULT_DESCRIPTIONS[result]);
     return 6;
   }
+  glfwSetWindowUserPointer(window, t);
+  glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
   // the game loop
-  while (!glfwWindowShouldClose(window))  // keep looping until the window is closed.
+  while (!glfwWindowShouldClose(window)) // keep looping until the window is closed.
   {
-    glfwPollEvents();  // poll for platform events to update the window with user input stuff
+    glfwPollEvents(); // poll for platform events to update the window with user input stuff
 
     // set the terminal background color to black by pushing a fill tile
-    rlhTermPushFillTile(t, 0, RLH_TRANSPARENT, RLH_BLACK);
+    rlhTermPushFill(t, 0, RLH_TRANSPARENT, RLH_BLACK);
 
     // every glyph in codepage 437 drawn to the upper left corner
     for (size_t x = 0; x < 16; x++)
     {
       for (size_t y = 0; y < 16; y++)
       {
-        rlhTermPushTileGrid(t, x, y, (y * 16) + x, RLH_C32(255, 0, 255, 255),
-                            RLH_C32(0, 0, 0, 255));
+        rlhTermPushGrid(t, x, y, (y * 16) + x, RLH_COLOR(1, 0, 1, 1),
+                        RLH_COLOR(0, 0, 0, 1));
       }
     }
 
     // half tile offset face on bottom right corner of codepage
-    rlhTermPushTileFree(t, 15 * tile_width + (tile_height / 2), 15 * tile_width + (tile_height / 2),
-                        2, RLH_WHITE, RLH_TRANSPARENT);
+    rlhTermPushFree(t, 15 * tile_width + (tile_height / 2), 15 * tile_width + (tile_height / 2),
+                    CP_SMILE, RLH_WHITE, RLH_TRANSPARENT);
 
     // increasingly larger faces
-    rlhTermPushTileGridSized(t, 18, 5, tile_width * 5, tile_height * 5, 2, RLH_WHITE,
-                             RLH_TRANSPARENT);
-    rlhTermPushTileGridSized(t, 23, 5, tile_width * 4, tile_height * 4, 2, RLH_WHITE,
-                             RLH_TRANSPARENT);
-    rlhTermPushTileGridSized(t, 27, 5, tile_width * 3, tile_height * 3, 2, RLH_WHITE,
-                             RLH_TRANSPARENT);
-    rlhTermPushTileGridSized(t, 30, 5, tile_width * 2, tile_height * 2, 2, RLH_WHITE,
-                             RLH_TRANSPARENT);
-    rlhTermPushTileGridSized(t, 32, 5, tile_width, tile_height, 2, RLH_WHITE, RLH_TRANSPARENT);
+    rlhTermPushGridSized(t, 18, 5, tile_width * 5, tile_height * 5, CP_SMILE, RLH_WHITE,
+                         RLH_TRANSPARENT);
+    rlhTermPushGridSized(t, 23, 5, tile_width * 4, tile_height * 4, CP_SMILE, RLH_WHITE,
+                         RLH_TRANSPARENT);
+    rlhTermPushGridSized(t, 27, 5, tile_width * 3, tile_height * 3, CP_SMILE, RLH_WHITE,
+                         RLH_TRANSPARENT);
+    rlhTermPushGridSized(t, 30, 5, tile_width * 2, tile_height * 2, CP_SMILE, RLH_WHITE,
+                         RLH_TRANSPARENT);
+    rlhTermPushGridSized(t, 32, 5, tile_width, tile_height, CP_SMILE, RLH_WHITE, RLH_TRANSPARENT);
 
     // big guy in corner going over edges
-    rlhTermPushTileFreeSized(t, -(tile_width * 3), 18 * tile_height, 15 * tile_width,
-                             8 * tile_height, 2, RLH_RED, RLH_TRANSPARENT);
+    rlhTermPushFreeSized(t, -(tile_width * 3), 18 * tile_height, 15 * tile_width,
+                         8 * tile_height, CP_SMILE, RLH_RED, RLH_TRANSPARENT);
 
     // print some text to the screen
     // this is easy to do because CP437 glyphs for characters collide with ascii character codes
     const size_t label_x = 18;
-    const char* label_1 = "roguelike.h";
+    const char *label_1 = "roguelike.h";
     const size_t label_1_y = 20;
     const size_t label_1_length = strlen(label_1);
     for (size_t x = 0; x < label_1_length; x++)
     {
-      rlhTermPushTileGrid(t, x + label_x, label_1_y, label_1[x], RLH_NAVY, RLH_YELLOW);
+      rlhTermPushGrid(t, x + label_x, label_1_y, label_1[x], RLH_NAVY, RLH_YELLOW);
     }
 
-    const char* label_2 = "by journeyman";
+    const char *label_2 = "by journeyman";
     const size_t label_2_y = label_1_y + 1;
     const size_t label_2_length = strlen(label_2);
     for (size_t x = 0; x < label_2_length; x++)
     {
-      rlhTermPushTileGrid(t, x + label_x, label_2_y, label_2[x], RLH_RED, RLH_GREEN);
+      rlhTermPushGrid(t, x + label_x, label_2_y, label_2[x], RLH_RED, RLH_GREEN);
     }
 
+    // get the current window size
+    glfwGetFramebufferSize(window, &w_width, &w_height);
     // set the viewport to the window dimensions
     rlhViewport(0, 0, w_width, w_height);
     // draw clear color as silver
     rlhClearColor(RLH_SILVER);
-    // draw the terminal centered within the viewport.
+    // draw the terminal aligned within the viewport.
     // note that we made the terminal smaller than the window, so there will be space outside of it
-    rlhTermDrawCentered(t, a, w_width, w_height);
+    rlhTermDrawAligned(t, w_width, w_height, RLH_HALIGN_LEFT, RLH_VALIGN_TOP);
     // swap the window buffers. this presents the frame to the screen and reuses the framebuffer
     // from the previous frame for the next draw
     glfwSwapBuffers(window);
   }
 
   // destroy all roguelike.h resources
-  rlhAtlasDestroy(a);
-  a = NULL;
   rlhTermDestroy(t);
   t = NULL;
 

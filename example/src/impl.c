@@ -20,5 +20,16 @@
     CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#define STB_IMAGE_IMPLEMENTATION
-#include <stb_image.h>
+#include <glad/glad.h>
+#define GLD_IMPLEMENTATION
+#include <gld/gl_debug.h>
+
+#define RLH_IMPLEMENTATION
+#include <rlh/roguelike.h>
+
+#define CP437_IMPLEMENTATION
+#include <cp/cp437.h>
+
+#include <png.h>
+#define PNGW_IMPLEMENTATION
+#include <pngw/png_wrapper.h>
