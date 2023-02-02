@@ -27,6 +27,8 @@ SPDX-License-Identifier: MIT
 
 # roguelike.h
 
+ [![REUSE status](https://api.reuse.software/badge/git.fsfe.org/reuse/api)](https://api.reuse.software/info/git.fsfe.org/reuse/api)
+
 roguelike.h is a header only emulated terminal rendering library with support for Opengl33. Documentation is provided in the header file at the top of the file and for each function.
 
 This library is designed for participants in the annual 7DRL game jam. If you use roguelike.h in your project, feel free to talk about it in an issue thread!
