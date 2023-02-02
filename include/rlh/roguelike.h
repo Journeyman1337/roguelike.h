@@ -1251,6 +1251,9 @@ extern "C"
     GLD_CALL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
     // DRAW!!!
     GLD_CALL(glDrawElements(GL_TRIANGLES, _rlhGetElementCount(term->vertex_data_tile_count), GL_UNSIGNED_INT, NULL));
+#ifndef RLH_RETAINED_MODE
+    rlhTermClearTileData(term);
+#endif
     return RLH_RESULT_OK;
   }
 #endif
