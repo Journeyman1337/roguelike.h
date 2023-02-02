@@ -35,7 +35,7 @@ This library is designed for participants in the annual 7DRL game jam. If you us
 
 ## Features
 
-- A performant batched terminal rendering system that works on Mac, Windows, and Linux platforms.
+- A performant batched terminal rendering system that works on Linux, Windows, and Mac platforms.
 - Support for custom glyph atlasses with as many glyphs as memory can contain across multiple texture pages.
 - floating point fullcolor background and foreground colors per tile.
 - Ability to render tiles on top of each other, with tiles rendered FIFO in the order that they are pushed into the terminal.
