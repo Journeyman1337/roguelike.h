@@ -25,8 +25,8 @@ PROJECT(rlh
     DESCRIPTION "A header only roguelike rendering library."
     LANGUAGES C
 )
-option(RLH_BUILD_EXAMPLE "Build the example project" ON)
-option(RLH_EXMAPLE_AUTO_FETCH "Automatically fetch the dependencies of the roguelike.h example project" ON)
+option(RLH_BUILD_EXAMPLE "Build the example project" OFF)
+option(RLH_EXAMPLE_AUTO_FETCH "Automatically fetch the dependencies of the roguelike.h example project" OFF)
 add_library(${PROJECT_NAME} INTERFACE "")
 add_library(rlh::rlh ALIAS ${PROJECT_NAME})
 target_include_directories(${PROJECT_NAME}

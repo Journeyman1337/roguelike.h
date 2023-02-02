@@ -22,29 +22,31 @@
 add_executable(rlh_example "")
 add_executable(rlh::example ALIAS rlh_example)
 add_subdirectory(src)
-Include(FetchContent)
-FetchContent_Declare(
-        glad
-        GIT_REPOSITORY https://github.com/Dav1dde/glad
-        GIT_TAG        v0.1.36
+if (RLH_EXAMPLE_AUTO_FETCH)
+    Include(FetchContent)
+    FetchContent_Declare(
+            glad
+            GIT_REPOSITORY https://github.com/Dav1dde/glad
+            GIT_TAG        v0.1.36
+            FIND_PACKAGE_ARGS
+    )
+    FetchContent_Declare(
+            stb
+            GIT_REPOSITORY https://github.com/nothings/stb
+    )
+    FetchContent_Declare(
+            gld
+            GIT_REPOSITORY https://github.com/Journeyman-dev/gl_debug.h
+            GIT_TAG        v1.0.0
+    )
+    FetchContent_Declare(
+        glfw
+        GIT_REPOSITORY https://github.com/glfw/glfw/
+        GIT_TAG        3.3.8
         FIND_PACKAGE_ARGS
-)
-FetchContent_Declare(
-        stb
-        GIT_REPOSITORY https://github.com/nothings/stb
-)
-FetchContent_Declare(
-        gld
-        GIT_REPOSITORY https://github.com/Journeyman-dev/gl_debug.h
-        GIT_TAG        v1.0.0
-)
-FetchContent_Declare(
-    glfw
-    GIT_REPOSITORY https://github.com/glfw/glfw/
-    GIT_TAG        3.3.8
-    FIND_PACKAGE_ARGS
-)
-FetchContent_MakeAvailable(glad stb gld glfw)
+    )
+    FetchContent_MakeAvailable(glad stb gld glfw)
+endif()
 target_link_libraries(rlh_example
     PUBLIC
         rlh::rlh
