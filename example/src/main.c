@@ -24,8 +24,11 @@
 #include <gld/gl_debug.h>
 #include <GLFW/glfw3.h>
 #include <rlh/roguelike.h>
-#include <stb_image.h>
+#include <cp/cp437.h>
+#include <pngw/png_wrapper.h>
 #include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 // if glDebug.h comes across an error, we want it sent to this callback for printing
 void gld_callback(const char *error) { printf("%s\n", error); }
@@ -85,24 +88,45 @@ int main()
   // load opengl bindings
   if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
   {
-    glfwDestroyWindow(window);
-    window = NULL;
-    glfwTerminate();
     printf("failed to load opengl bindings!\n");
     return 3;
   }
   // load the atlas image from secondary storage
-  int i_width, i_height;
-  uint8_t *pixels = stbi_load("cp_8x8_rgba_bg_alpha.png", &i_width, &i_height, NULL, 4);
+  const char *image_path = "cp_8x8_rgba_bg_alpha.png";
+  size_t i_width, i_height, file_depth;
+  pngwcolor_t file_color;
+  pngwresult_t pngw_result = pngwFileInfo(image_path, &i_width, &i_height, &file_depth, &file_color);
+  if (pngw_result != PNGW_RESULT_OK)
+  {
+    printf("an error has occured getting png file info: %s\n", PNGW_RESULT_DESCRIPTIONS[pngw_result]);
+    return 4;
+  }
+  size_t size;
+  // If you change the channel_size to 2 and it should work fine
+  // roguelike.h also supports a channel size of 4, but png_wrapper.h can not load images like that.
+  const size_t image_load_channel_size = 1;
+  const size_t bits_per_byte = 8;
+  const size_t image_load_depth = image_load_channel_size * bits_per_byte;
+  // if you change the load_color to PNGW_COLOR_G or PNGW_COLOR_GA and it will work fine with roguelike.h.
+  const pngwcolor_t image_load_color = PNGW_COLOR_RGBA;
+  pngw_result = pngwDataSize(i_width, i_height, image_load_depth, image_load_color, &size);
+  if (pngw_result != PNGW_RESULT_OK)
+  {
+    printf("an error has occured getting image data size: %s\n", PNGW_RESULT_DESCRIPTIONS[pngw_result]);
+    return 5;
+  }
+  pngwb_t *pixels = malloc(size);
   if (!pixels)
   {
-    glfwDestroyWindow(window);
-    window = NULL;
-    glfwTerminate();
-    printf(
-        "Failed to load texture atlas image. Make sure that the image is in the same directory as "
-        "the built executable.\n");
-    return 4;
+    printf("an error has occured reading png file data: out of memory\n");
+    return 6;
+  }
+  pngw_result = pngwReadFile(image_path, pixels, PNGW_DEFAULT_ROW_OFFSET, i_width, i_height, image_load_depth,
+                             image_load_color);
+  if (pngw_result != PNGW_RESULT_OK)
+  {
+    printf("an error has occured loading image bytes: %s\n", PNGW_RESULT_DESCRIPTIONS[pngw_result]);
+    return 7;
   }
 
   // setup the stpqp coordinates for the atlas
@@ -147,8 +171,22 @@ int main()
   atlas_info.width = i_width;
   atlas_info.height = i_height;
   atlas_info.pages = 1;
-  atlas_info.channel_size = 1;
-  atlas_info.color = RLH_COLOR_RGBA;
+  atlas_info.channel_size = image_load_channel_size;
+  switch (image_load_color)
+  {
+  case PNGW_COLOR_G:
+    atlas_info.color = RLH_COLOR_G;
+    break;
+  case PNGW_COLOR_GA:
+    atlas_info.color = RLH_COLOR_GA;
+    break;
+  case PNGW_COLOR_RGBA:
+    atlas_info.color = RLH_COLOR_RGBA;
+    break;
+  default:
+    printf("invalid image color type");
+    return 8;
+  }
   atlas_info.pixel_data = pixels;
   atlas_info.glyph_count = sheet_sprite_count;
   atlas_info.glyph_stpqp = stpqp;
@@ -202,22 +240,22 @@ int main()
 
     // half tile offset face on bottom right corner of codepage
     rlhTermPushFree(t, 15 * tile_width + (tile_height / 2), 15 * tile_width + (tile_height / 2),
-                    2, RLH_WHITE, RLH_TRANSPARENT);
+                    CP_SMILE, RLH_WHITE, RLH_TRANSPARENT);
 
     // increasingly larger faces
-    rlhTermPushGridSized(t, 18, 5, tile_width * 5, tile_height * 5, 2, RLH_WHITE,
+    rlhTermPushGridSized(t, 18, 5, tile_width * 5, tile_height * 5, CP_SMILE, RLH_WHITE,
                          RLH_TRANSPARENT);
-    rlhTermPushGridSized(t, 23, 5, tile_width * 4, tile_height * 4, 2, RLH_WHITE,
+    rlhTermPushGridSized(t, 23, 5, tile_width * 4, tile_height * 4, CP_SMILE, RLH_WHITE,
                          RLH_TRANSPARENT);
-    rlhTermPushGridSized(t, 27, 5, tile_width * 3, tile_height * 3, 2, RLH_WHITE,
+    rlhTermPushGridSized(t, 27, 5, tile_width * 3, tile_height * 3, CP_SMILE, RLH_WHITE,
                          RLH_TRANSPARENT);
-    rlhTermPushGridSized(t, 30, 5, tile_width * 2, tile_height * 2, 2, RLH_WHITE,
+    rlhTermPushGridSized(t, 30, 5, tile_width * 2, tile_height * 2, CP_SMILE, RLH_WHITE,
                          RLH_TRANSPARENT);
-    rlhTermPushGridSized(t, 32, 5, tile_width, tile_height, 2, RLH_WHITE, RLH_TRANSPARENT);
+    rlhTermPushGridSized(t, 32, 5, tile_width, tile_height, CP_SMILE, RLH_WHITE, RLH_TRANSPARENT);
 
     // big guy in corner going over edges
     rlhTermPushFreeSized(t, -(tile_width * 3), 18 * tile_height, 15 * tile_width,
-                         8 * tile_height, 2, RLH_RED, RLH_TRANSPARENT);
+                         8 * tile_height, CP_SMILE, RLH_RED, RLH_TRANSPARENT);
 
     // print some text to the screen
     // this is easy to do because CP437 glyphs for characters collide with ascii character codes
@@ -247,8 +285,6 @@ int main()
     // draw the terminal aligned within the viewport.
     // note that we made the terminal smaller than the window, so there will be space outside of it
     rlhTermDrawAligned(t, w_width, w_height, RLH_HALIGN_LEFT, RLH_VALIGN_TOP);
-    // clearing the terminal is required to prevent memory leaks
-    rlhTermClearTileData(t);
     // swap the window buffers. this presents the frame to the screen and reuses the framebuffer
     // from the previous frame for the next draw
     glfwSwapBuffers(window);

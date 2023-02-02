@@ -21,8 +21,6 @@
 
 target_sources(rlh_example
     PUBLIC
-        "gld_impl.c"
+        "impl.c"
         "main.c"
-        "rlh_impl.c"
-        "stb_image_impl.c"
 )

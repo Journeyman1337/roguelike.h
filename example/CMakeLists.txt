@@ -31,13 +31,27 @@ if (RLH_EXAMPLE_AUTO_FETCH)
             FIND_PACKAGE_ARGS
     )
     FetchContent_Declare(
-            stb
-            GIT_REPOSITORY https://github.com/nothings/stb
+        png
+        GIT_REPOSITORY https://github.com/glennrp/libpng
+        GIT_TAG        v1.6.38
     )
     FetchContent_Declare(
-            gld
-            GIT_REPOSITORY https://github.com/Journeyman-dev/gl_debug.h
-            GIT_TAG        v1.0.0
+        cp
+        GIT_REPOSITORY https://github.com/Journeyman-dev/cp437.h
+        GIT_TAG        v1.2.0
+        FIND_PACKAGE_ARGS
+    )
+    set(CP_BUILD_EXAMPLE OFF)
+    FetchContent_Declare(
+        pngw
+        GIT_REPOSITORY https://github.com/Journeyman-dev/png_wrapper.h
+        GIT_TAG        v1.0.0
+        FIND_PACKAGE_ARGS
+    )
+    FetchContent_Declare(
+        gld
+        GIT_REPOSITORY https://github.com/Journeyman-dev/gl_debug.h
+        GIT_TAG        v1.0.0
     )
     FetchContent_Declare(
         glfw
@@ -45,18 +59,17 @@ if (RLH_EXAMPLE_AUTO_FETCH)
         GIT_TAG        3.3.8
         FIND_PACKAGE_ARGS
     )
-    FetchContent_MakeAvailable(glad stb gld glfw)
+    FetchContent_MakeAvailable(glad png gld glfw cp pngw)
 endif()
 target_link_libraries(rlh_example
     PUBLIC
         rlh::rlh
         glad
+        png
         gld::gld
+        cp::cp
+        pngw::pngw
         glfw
-)
-target_include_directories(rlh_example
-    PUBLIC
-        "${stb_SOURCE_DIR}"
 )
 # grab the content file paths
 set(RLH_ASSET_FILES
